@@ -1,0 +1,51 @@
+FINAL HIERARCHICAL BREAST CANCER TEST RESULTS
+======================================================================
+
+Test images: 1187
+
+Binary test accuracy: 95.87%
+
+Hierarchical overall accuracy: 78.52%
+Macro precision: 0.7691
+Macro recall: 0.7303
+Macro F1: 0.7402
+Weighted precision: 0.7901
+Weighted recall: 0.7852
+Weighted F1: 0.7809
+
+CLASSIFICATION REPORT
+                     precision    recall  f1-score   support
+
+           adenosis       0.80      0.91      0.85        66
+   ductal_carcinoma       0.81      0.89      0.85       518
+       fibroadenoma       0.83      0.79      0.81       152
+  lobular_carcinoma       0.71      0.44      0.54        94
+ mucinous_carcinoma       0.84      0.62      0.71       119
+papillary_carcinoma       0.54      0.75      0.63        84
+    phyllodes_tumor       0.78      0.68      0.72        68
+    tubular_adenoma       0.84      0.77      0.80        86
+
+           accuracy                           0.79      1187
+          macro avg       0.77      0.73      0.74      1187
+       weighted avg       0.79      0.79      0.78      1187
+
+
+CONFUSION MATRIX
+[[ 60   0   1   0   0   1   1   3]
+ [  3 462   1  13   6  33   0   0]
+ [  5   9 120   0   1   5   8   4]
+ [  2  50   0  41   1   0   0   0]
+ [  1  28   4   2  74   9   0   1]
+ [  1  13   0   0   3  63   1   3]
+ [  3   4   9   2   0   2  46   2]
+ [  0   2   9   0   3   3   3  66]]
+
+PER-CLASS ACCURACY
+adenosis: 90.91%
+ductal_carcinoma: 89.19%
+fibroadenoma: 78.95%
+lobular_carcinoma: 43.62%
+mucinous_carcinoma: 62.18%
+papillary_carcinoma: 75.00%
+phyllodes_tumor: 67.65%
+tubular_adenoma: 76.74%

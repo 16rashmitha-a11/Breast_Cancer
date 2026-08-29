@@ -1,0 +1,39 @@
+DENSENET121 - 8 CLASS BREAST CANCER
+SUBCLASS FINAL TEST EVALUATION
+======================================================================
+
+Overall Accuracy: 0.8079 (80.79%)
+Macro Precision: 0.7772
+Macro Recall: 0.8257
+Macro F1-Score: 0.7927
+Weighted Precision: 0.8305
+Weighted Recall: 0.8079
+Weighted F1-Score: 0.8125
+
+CONFUSION MATRIX
+======================================================================
+[[ 64   0   0   0   0   0   2   0]
+ [  3 408   2  46  13  43   2   1]
+ [  2   3 131   1   1   2   8   4]
+ [  3  19   0  70   1   1   0   0]
+ [  6  12   3   2  83  11   0   2]
+ [  0   6   0   0   0  75   1   2]
+ [  3   0   7   1   0   1  53   3]
+ [  0   1   8   0   0   2   0  75]]
+
+CLASSIFICATION REPORT
+======================================================================
+                     precision    recall  f1-score   support
+
+           adenosis     0.7901    0.9697    0.8707        66
+   ductal_carcinoma     0.9087    0.7876    0.8438       518
+       fibroadenoma     0.8675    0.8618    0.8647       152
+  lobular_carcinoma     0.5833    0.7447    0.6542        94
+ mucinous_carcinoma     0.8469    0.6975    0.7650       119
+papillary_carcinoma     0.5556    0.8929    0.6849        84
+    phyllodes_tumor     0.8030    0.7794    0.7910        68
+    tubular_adenoma     0.8621    0.8721    0.8671        86
+
+           accuracy                         0.8079      1187
+          macro avg     0.7772    0.8257    0.7927      1187
+       weighted avg     0.8305    0.8079    0.8125      1187

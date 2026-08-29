@@ -1,0 +1,12 @@
+.venv/
+venv/
+__pycache__/
+*.pyc
+
+*.keras
+*.h5
+
+weights/
+models/
+
+.ipynb_checkpoints/
