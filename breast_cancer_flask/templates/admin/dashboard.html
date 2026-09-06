@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+
+{% block topbar_title %}
+Admin Dashboard
+{% endblock %}
+
+
+{% block content %}
+
+<div class="page-content">
+
+    <div class="page-heading">
+
+        <div class="eyebrow">
+            ADMINISTRATION
+        </div>
+
+        <h1>
+            Admin Dashboard
+        </h1>
+
+        <p>
+            Monitor patients and breast tissue analysis
+            records.
+        </p>
+
+    </div>
+
+
+    <div class="admin-stat-grid">
+
+
+        <div class="admin-card">
+
+            <h3>
+                Registered Patients
+            </h3>
+
+            <p>
+                Total patient accounts in the system.
+            </p>
+
+            <div class="admin-number">
+                {{ patient_count }}
+            </div>
+
+        </div>
+
+
+        <div class="admin-card">
+
+            <h3>
+                Total Predictions
+            </h3>
+
+            <p>
+                Histopathology analyses performed.
+            </p>
+
+            <div class="admin-number">
+                {{ prediction_count }}
+            </div>
+
+        </div>
+
+
+        <div class="admin-card">
+
+            <h3>
+                Classification
+            </h3>
+
+            <p>
+                Binary and eight-class tissue
+                classification.
+            </p>
+
+            <div class="admin-number">
+                8
+            </div>
+
+        </div>
+
+
+    </div>
+
+
+    <div class="admin-actions">
+
+
+        <a
+            href="{{ url_for('admin_patients') }}"
+            class="admin-card"
+        >
+
+            <h3>
+                Patient Management
+            </h3>
+
+            <p>
+                View registered patients and their
+                analysis records.
+            </p>
+
+        </a>
+
+
+        <a
+            href="{{ url_for('admin_predictions') }}"
+            class="admin-card"
+        >
+
+            <h3>
+                Prediction Records
+            </h3>
+
+            <p>
+                Review all histopathology prediction
+                results.
+            </p>
+
+        </a>
+
+
+    </div>
+
+</div>
+{% endblock %}

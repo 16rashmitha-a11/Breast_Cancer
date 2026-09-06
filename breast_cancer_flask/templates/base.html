@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        {% block title %}
+        BreastCare AI
+        {% endblock %}
+    </title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/style.css') }}"
+    >
+</head>
+
+<body>
+
+{% if session.get("user_id") %}
+
+<div class="app-layout">
+
+    <!-- ================= SIDEBAR ================= -->
+
+    <aside class="sidebar">
+
+        <div class="sidebar-brand">
+
+            <div class="sidebar-brand-icon">
+                🎗️
+            </div>
+
+            <div class="sidebar-brand-text">
+                <strong>BreastCare AI</strong>
+                <span>Breast Cancer Analysis</span>
+            </div>
+
+        </div>
+
+
+        <!-- MAIN -->
+
+        <div class="sidebar-section">
+
+            <div class="sidebar-section-title">
+                Main
+            </div>
+
+            <nav class="sidebar-nav">
+
+                {% if session.get("role") == "admin" %}
+
+                <a
+                    href="{{ url_for('admin_dashboard') }}"
+                    class="sidebar-link"
+                >
+                    <span class="sidebar-icon">⌂</span>
+                    <span>Dashboard</span>
+                </a>
+
+                <a
+                    href="{{ url_for('admin_patients') }}"
+                    class="sidebar-link"
+                >
+                    <span class="sidebar-icon">♙</span>
+                    <span>Patients</span>
+                </a>
+
+                <a
+                    href="{{ url_for('admin_predictions') }}"
+                    class="sidebar-link"
+                >
+                    <span class="sidebar-icon">◉</span>
+                    <span>Predictions</span>
+                </a>
+
+                {% else %}
+
+                <a
+                    href="{{ url_for('patient_dashboard') }}"
+                    class="sidebar-link"
+                >
+                    <span class="sidebar-icon">⌂</span>
+                    <span>Dashboard</span>
+                </a>
+
+                <a
+                    href="{{ url_for('prediction') }}"
+                    class="sidebar-link"
+                >
+                    <span class="sidebar-icon">⌕</span>
+                    <span>New Prediction</span>
+                </a>
+
+                <a
+                    href="{{ url_for('history') }}"
+                    class="sidebar-link"
+                >
+                    <span class="sidebar-icon">◷</span>
+                    <span>Prediction History</span>
+                </a>
+
+                {% endif %}
+
+            </nav>
+
+        </div>
+
+
+        <!-- INFORMATION -->
+
+        {% if session.get("role") != "admin" %}
+
+        <div class="sidebar-section">
+
+            <div class="sidebar-section-title">
+                Information
+            </div>
+
+            <nav class="sidebar-nav">
+
+                <a
+                    href="{{ url_for('cancer_information') }}"
+                    class="sidebar-link"
+                >
+                    <span class="sidebar-icon">▣</span>
+                    <span>Cancer Information</span>
+                </a>
+
+            </nav>
+
+        </div>
+
+        {% endif %}
+
+
+        <!-- ACCOUNT -->
+
+        <div class="sidebar-section">
+
+            <div class="sidebar-section-title">
+                Account
+            </div>
+
+            <nav class="sidebar-nav">
+
+                {% if session.get("role") != "admin" %}
+
+                <a
+                    href="{{ url_for('profile') }}"
+                    class="sidebar-link"
+                >
+                    <span class="sidebar-icon">○</span>
+                    <span>Profile</span>
+                </a>
+
+                {% endif %}
+
+            </nav>
+
+        </div>
+
+
+        <!-- LOGOUT -->
+
+        <div class="sidebar-bottom">
+
+            <a
+                href="{{ url_for('logout') }}"
+                class="sidebar-logout"
+            >
+                <span class="sidebar-icon">↪</span>
+                <span>Logout</span>
+            </a>
+
+        </div>
+
+    </aside>
+
+
+    <!-- ================= MAIN ================= -->
+
+    <main class="main-area">
+
+        <header class="topbar">
+
+            <div class="topbar-title">
+                {% block topbar_title %}
+                BreastCare AI
+                {% endblock %}
+            </div>
+
+            <div class="topbar-user">
+
+                <div class="user-avatar-small">
+                    {{ session.get("name", "U")[0]|upper }}
+                </div>
+
+                <span class="topbar-user-name">
+                    {{ session.get("name", "User") }}
+                </span>
+
+            </div>
+
+        </header>
+
+
+        {% block content %}
+        {% endblock %}
+
+    </main>
+
+</div>
+
+{% else %}
+
+{% block public_content %}
+{% endblock %}
+
+{% endif %}
+
+
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+
+</body>
+</html>

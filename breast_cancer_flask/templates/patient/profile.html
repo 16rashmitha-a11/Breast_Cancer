@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+
+{% block title %}
+Profile | BreastCare AI
+{% endblock %}
+
+{% block topbar_title %}
+My Profile
+{% endblock %}
+
+{% block content %}
+
+<div class="page-container">
+
+    <div class="page-header">
+
+        <span class="eyebrow">
+            Account
+        </span>
+
+        <h1>
+            My Profile
+        </h1>
+
+        <p>
+            View your BreastCare AI account information.
+        </p>
+
+    </div>
+
+
+    <div class="profile-card">
+
+        <div class="profile-top">
+
+            <div class="profile-avatar">
+
+                {{ user.name[0]|upper }}
+
+            </div>
+
+            <div>
+
+                <h2 class="profile-name">
+                    {{ user.name }}
+                </h2>
+
+                <div class="profile-email">
+                    {{ user.email }}
+                </div>
+
+                <span class="profile-badge">
+                    {{ user.role }}
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <div class="profile-info-grid">
+
+            <div class="profile-info">
+
+                <span>
+                    Full Name
+                </span>
+
+                <strong>
+                    {{ user.name }}
+                </strong>
+
+            </div>
+
+
+            <div class="profile-info">
+
+                <span>
+                    Email Address
+                </span>
+
+                <strong>
+                    {{ user.email }}
+                </strong>
+
+            </div>
+
+
+            <div class="profile-info">
+
+                <span>
+                    Account Type
+                </span>
+
+                <strong>
+                    {{ user.role|capitalize }}
+                </strong>
+
+            </div>
+
+
+            <div class="profile-info">
+
+                <span>
+                    Account Status
+                </span>
+
+                <strong>
+                    Active
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <div
+            class="info-section"
+            style="margin-top:25px;margin-bottom:0;"
+        >
+
+            <div class="info-section-header">
+
+                <div class="info-section-icon">
+                    🔐
+                </div>
+
+                <h2>
+                    Account Security
+                </h2>
+
+            </div>
+
+            <p>
+                Your account is protected through authenticated
+                access. Prediction records are associated with
+                your account so that your analysis history can
+                be viewed from the Prediction History section.
+            </p>
+
+        </div>
+
+
+        <div class="action-row">
+
+            <a
+                href="{{ url_for('history') }}"
+                class="secondary-btn"
+            >
+                View Prediction History
+            </a>
+
+            <a
+                href="{{ url_for('logout') }}"
+                class="primary-btn"
+            >
+                Logout
+            </a>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

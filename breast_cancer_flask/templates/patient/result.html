@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title %}
+Profile | BreastCare AI
+{% endblock %}
+
+{% block content %}
+<div class="result-card gradcam-card">
+
+    <div class="result-card-header">
+        <h2>AI Explainability</h2>
+        <p>
+            Grad-CAM highlights the regions of the image
+            that contributed most to the model's prediction.
+        </p>
+    </div>
+
+    {% if gradcam_url %}
+
+        <div class="gradcam-image-container">
+
+            <img
+                src="{{ gradcam_url }}"
+                alt="Grad-CAM visualization"
+                class="gradcam-image"
+            >
+
+        </div>
+
+        <div class="gradcam-actions">
+
+            <a
+                href="{{ gradcam_url }}"
+                download
+                class="btn">
+                Download Grad-CAM
+            </a>
+
+        </div>
+
+    {% else %}
+
+        <div class="empty-state">
+            <p>
+                Grad-CAM visualization could not be generated
+                for this prediction.
+            </p>
+        </div>
+
+    {% endif %}
+</div>
+{% endblock %}

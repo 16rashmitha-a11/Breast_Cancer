@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+
+{% block topbar_title %}
+Predictions
+{% endblock %}
+
+
+{% block content %}
+
+<div class="page-content">
+
+    <div class="page-heading">
+
+        <div class="eyebrow">
+            ADMINISTRATION
+        </div>
+
+        <h1>
+            Prediction Records
+        </h1>
+
+        <p>
+            All patient histopathology analysis records.
+        </p>
+
+    </div>
+
+
+    <div class="table-card">
+
+        <div class="table-wrapper">
+
+            <table class="data-table">
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            Patient
+                        </th>
+
+                        <th>
+                            Classification
+                        </th>
+
+                        <th>
+                            Subtype
+                        </th>
+
+                        <th>
+                            Confidence
+                        </th>
+
+                        <th>
+                            Date
+                        </th>
+
+                        <th>
+                            Action
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                {% for prediction in predictions %}
+
+                    <tr>
+
+                        <td>
+                            {{ prediction["patient_name"] }}
+                        </td>
+
+                        <td>
+                            <span class="status">
+                                {{ prediction["binary_prediction"] }}
+                            </span>
+                        </td>
+
+                        <td>
+                            {{ prediction["subclass_prediction"]
+                                .replace("_", " ")
+                                .title() }}
+                        </td>
+
+                        <td>
+                            {{ "%.2f"|format(
+                                prediction["binary_confidence"]|float
+                            ) }}%
+                        </td>
+
+                        <td>
+                            {{ prediction["created_at"] }}
+                        </td>
+
+                        <td>
+
+                            <a
+                                href="{{ url_for(
+                                    'admin_prediction_detail',
+                                    prediction_id=prediction['id']
+                                ) }}"
+                                class="btn btn-secondary"
+                            >
+                                View
+                            </a>
+
+                        </td>
+
+                    </tr>
+
+                {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

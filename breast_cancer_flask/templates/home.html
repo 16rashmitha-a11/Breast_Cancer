@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}
+BreastCare AI
+{% endblock %}
+
+{% block public_content %}
+
+<div class="auth-page">
+
+    <div
+        class="auth-card"
+        style="
+            max-width: 900px;
+            text-align:center;
+            padding:50px;
+        "
+    >
+
+        <div
+            class="auth-logo"
+            style="margin-left:auto;margin-right:auto;"
+        >
+            🎗️
+        </div>
+
+        <span class="eyebrow">
+            BreastCare AI
+        </span>
+
+        <h1 style="
+            font-size:40px;
+            margin-top:8px;
+        ">
+            Smart Breast Cancer
+            Detection & Diagnosis
+        </h1>
+
+        <p style="
+            max-width:650px;
+            margin:15px auto 28px;
+            line-height:1.8;
+        ">
+            BreastCare AI is a deep-learning based research
+            application designed to analyze histopathological
+            breast tissue images and provide AI-assisted
+            classification results.
+        </p>
+
+        <div class="action-row"
+             style="justify-content:center;">
+
+            <a
+                href="{{ url_for('login') }}"
+                class="primary-btn"
+            >
+                Login
+            </a>
+
+            <a
+                href="{{ url_for('register') }}"
+                class="secondary-btn"
+            >
+                Create Account
+            </a>
+
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}

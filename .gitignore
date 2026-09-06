@@ -10,3 +10,5 @@ weights/
 models/
 
 .ipynb_checkpoints/
+
+app/

@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>AI Breast Tissue Analysis</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background: #fff7fa;
+            color: #3f2933;
+        }
+
+        .page {
+            min-height: 100vh;
+            padding: 35px;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: auto;
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            margin: 0;
+            color: #6f304d;
+            font-size: 30px;
+        }
+
+        .title-area p {
+            color: #806b74;
+            margin-top: 8px;
+        }
+
+        .back-btn {
+            text-decoration: none;
+            padding: 11px 18px;
+            border-radius: 10px;
+            background: #f1d6e0;
+            color: #6f304d;
+            font-weight: 600;
+        }
+
+        .main-card {
+            background: white;
+            border-radius: 22px;
+            padding: 35px;
+            box-shadow: 0 12px 40px rgba(95,45,65,.10);
+        }
+
+        .upload-area {
+            display: block;
+            border: 2px dashed #d7a5b9;
+            border-radius: 18px;
+            padding: 55px 30px;
+            text-align: center;
+            background: #fffafd;
+            cursor: pointer;
+        }
+
+        .upload-area:hover {
+            background: #fff3f7;
+            border-color: #a75b79;
+        }
+
+        .upload-icon {
+            font-size: 48px;
+        }
+
+        .upload-area h2 {
+            color: #633148;
+        }
+
+        .upload-area p {
+            color: #806b74;
+        }
+
+        .file-types {
+            font-size: 13px;
+            color: #9a7d88;
+        }
+
+        #imageInput {
+            display: none;
+        }
+
+        .selected-box {
+            display: none;
+            margin-top: 25px;
+            padding: 20px;
+            border-radius: 14px;
+            background: #fff4f7;
+        }
+
+        .selected-title {
+            font-weight: bold;
+            color: #633148;
+            margin-bottom: 12px;
+        }
+
+        #fileList {
+            margin: 0;
+            padding-left: 20px;
+            color: #725a64;
+        }
+
+        #fileList li {
+            margin: 7px 0;
+        }
+
+        .button-area {
+            text-align: center;
+            margin-top: 28px;
+        }
+
+        .analyze-btn {
+            border: none;
+            border-radius: 12px;
+            padding: 15px 35px;
+            background: #8d3f61;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .analyze-btn:hover {
+            background: #71314e;
+        }
+
+        .analyze-btn:disabled {
+            opacity: .6;
+            cursor: not-allowed;
+        }
+
+        #processingBox {
+            display: none;
+            margin-top: 30px;
+            padding: 25px;
+            border-radius: 16px;
+            background: #fff4f7;
+            text-align: center;
+        }
+
+        .loader {
+            width: 42px;
+            height: 42px;
+            border: 4px solid #ead0db;
+            border-top-color: #8d3f61;
+            border-radius: 50%;
+            animation: spin .9s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .processing-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #633148;
+        }
+
+        .processing-text {
+            margin-top: 8px;
+            color: #806b74;
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(3,1fr);
+            gap: 18px;
+            margin-top: 28px;
+        }
+
+        .feature {
+            padding: 20px;
+            border-radius: 15px;
+            background: #fff7fa;
+        }
+
+        .feature h3 {
+            color: #6f304d;
+            font-size: 16px;
+        }
+
+        .feature p {
+            color: #806b74;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        @media(max-width:750px) {
+
+            .page {
+                padding: 18px;
+            }
+
+            .topbar {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+
+            .features {
+                grid-template-columns: 1fr;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+<div class="page">
+
+<div class="container">
+
+    <div class="topbar">
+
+        <div class="title-area">
+
+            <h1>
+                AI Breast Tissue Analysis
+            </h1>
+
+            <p>
+                Upload one or multiple histopathology images for AI-assisted analysis.
+            </p>
+
+        </div>
+
+        <a
+            href="{{ url_for('patient_dashboard') }}"
+            class="back-btn"
+        >
+            ← Dashboard
+        </a>
+
+    </div>
+
+
+    <div class="main-card">
+
+        <!-- IMPORTANT:
+             name="images"
+             matches request.files.getlist("images")
+        -->
+
+        <form
+            id="predictionForm"
+            action="{{ url_for('predict') }}"
+            method="POST"
+            enctype="multipart/form-data"
+        >
+
+            <label
+                for="imageInput"
+                class="upload-area"
+            >
+
+                <div class="upload-icon">
+                    🧬
+                </div>
+
+                <h2>
+                    Select Histopathology Images
+                </h2>
+
+                <p>
+                    Choose one or multiple images from your device
+                </p>
+
+                <div class="file-types">
+                    PNG · JPG · JPEG · BMP · TIF · TIFF
+                </div>
+
+            </label>
+
+
+            <input
+                type="file"
+                id="imageInput"
+                name="images"
+                accept=".png,.jpg,.jpeg,.bmp,.tif,.tiff"
+                multiple
+            >
+
+
+            <div
+                class="selected-box"
+                id="selectedBox"
+            >
+
+                <div class="selected-title">
+                    Selected Images
+                </div>
+
+                <ul id="fileList"></ul>
+
+            </div>
+
+
+            <div class="button-area">
+
+                <button
+                    type="submit"
+                    class="analyze-btn"
+                    id="analyzeButton"
+                    disabled
+                >
+                    ✦ Start AI Analysis
+                </button>
+
+            </div>
+
+
+            <div id="processingBox">
+
+                <div class="loader"></div>
+
+                <div class="processing-title">
+                    AI Analysis in Progress
+                </div>
+
+                <div
+                    class="processing-text"
+                    id="processingText"
+                >
+                    Preparing your images...
+                </div>
+
+            </div>
+
+        </form>
+
+
+        <div class="features">
+
+            <div class="feature">
+
+                <h3>
+                    🔬 Image Processing
+                </h3>
+
+                <p>
+                    Each uploaded image is prepared and resized before being passed to the trained deep learning models.
+                </p>
+
+            </div>
+
+
+            <div class="feature">
+
+                <h3>
+                    🧠 AI Classification
+                </h3>
+
+                <p>
+                    Each image is analyzed individually using binary classification and histopathological subtype classification.
+                </p>
+
+            </div>
+
+
+            <div class="feature">
+
+                <h3>
+                    ✨ Explainable AI
+                </h3>
+
+                <p>
+                    Grad-CAM visualization is generated for each successfully analyzed image.
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+</div>
+
+
+<script>
+
+const input =
+    document.getElementById("imageInput");
+
+const selectedBox =
+    document.getElementById("selectedBox");
+
+const fileList =
+    document.getElementById("fileList");
+
+const analyzeButton =
+    document.getElementById("analyzeButton");
+
+const form =
+    document.getElementById("predictionForm");
+
+const processingBox =
+    document.getElementById("processingBox");
+
+const processingText =
+    document.getElementById("processingText");
+
+
+input.addEventListener(
+    "change",
+    function () {
+
+        fileList.innerHTML = "";
+
+        const files = input.files;
+
+        if (files.length === 0) {
+
+            selectedBox.style.display = "none";
+
+            analyzeButton.disabled = true;
+
+            return;
+        }
+
+        selectedBox.style.display = "block";
+
+        analyzeButton.disabled = false;
+
+        for (
+            let i = 0;
+            i < files.length;
+            i++
+        ) {
+
+            const li =
+                document.createElement("li");
+
+            li.textContent =
+                (i + 1) + ". " + files[i].name;
+
+            fileList.appendChild(li);
+        }
+
+    }
+);
+
+
+form.addEventListener(
+    "submit",
+    function () {
+
+        if (input.files.length === 0) {
+
+            return;
+        }
+
+        analyzeButton.disabled = true;
+
+        analyzeButton.textContent =
+            "AI Analysis Running...";
+
+        processingBox.style.display =
+            "block";
+
+        const count =
+            input.files.length;
+
+        let messages = [
+
+            "Preparing " + count + " image(s)...",
+
+            "Improving image input quality...",
+
+            "Preprocessing histopathology image...",
+
+            "Running DenseNet deep learning analysis...",
+
+            "Generating Grad-CAM explanation...",
+
+            "Saving prediction result...",
+
+            "Processing the next image..."
+
+        ];
+
+        let index = 0;
+
+        processingText.textContent =
+            messages[0];
+
+        const timer = setInterval(
+            function () {
+
+                index++;
+
+                if (
+                    index >= messages.length
+                ) {
+
+                    index = 0;
+                }
+
+                processingText.textContent =
+                    messages[index];
+
+            },
+            1800
+        );
+
+    }
+);
+
+</script>
+
+</body>
+</html>

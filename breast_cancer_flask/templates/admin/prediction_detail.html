@@ -1,0 +1,346 @@
+{% extends "base.html" %}
+
+{% block title %}
+Prediction Details | BreastCare AI
+{% endblock %}
+
+{% block content %}
+
+<div class="result-header">
+
+    <span class="section-label">
+        AI ANALYSIS RESULT
+    </span>
+
+    <h1>
+        Prediction Details
+    </h1>
+
+    <p>
+        Your breast histopathology image has been analyzed
+        using the deep learning model.
+    </p>
+
+</div>
+
+
+<!-- =====================================================
+     MAIN RESULT
+====================================================== -->
+
+<div class="result-grid">
+
+    <!-- BINARY RESULT -->
+
+    <div class="result-card">
+
+        <span>
+            Binary Classification
+        </span>
+
+        <h2>
+            {{ prediction["binary_prediction"] }}
+        </h2>
+
+        <div class="confidence-box">
+
+            <span>
+                Confidence
+            </span>
+
+            <strong>
+                {{ "%.2f"|format(
+                    prediction["binary_confidence"]
+                ) }}%
+            </strong>
+
+        </div>
+
+    </div>
+
+
+    <!-- SUBCLASS RESULT -->
+
+    <div class="result-card highlight">
+
+        <span>
+            8-Class Classification
+        </span>
+
+        <h2>
+            {{ prediction["subclass_prediction"]
+                .replace("_", " ")
+                .title()
+            }}
+        </h2>
+
+        <div class="confidence-box">
+
+            <span>
+                Confidence
+            </span>
+
+            <strong>
+                {{ "%.2f"|format(
+                    prediction["subclass_confidence"]
+                ) }}%
+            </strong>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     PREDICTION INFORMATION
+====================================================== -->
+
+<div class="detail-card">
+
+    <h2>
+        📋 Prediction Information
+    </h2>
+
+    <div class="detail-grid">
+
+        <div>
+
+            <span>
+                Image
+            </span>
+
+            <strong>
+                {{ prediction["original_filename"] }}
+            </strong>
+
+        </div>
+
+
+        <div>
+
+            <span>
+                Date
+            </span>
+
+            <strong>
+                {{ prediction["created_at"] }}
+            </strong>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     SUBCLASS PROBABILITIES
+====================================================== -->
+
+<div class="detail-card">
+
+    <h2>
+        📊 Subclass Probabilities
+    </h2>
+
+    <p class="small-text">
+        Probability distribution across all eight breast
+        histopathology subclasses.
+    </p>
+
+
+    {% for name, probability in probabilities.items() %}
+
+    <div class="probability-row">
+
+        <div class="probability-name">
+
+            {{ name.replace(
+                "_",
+                " "
+            ).title() }}
+
+        </div>
+
+
+        <div class="probability-bar">
+
+            <div
+                class="progress-fill"
+                data-probability="{{ probability|default(0) }}"
+            ></div>
+
+        </div>
+
+
+        <strong class="probability-value">
+
+            {{ "%.2f"|format(
+                probability
+            ) }}%
+
+        </strong>
+
+    </div>
+
+    {% endfor %}
+
+</div>
+
+
+<!-- =====================================================
+     ORIGINAL IMAGE
+====================================================== -->
+
+<div class="result-card">
+
+    <h2>
+        🖼️ Original Histopathology Image
+    </h2>
+
+    <p>
+        Image uploaded for AI analysis.
+    </p>
+
+    <div class="image-container">
+
+        <img
+            src="{{ url_for(
+                'uploaded_image',
+                filename=original_image_filename
+            ) }}"
+            alt="Original Histopathology Image"
+            class="result-image"
+        >
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     GRAD-CAM
+====================================================== -->
+
+<div class="result-card">
+
+    <h2>
+        🔬 AI Attention Visualization
+    </h2>
+
+    <p>
+        Grad-CAM highlights the regions of the image
+        that contributed to the model's prediction.
+    </p>
+
+
+    {% if gradcam_filename %}
+
+    <div class="image-container">
+
+        <img
+            src="{{ url_for(
+                'gradcam_image',
+                filename=gradcam_filename
+            ) }}"
+            alt="Grad-CAM Visualization"
+            class="result-image"
+        >
+
+    </div>
+
+
+    <p class="small-text">
+
+        Grad-CAM is an explainability visualization
+        showing areas receiving attention from the
+        deep learning model. It is intended for
+        research and educational purposes and is not
+        a medical diagnosis.
+
+    </p>
+
+
+    {% else %}
+
+    <div class="empty-state">
+
+        <h3>
+            Grad-CAM Not Available
+        </h3>
+
+        <p>
+            A Grad-CAM visualization could not be
+            generated for this prediction.
+        </p>
+
+    </div>
+
+    {% endif %}
+
+</div>
+
+
+<!-- =====================================================
+     ACTION BUTTONS
+====================================================== -->
+
+<div class="action-row">
+
+    <a
+        href="{{ url_for(
+            'download_report',
+            prediction_id=prediction['id']
+        ) }}"
+        class="primary-btn"
+    >
+
+        📄 Download PDF Report
+
+    </a>
+
+
+    <a
+        href="{{ url_for('history') }}"
+        class="secondary-btn"
+    >
+
+        ← Back to History
+
+    </a>
+
+</div>
+
+
+<script>
+
+/* =====================================================
+   PROBABILITY BARS
+====================================================== */
+
+document.querySelectorAll(
+    ".progress-fill"
+).forEach(function(bar) {
+
+    const probability = parseFloat(
+        bar.dataset.probability
+    ) || 0;
+
+    const safeProbability = Math.max(
+        0,
+        Math.min(
+            probability,
+            100
+        )
+    );
+
+    bar.style.width =
+        safeProbability + "%";
+
+});
+
+</script>
+
+{% endblock %}

@@ -1,0 +1,25 @@
+DENSENET121 8-CLASS FINE-TUNING RESULTS
+=========================================
+
+Stage 1 model:
+C:\Users\16ras\OneDrive\Documents\Desktop\BreastCancerProject\models\densenet121_subclass_best_v2.keras
+
+Fine-tuned model:
+C:\Users\16ras\OneDrive\Documents\Desktop\BreastCancerProject\models\densenet121_subclass_finetuned_best.keras
+
+Test Loss: 0.614848
+Test Accuracy: 0.786858
+Test Accuracy (%): 78.69
+
+Learning Rate: 1e-05
+Epochs: 15
+
+Classes:
+- adenosis
+- ductal_carcinoma
+- fibroadenoma
+- lobular_carcinoma
+- mucinous_carcinoma
+- papillary_carcinoma
+- phyllodes_tumor
+- tubular_adenoma

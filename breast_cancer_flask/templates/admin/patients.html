@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+
+{% block topbar_title %}
+Patients
+{% endblock %}
+
+
+{% block content %}
+
+<div class="page-content">
+
+    <div class="page-heading">
+
+        <div class="eyebrow">
+            ADMINISTRATION
+        </div>
+
+        <h1>
+            Patients
+        </h1>
+
+        <p>
+            Registered patient accounts.
+        </p>
+
+    </div>
+
+
+    <div class="table-card">
+
+        <div class="table-wrapper">
+
+            <table class="data-table">
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            ID
+                        </th>
+
+                        <th>
+                            Name
+                        </th>
+
+                        <th>
+                            Email
+                        </th>
+
+                        <th>
+                            Role
+                        </th>
+
+                        <th>
+                            Action
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                {% for patient in patients %}
+
+                    <tr>
+
+                        <td>
+                            #{{ patient["id"] }}
+                        </td>
+
+                        <td>
+                            {{ patient["name"] }}
+                        </td>
+
+                        <td>
+                            {{ patient["email"] }}
+                        </td>
+
+                        <td>
+                            <span class="status">
+                                {{ patient["role"] }}
+                            </span>
+                        </td>
+
+                        <td>
+
+                            <a
+                                href="{{ url_for(
+                                    'admin_patient_detail',
+                                    user_id=patient['id']
+                                ) }}"
+                                class="btn btn-secondary"
+                            >
+                                View
+                            </a>
+
+                        </td>
+
+                    </tr>
+
+                {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

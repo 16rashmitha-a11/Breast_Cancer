@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+
+{% block title %}
+Patient Details | BreastCare AI
+{% endblock %}
+
+{% block content %}
+
+<div class="page-heading">
+
+    <span class="section-label">
+        PATIENT DETAILS
+    </span>
+
+    <h1>
+        {{ user["name"] }}
+    </h1>
+
+    <p>
+        {{ user["email"] }}
+    </p>
+
+</div>
+
+
+<div class="detail-card">
+
+    <h2>
+        Patient Information
+    </h2>
+
+    <div class="detail-grid">
+
+        <div>
+            <span>Name</span>
+            <strong>{{ user["name"] }}</strong>
+        </div>
+
+        <div>
+            <span>Email</span>
+            <strong>{{ user["email"] }}</strong>
+        </div>
+
+        <div>
+            <span>Phone</span>
+            <strong>{{ user["phone"] or "—" }}</strong>
+        </div>
+
+        <div>
+            <span>Age</span>
+            <strong>{{ user["age"] or "—" }}</strong>
+        </div>
+
+        <div>
+            <span>Gender</span>
+            <strong>{{ user["gender"] or "—" }}</strong>
+        </div>
+
+        <div class="full-width">
+            <span>Address</span>
+            <strong>{{ user["address"] or "—" }}</strong>
+        </div>
+
+    </div>
+
+</div>
+
+
+<div class="section-header">
+
+    <div>
+
+        <span class="section-label">
+            ANALYSIS HISTORY
+        </span>
+
+        <h2>
+            Patient Predictions
+        </h2>
+
+    </div>
+
+</div>
+
+
+{% if predictions %}
+
+<div class="prediction-list">
+
+    {% for item in predictions %}
+
+    <div class="prediction-card">
+
+        <div class="prediction-image-placeholder">
+            🔬
+        </div>
+
+        <div class="prediction-main">
+
+            <h3>
+                {{ item["original_filename"] }}
+            </h3>
+
+            <p>
+                {{ item["created_at"] }}
+            </p>
+
+        </div>
+
+        <div class="prediction-result">
+
+            <strong>
+                {{ item["binary_prediction"] }}
+            </strong>
+
+            <span>
+                {{ "%.2f"|format(
+                    item["binary_confidence"]
+                ) }}%
+            </span>
+
+        </div>
+
+        <a
+            href="{{ url_for(
+                'admin_prediction_detail',
+                prediction_id=item['id']
+            ) }}"
+            class="view-btn">
+
+            View
+
+        </a>
+
+    </div>
+
+    {% endfor %}
+
+</div>
+
+{% else %}
+
+<div class="empty-state">
+
+    <div>
+        🔬
+    </div>
+
+    <h3>
+        No predictions
+    </h3>
+
+</div>
+
+{% endif %}
+{% endblock %}
