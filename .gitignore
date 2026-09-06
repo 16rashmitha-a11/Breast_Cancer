@@ -12,3 +12,4 @@ models/
 .ipynb_checkpoints/
 
 app/
+archive/
