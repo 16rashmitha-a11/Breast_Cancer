@@ -23,9 +23,118 @@
             color: #3f2933;
         }
 
+
+        /* ================= SIDEBAR ================= */
+
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 245px;
+            height: 100vh;
+            background: #54263f;
+            color: white;
+            padding: 28px 18px;
+            z-index: 1000;
+        }
+
+        .brand {
+            text-align: center;
+            margin-bottom: 35px;
+        }
+
+        .brand-icon {
+            width: 48px;
+            height: 48px;
+            margin: auto;
+            border-radius: 50%;
+            background: #d98aae;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 23px;
+            margin-bottom: 10px;
+        }
+
+        .brand h2 {
+            font-size: 20px;
+            margin-bottom: 4px;
+            color: white;
+        }
+
+        .brand p {
+            font-size: 11px;
+            color: #e9cbd9;
+        }
+
+        .nav {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .nav a {
+            text-decoration: none;
+            color: #f6e8ee;
+            padding: 13px 15px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 14px;
+            transition: 0.2s ease;
+        }
+
+        .nav a:hover {
+            background: #6c3452;
+            color: white;
+        }
+
+        .nav a.active {
+            background: #a94f78;
+            color: white;
+        }
+
+        .nav-icon {
+            width: 22px;
+            text-align: center;
+            font-size: 17px;
+        }
+
+        .logout {
+            position: absolute;
+            bottom: 25px;
+            left: 18px;
+            right: 18px;
+        }
+
+        .logout a {
+            text-decoration: none;
+            color: #f7dce7;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 13px 15px;
+            border-radius: 10px;
+            font-size: 14px;
+        }
+
+        .logout a:hover {
+            background: #6c3452;
+            color: white;
+        }
+
+
+        /* ================= EXISTING PAGE ================= */
+
         .page {
             min-height: 100vh;
             padding: 35px;
+        }
+
+        /* SIDEBAR SPACE - ADDED ONLY */
+        .page {
+            margin-left: 245px;
         }
 
         .container {
@@ -136,7 +245,7 @@
             border: none;
             border-radius: 12px;
             padding: 15px 35px;
-            background: #8d3f61;
+            background: #8a0c43;
             color: white;
             font-size: 16px;
             font-weight: bold;
@@ -144,7 +253,7 @@
         }
 
         .analyze-btn:hover {
-            background: #71314e;
+            background: #8d2e59;
         }
 
         .analyze-btn:disabled {
@@ -212,10 +321,18 @@
             line-height: 1.6;
         }
 
+
+        /* ================= RESPONSIVE ================= */
+
         @media(max-width:750px) {
+
+            .sidebar {
+                width: 210px;
+            }
 
             .page {
                 padding: 18px;
+                margin-left: 210px;
             }
 
             .topbar {
@@ -230,6 +347,26 @@
 
         }
 
+        @media(max-width:550px) {
+
+            .sidebar {
+                position: relative;
+                width: 100%;
+                height: auto;
+            }
+
+            .logout {
+                position: static;
+                margin-top: 20px;
+            }
+
+            .page {
+                margin-left: 0;
+                padding: 20px;
+            }
+
+        }
+
     </style>
 
 </head>
@@ -237,166 +374,225 @@
 
 <body>
 
-<div class="page">
 
-<div class="container">
+    <!-- ================= SIDEBAR ================= -->
 
-    <div class="topbar">
+    <aside class="sidebar">
 
-        <div class="title-area">
+        <div class="brand">
 
-            <h1>
-                AI Breast Tissue Analysis
-            </h1>
+            <div class="brand-icon">
+                🩷
+            </div>
 
-            <p>
-                Upload one or multiple histopathology images for AI-assisted analysis.
-            </p>
+            <h2>BreastCare AI</h2>
+
+            <p>AI-Assisted Breast Analysis</p>
 
         </div>
 
-        <a
-            href="{{ url_for('patient_dashboard') }}"
-            class="back-btn"
-        >
-            ← Dashboard
-        </a>
 
-    </div>
+        <nav class="nav">
+
+            <a href="{{ url_for('patient_dashboard') }}">
+                <span class="nav-icon">⌂</span>
+                Dashboard
+            </a>
+
+            <a href="{{ url_for('prediction') }}" class="active">
+                <span class="nav-icon">🔬</span>
+                New Prediction
+            </a>
+
+            <a href="{{ url_for('history') }}">
+                <span class="nav-icon">◷</span>
+                Patient History
+            </a>
+
+            <a href="{{ url_for('cancer_information') }}">
+                <span class="nav-icon">▣</span>
+                Cancer Information
+            </a>
+
+            <a href="{{ url_for('profile') }}">
+                <span class="nav-icon">◯</span>
+                Profile
+            </a>
+
+        </nav>
 
 
-    <div class="main-card">
+        <div class="logout">
 
-        <!-- IMPORTANT:
-             name="images"
-             matches request.files.getlist("images")
-        -->
+            <a href="{{ url_for('logout') }}">
+                <span class="nav-icon">↪</span>
+                Logout
+            </a>
 
-        <form
-            id="predictionForm"
-            action="{{ url_for('predict') }}"
-            method="POST"
-            enctype="multipart/form-data"
-        >
+        </div>
 
-            <label
-                for="imageInput"
-                class="upload-area"
-            >
+    </aside>
 
-                <div class="upload-icon">
-                    🧬
-                </div>
 
-                <h2>
-                    Select Histopathology Images
-                </h2>
+    <!-- ================= YOUR EXISTING PAGE ================= -->
+
+    <div class="page">
+
+    <div class="container">
+
+        <div class="topbar">
+
+            <div class="title-area">
+
+                <h1>
+                    AI Breast Tissue Analysis
+                </h1>
 
                 <p>
-                    Choose one or multiple images from your device
+                    Upload one or multiple histopathology images for AI-assisted analysis.
                 </p>
 
-                <div class="file-types">
-                    PNG · JPG · JPEG · BMP · TIF · TIFF
-                </div>
-
-            </label>
-
-
-            <input
-                type="file"
-                id="imageInput"
-                name="images"
-                accept=".png,.jpg,.jpeg,.bmp,.tif,.tiff"
-                multiple
-            >
-
-
-            <div
-                class="selected-box"
-                id="selectedBox"
-            >
-
-                <div class="selected-title">
-                    Selected Images
-                </div>
-
-                <ul id="fileList"></ul>
-
             </div>
 
+            
 
-            <div class="button-area">
+        </div>
 
-                <button
-                    type="submit"
-                    class="analyze-btn"
-                    id="analyzeButton"
-                    disabled
+
+        <div class="main-card">
+
+            <!-- IMPORTANT:
+                 name="images"
+                 matches request.files.getlist("images")
+            -->
+
+            <form
+                id="predictionForm"
+                action="{{ url_for('predict') }}"
+                method="POST"
+                enctype="multipart/form-data"
+            >
+
+                <label
+                    for="imageInput"
+                    class="upload-area"
                 >
-                    ✦ Start AI Analysis
-                </button>
 
-            </div>
+                    <div class="upload-icon">
+                        🧬
+                    </div>
+
+                    <h2>
+                        Select Histopathology Images
+                    </h2>
+
+                    <p>
+                        Choose one or multiple images from your device
+                    </p>
+
+                    <div class="file-types">
+                        PNG · JPG · JPEG · BMP · TIF · TIFF
+                    </div>
+
+                </label>
 
 
-            <div id="processingBox">
+                <input
+                    type="file"
+                    id="imageInput"
+                    name="images"
+                    accept=".png,.jpg,.jpeg,.bmp,.tif,.tiff"
+                    multiple
+                >
 
-                <div class="loader"></div>
-
-                <div class="processing-title">
-                    AI Analysis in Progress
-                </div>
 
                 <div
-                    class="processing-text"
-                    id="processingText"
+                    class="selected-box"
+                    id="selectedBox"
                 >
-                    Preparing your images...
+
+                    <div class="selected-title">
+                        Selected Images
+                    </div>
+
+                    <ul id="fileList"></ul>
+
                 </div>
 
-            </div>
 
-        </form>
+                <div class="button-area">
 
+                    <button
+                        type="submit"
+                        class="analyze-btn"
+                        id="analyzeButton"
+                        disabled
+                    >
+                        ✦ Start AI Analysis
+                    </button>
 
-        <div class="features">
-
-            <div class="feature">
-
-                <h3>
-                    🔬 Image Processing
-                </h3>
-
-                <p>
-                    Each uploaded image is prepared and resized before being passed to the trained deep learning models.
-                </p>
-
-            </div>
+                </div>
 
 
-            <div class="feature">
+                <div id="processingBox">
 
-                <h3>
-                    🧠 AI Classification
-                </h3>
+                    <div class="loader"></div>
 
-                <p>
-                    Each image is analyzed individually using binary classification and histopathological subtype classification.
-                </p>
+                    <div class="processing-title">
+                        AI Analysis in Progress
+                    </div>
 
-            </div>
+                    <div
+                        class="processing-text"
+                        id="processingText"
+                    >
+                        Preparing your images...
+                    </div>
+
+                </div>
+
+            </form>
 
 
-            <div class="feature">
+            <div class="features">
 
-                <h3>
-                    ✨ Explainable AI
-                </h3>
+                <div class="feature">
 
-                <p>
-                    Grad-CAM visualization is generated for each successfully analyzed image.
-                </p>
+                    <h3>
+                        🔬 Image Processing
+                    </h3>
+
+                    <p>
+                        Each uploaded image is prepared and resized before being passed to the trained deep learning models.
+                    </p>
+
+                </div>
+
+
+                <div class="feature">
+
+                    <h3>
+                        🧠 AI Classification
+                    </h3>
+
+                    <p>
+                        Each image is analyzed individually using binary classification and histopathological subtype classification.
+                    </p>
+
+                </div>
+
+
+                <div class="feature">
+
+                    <h3>
+                        ✨ Explainable AI
+                    </h3>
+
+                    <p>
+                        Grad-CAM visualization is generated for each successfully analyzed image.
+                    </p>
+
+                </div>
 
             </div>
 
@@ -404,9 +600,7 @@
 
     </div>
 
-</div>
-
-</div>
+    </div>
 
 
 <script>
@@ -540,5 +734,7 @@ form.addEventListener(
 
 </script>
 
+
 </body>
+
 </html>

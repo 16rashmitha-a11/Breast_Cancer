@@ -1,156 +1,560 @@
 {% extends "base.html" %}
 
-{% block title %}
-Patient Details | BreastCare AI
-{% endblock %}
+{% block title %}Patient Details | BreastCare AI{% endblock %}
 
 {% block content %}
 
-<div class="page-heading">
+<style>
 
-    <span class="section-label">
-        PATIENT DETAILS
-    </span>
+.patient-page {
+    max-width: 1250px;
+    margin: 0 auto;
+    padding: 35px 40px 60px;
+}
 
-    <h1>
-        {{ user["name"] }}
-    </h1>
+/* HEADER */
 
-    <p>
-        {{ user["email"] }}
-    </p>
+.patient-header {
+    margin-bottom: 25px;
+}
 
-</div>
+.back-link {
+    color: #8f315f;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.patient-header small {
+    display: block;
+    margin-top: 25px;
+    color: #a03d68;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 1.4px;
+}
+
+.patient-header h1 {
+    margin: 7px 0 5px;
+    color: #382538;
+    font-size: 34px;
+}
+
+.patient-header p {
+    margin: 0;
+    color: #82747d;
+}
+
+/* PATIENT CARD */
+
+.patient-card {
+    background: white;
+    border: 1px solid #eadde5;
+    border-radius: 18px;
+    padding: 26px;
+    box-shadow: 0 8px 28px rgba(65,38,54,.06);
+    margin-bottom: 28px;
+}
+
+.patient-profile {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    margin-bottom: 25px;
+}
+
+.patient-avatar {
+    width: 68px;
+    height: 68px;
+    border-radius: 18px;
+    background: #f5e3ec;
+    color: #8f315f;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 27px;
+    font-weight: 800;
+}
+
+.patient-name {
+    font-size: 23px;
+    font-weight: 800;
+    color: #3d2937;
+}
+
+.patient-email {
+    margin-top: 4px;
+    color: #887a82;
+    font-size: 14px;
+}
+
+/* INFORMATION GRID */
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+}
+
+.info-item {
+    background: #fcf9fb;
+    border: 1px solid #eee3e8;
+    border-radius: 12px;
+    padding: 16px;
+}
+
+.info-label {
+    color: #91828b;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: .7px;
+    font-weight: 700;
+    margin-bottom: 7px;
+}
+
+.info-value {
+    color: #3e2b38;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+/* SECTION */
+
+.section-header {
+    margin-bottom: 15px;
+}
+
+.section-header small {
+    color: #a03d68;
+    font-weight: 800;
+    font-size: 11px;
+    letter-spacing: 1.2px;
+}
+
+.section-header h2 {
+    margin: 5px 0;
+    color: #3d2937;
+    font-size: 23px;
+}
+
+.section-header p {
+    color: #897c83;
+    margin: 0;
+    font-size: 13px;
+}
+
+/* TABLE */
+
+.predictions-card {
+    background: white;
+    border: 1px solid #eadde5;
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 8px 28px rgba(65,38,54,.06);
+}
+
+.predictions-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.predictions-table th {
+    background: #faf4f7;
+    color: #725667;
+    text-align: left;
+    padding: 16px 18px;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: .7px;
+}
+
+.predictions-table td {
+    padding: 17px 18px;
+    border-top: 1px solid #eee6ea;
+    color: #4b3a44;
+    font-size: 13px;
+    vertical-align: middle;
+}
+
+.filename {
+    font-weight: 700;
+    color: #3c2936;
+}
+
+.date {
+    color: #8b7d85;
+    font-size: 12px;
+}
+
+.badge {
+    display: inline-flex;
+    padding: 6px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 800;
+}
+
+.badge-benign {
+    background: #eaf4ef;
+    color: #47735d;
+}
+
+.badge-malignant {
+    background: #f9e9ee;
+    color: #a0335c;
+}
+
+.view-button {
+    display: inline-flex;
+    padding: 8px 13px;
+    border-radius: 8px;
+    background: #8f315f;
+    color: white;
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.view-button:hover {
+    background: #74264d;
+}
+
+/* EMPTY */
+
+.empty-state {
+    text-align: center;
+    padding: 55px 20px;
+    color: #8d8087;
+}
+
+.empty-icon {
+    font-size: 40px;
+    margin-bottom: 12px;
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 850px) {
+
+    .patient-page {
+        padding: 25px 18px 40px;
+    }
+
+    .info-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .predictions-card {
+        overflow-x: auto;
+    }
+
+    .predictions-table {
+        min-width: 750px;
+    }
+
+}
+
+@media (max-width: 550px) {
+
+    .info-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .patient-header h1 {
+        font-size: 28px;
+    }
+
+}
+
+</style>
 
 
-<div class="detail-card">
+<div class="patient-page">
 
-    <h2>
-        Patient Information
-    </h2>
 
-    <div class="detail-grid">
+    <!-- HEADER -->
 
-        <div>
-            <span>Name</span>
-            <strong>{{ user["name"] }}</strong>
+    <div class="patient-header">
+
+        <a
+            href="{{ url_for('admin_patients') }}"
+            class="back-link"
+        >
+            ← Back to Patients
+        </a>
+
+        <small>PATIENT DETAILS</small>
+
+        <h1>
+            {{ user["name"] }}
+        </h1>
+
+        <p>
+            Patient account and histopathology analysis history
+        </p>
+
+    </div>
+
+
+    <!-- PATIENT INFORMATION -->
+
+    <div class="patient-card">
+
+        <div class="patient-profile">
+
+            <div class="patient-avatar">
+                {{ user["name"][0]|upper }}
+            </div>
+
+            <div>
+
+                <div class="patient-name">
+                    {{ user["name"] }}
+                </div>
+
+                <div class="patient-email">
+                    {{ user["email"] }}
+                </div>
+
+            </div>
+
         </div>
 
-        <div>
-            <span>Email</span>
-            <strong>{{ user["email"] }}</strong>
-        </div>
 
-        <div>
-            <span>Phone</span>
-            <strong>{{ user["phone"] or "—" }}</strong>
-        </div>
+        <div class="info-grid">
 
-        <div>
-            <span>Age</span>
-            <strong>{{ user["age"] or "—" }}</strong>
-        </div>
+            <div class="info-item">
 
-        <div>
-            <span>Gender</span>
-            <strong>{{ user["gender"] or "—" }}</strong>
-        </div>
+                <div class="info-label">
+                    Name
+                </div>
 
-        <div class="full-width">
-            <span>Address</span>
-            <strong>{{ user["address"] or "—" }}</strong>
+                <div class="info-value">
+                    {{ user["name"] }}
+                </div>
+
+            </div>
+
+
+            <div class="info-item">
+
+                <div class="info-label">
+                    Email
+                </div>
+
+                <div class="info-value">
+                    {{ user["email"] }}
+                </div>
+
+            </div>
+
+
+            <div class="info-item">
+
+                <div class="info-label">
+                    Phone
+                </div>
+
+                <div class="info-value">
+                    {{ user["phone"] or "Not provided" if "phone" in user.keys() else "Not provided" }}
+                </div>
+
+            </div>
+
+
+            <div class="info-item">
+
+                <div class="info-label">
+                    Age
+                </div>
+
+                <div class="info-value">
+                    {{ user["age"] or "Not provided" if "age" in user.keys() else "Not provided" }}
+                </div>
+
+            </div>
+
+
+            <div class="info-item">
+
+                <div class="info-label">
+                    Gender
+                </div>
+
+                <div class="info-value">
+                    {{ user["gender"] or "Not provided" if "gender" in user.keys() else "Not provided" }}
+                </div>
+
+            </div>
+
+
+            <div class="info-item">
+
+                <div class="info-label">
+                    Address
+                </div>
+
+                <div class="info-value">
+                    {{ user["address"] or "Not provided" if "address" in user.keys() else "Not provided" }}
+                </div>
+
+            </div>
+
         </div>
 
     </div>
 
-</div>
 
+    <!-- ANALYSIS HISTORY -->
 
-<div class="section-header">
+    <div class="section-header">
 
-    <div>
-
-        <span class="section-label">
-            ANALYSIS HISTORY
-        </span>
+        <small>ANALYSIS HISTORY</small>
 
         <h2>
             Patient Predictions
         </h2>
 
-    </div>
-
-</div>
-
-
-{% if predictions %}
-
-<div class="prediction-list">
-
-    {% for item in predictions %}
-
-    <div class="prediction-card">
-
-        <div class="prediction-image-placeholder">
-            🔬
-        </div>
-
-        <div class="prediction-main">
-
-            <h3>
-                {{ item["original_filename"] }}
-            </h3>
-
-            <p>
-                {{ item["created_at"] }}
-            </p>
-
-        </div>
-
-        <div class="prediction-result">
-
-            <strong>
-                {{ item["binary_prediction"] }}
-            </strong>
-
-            <span>
-                {{ "%.2f"|format(
-                    item["binary_confidence"]
-                ) }}%
-            </span>
-
-        </div>
-
-        <a
-            href="{{ url_for(
-                'admin_prediction_detail',
-                prediction_id=item['id']
-            ) }}"
-            class="view-btn">
-
-            View
-
-        </a>
+        <p>
+            Histopathology analysis records associated with this patient.
+        </p>
 
     </div>
 
-    {% endfor %}
 
-</div>
+    <div class="predictions-card">
 
-{% else %}
+        {% if predictions %}
 
-<div class="empty-state">
+        <table class="predictions-table">
 
-    <div>
-        🔬
+            <thead>
+
+                <tr>
+
+                    <th>Image</th>
+
+                    <th>Date</th>
+
+                    <th>Binary Result</th>
+
+                    <th>Confidence</th>
+
+                    <th>Subtype</th>
+
+                    <th>Action</th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+            {% for prediction in predictions %}
+
+                <tr>
+
+                    <td>
+
+                        <div class="filename">
+                            {{ prediction["original_filename"] }}
+                        </div>
+
+                    </td>
+
+
+                    <td>
+
+                        <div class="date">
+
+                            {% if prediction["created_at"] %}
+                                {{ prediction["created_at"] }}
+                            {% else %}
+                                —
+                            {% endif %}
+
+                        </div>
+
+                    </td>
+
+
+                    <td>
+
+                        {% if prediction["binary_prediction"]|lower == "malignant" %}
+
+                            <span class="badge badge-malignant">
+                                Malignant
+                            </span>
+
+                        {% else %}
+
+                            <span class="badge badge-benign">
+                                Benign
+                            </span>
+
+                        {% endif %}
+
+                    </td>
+
+
+                    <td>
+
+                        {{ "%.2f"|format(
+                            prediction["binary_confidence"]|float
+                            if prediction["binary_confidence"]|float > 1
+                            else prediction["binary_confidence"]|float * 100
+                        ) }}%
+
+                    </td>
+
+
+                    <td>
+
+                        {{ prediction["subclass_prediction"] or "—" }}
+
+                    </td>
+
+
+                    <td>
+
+                        <a
+                            href="{{ url_for(
+                                'admin_prediction_detail',
+                                prediction_id=prediction['id']
+                            ) }}"
+                            class="view-button"
+                        >
+                            View
+                        </a>
+
+                    </td>
+
+                </tr>
+
+            {% endfor %}
+
+            </tbody>
+
+        </table>
+
+        {% else %}
+
+            <div class="empty-state">
+
+                <div class="empty-icon">
+                    🔬
+                </div>
+
+                No prediction records found for this patient.
+
+            </div>
+
+        {% endif %}
+
     </div>
 
-    <h3>
-        No predictions
-    </h3>
 
 </div>
 
-{% endif %}
 {% endblock %}

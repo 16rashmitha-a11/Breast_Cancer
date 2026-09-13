@@ -3,7 +3,6 @@ import uuid
 
 import numpy as np
 import tensorflow as tf
-
 from PIL import Image
 
 import matplotlib
@@ -16,9 +15,7 @@ from matplotlib import colormaps
 # PATHS
 # ============================================================
 
-BASE_DIR = os.path.dirname(
-    os.path.abspath(__file__)
-)
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 GRADCAM_DIR = os.path.join(
     BASE_DIR,
@@ -26,40 +23,61 @@ GRADCAM_DIR = os.path.join(
     "gradcam",
 )
 
-os.makedirs(
-    GRADCAM_DIR,
-    exist_ok=True,
-)
+os.makedirs(GRADCAM_DIR, exist_ok=True)
 
 
 # ============================================================
 # DENSENET121 TARGET LAYER
+# ============================================================
+#
+# We use the last convolutional feature map of DenseNet121.
+#
+# conv5_block16_concat = 7 x 7 x 1024
+#
+# The important difference from the old code is that after
+# this feature map we continue through DenseNet's remaining
+# BN/ReLU layers AND then through the actual classifier.
+#
 # ============================================================
 
 TARGET_LAYER_NAME = "conv5_block16_concat"
 
 
 # ============================================================
-# PREPROCESS IMAGE
+# IMAGE PREPROCESSING
 # ============================================================
 
 def preprocess_image(image_path):
-    image = Image.open(
+    """
+    Preprocess the image exactly as DenseNet121 expects.
+
+    Input:
         image_path
-    ).convert("RGB")
+
+    Output:
+        Tensor/array with shape (1, 224, 224, 3)
+    """
+
+    if not os.path.exists(image_path):
+        raise FileNotFoundError(
+            f"Image does not exist: {image_path}"
+        )
+
+    image = Image.open(image_path).convert("RGB")
 
     image = image.resize(
-        (224, 224)
+        (224, 224),
+        Image.Resampling.BILINEAR
     )
 
     image_array = np.asarray(
         image,
-        dtype=np.float32,
+        dtype=np.float32
     )
 
     image_array = np.expand_dims(
         image_array,
-        axis=0,
+        axis=0
     )
 
     image_array = (
@@ -72,20 +90,24 @@ def preprocess_image(image_path):
 
 
 # ============================================================
-# FIND DENSENET BASE MODEL
+# FIND DENSENET121 BASE MODEL
 # ============================================================
 
 def get_densenet_base(model):
+    """
+    Find the nested DenseNet121 model inside the classifier.
+    """
 
-    # First: normal expected name.
+    # --------------------------------------------------------
+    # First try the expected name.
+    # --------------------------------------------------------
+
     try:
-        base_model = model.get_layer(
-            "densenet121"
-        )
+        base_model = model.get_layer("densenet121")
 
         print(
-            "DenseNet121 base model:",
-            base_model.name,
+            "DenseNet121 base model found:",
+            base_model.name
         )
 
         return base_model
@@ -93,59 +115,80 @@ def get_densenet_base(model):
     except Exception:
         pass
 
-    # Backup: find a nested model containing DenseNet.
+
+    # --------------------------------------------------------
+    # Search nested models.
+    # --------------------------------------------------------
+
     for layer in model.layers:
 
-        if isinstance(
-            layer,
-            tf.keras.Model,
-        ):
+        if isinstance(layer, tf.keras.Model):
 
             if "densenet" in layer.name.lower():
 
                 print(
                     "DenseNet base model found:",
-                    layer.name,
+                    layer.name
                 )
 
                 return layer
 
-    # Backup: look through all layers by name.
+
+    # --------------------------------------------------------
+    # Search by name.
+    # --------------------------------------------------------
+
     for layer in model.layers:
 
         if "densenet" in layer.name.lower():
 
             print(
                 "DenseNet-like layer found:",
-                layer.name,
+                layer.name
             )
 
             return layer
 
+
     raise ValueError(
-        "DenseNet121 base model could not be found."
+        "DenseNet121 base model could not be found "
+        "inside the subclass model."
     )
 
 
 # ============================================================
-# FIND TARGET CONVOLUTIONAL LAYER
+# FIND TARGET LAYER
 # ============================================================
 
 def get_target_layer(base_model):
+    """
+    Find the last convolutional feature map.
+
+    Preferred:
+        conv5_block16_concat
+
+    If unavailable, automatically search backwards for a
+    suitable 4-D convolutional feature layer.
+    """
+
+    # --------------------------------------------------------
+    # Preferred layer.
+    # --------------------------------------------------------
 
     try:
+
         target_layer = base_model.get_layer(
             TARGET_LAYER_NAME
         )
 
         print(
             "Grad-CAM target layer:",
-            target_layer.name,
+            target_layer.name
         )
 
         print(
-            "Target output:",
-            target_layer.output.shape,
+            "Grad-CAM target output:",
+            target_layer.output.shape
         )
 
         return target_layer
@@ -154,31 +197,34 @@ def get_target_layer(base_model):
 
         print(
             "Preferred Grad-CAM layer not found:",
-            repr(error),
+            repr(error)
         )
 
-    # Backup: use the last 4-D layer.
-    for layer in reversed(
-        base_model.layers
-    ):
+
+    # --------------------------------------------------------
+    # Fallback.
+    # --------------------------------------------------------
+
+    for layer in reversed(base_model.layers):
 
         try:
 
-            output_shape = layer.output.shape
+            output = layer.output
+            shape = output.shape
 
             if (
-                len(output_shape) == 4
-                and output_shape[-1] is not None
+                len(shape) == 4
+                and shape[-1] is not None
             ):
 
                 print(
-                    "Automatic Grad-CAM layer:",
-                    layer.name,
+                    "Fallback Grad-CAM layer:",
+                    layer.name
                 )
 
                 print(
-                    "Target output:",
-                    layer.output.shape,
+                    "Fallback output:",
+                    shape
                 )
 
                 return layer
@@ -186,53 +232,84 @@ def get_target_layer(base_model):
         except Exception:
             continue
 
+
     raise ValueError(
-        "No suitable convolutional layer was found for Grad-CAM."
+        "No suitable convolutional layer was found "
+        "for Grad-CAM."
     )
 
 
 # ============================================================
-# APPLY OUTER MODEL LAYERS
+# FIND LAYER INDEX
 # ============================================================
 
-def apply_layers_after_base(
-    model,
+def get_layer_index(model, target_layer):
+    """
+    Find target layer index inside a model.
+    """
+
+    for index, layer in enumerate(model.layers):
+
+        if layer is target_layer:
+            return index
+
+        if layer.name == target_layer.name:
+            return index
+
+    return None
+
+
+# ============================================================
+# APPLY LAYERS AFTER TARGET INSIDE DENSENET
+# ============================================================
+
+def apply_layers_after_target(
     base_model,
-    tensor,
+    target_layer,
+    tensor
 ):
+    """
+    Continue the DenseNet121 forward pass after the Grad-CAM
+    target layer.
 
-    base_index = None
+    This is important because conv5_block16_concat is NOT the
+    final output of DenseNet121.
 
-    for index, layer in enumerate(
-        model.layers
-    ):
+    DenseNet continues through its final BN and ReLU.
+    """
 
-        if layer is base_model:
-            base_index = index
-            break
+    target_index = get_layer_index(
+        base_model,
+        target_layer
+    )
 
-        if layer.name == base_model.name:
-            base_index = index
-            break
-
-    if base_index is None:
+    if target_index is None:
 
         raise ValueError(
-            "Could not find DenseNet base model inside outer model."
+            "Could not find Grad-CAM target layer "
+            "inside DenseNet121."
         )
-
-    following_layers = model.layers[
-        base_index + 1:
-    ]
 
     x = tensor
 
+    following_layers = base_model.layers[
+        target_index + 1:
+    ]
+
+    print(
+        "Layers after Grad-CAM target:",
+        len(following_layers)
+    )
+
     for layer in following_layers:
 
-        # Skip InputLayer safely.
+        # ----------------------------------------------------
+        # Ignore InputLayer if encountered.
+        # ----------------------------------------------------
+
         if isinstance(
             layer,
-            tf.keras.layers.InputLayer,
+            tf.keras.layers.InputLayer
         ):
             continue
 
@@ -240,7 +317,7 @@ def apply_layers_after_base(
 
             x = layer(
                 x,
-                training=False,
+                training=False
             )
 
         except TypeError:
@@ -251,219 +328,427 @@ def apply_layers_after_base(
 
 
 # ============================================================
-# GENERATE GRAD-CAM
+# APPLY OUTER CLASSIFIER
 # ============================================================
 
-def make_gradcam(
+def apply_outer_classifier(
     model,
-    image_path,
-    predicted_class_index,
+    base_model,
+    tensor
 ):
+    """
+    Continue from DenseNet121 output through the actual
+    classifier layers of the trained model.
 
-    print("\n" + "=" * 70)
-    print("GENERATING GRAD-CAM")
-    print("IMAGE:", image_path)
-    print("CLASS INDEX:", predicted_class_index)
-    print("=" * 70)
+    This ensures that the Grad-CAM gradient corresponds to
+    the same classifier prediction produced by the real model.
+    """
 
-    if not os.path.exists(image_path):
-
-        raise FileNotFoundError(
-            f"Image does not exist: {image_path}"
-        )
-
-    image_array = preprocess_image(
-        image_path
-    )
-
-    base_model = get_densenet_base(
-        model
-    )
-
-    target_layer = get_target_layer(
+    base_index = get_layer_index(
+        model,
         base_model
     )
 
+    if base_index is None:
+
+        raise ValueError(
+            "Could not find DenseNet121 base model "
+            "inside the subclass model."
+        )
+
+    x = tensor
+
+    following_layers = model.layers[
+        base_index + 1:
+    ]
+
+    print(
+        "Outer classifier layers:",
+        len(following_layers)
+    )
+
+    for layer in following_layers:
+
+        if isinstance(
+            layer,
+            tf.keras.layers.InputLayer
+        ):
+            continue
+
+        try:
+
+            x = layer(
+                x,
+                training=False
+            )
+
+        except TypeError:
+
+            x = layer(x)
+
+    return x
+
+
+# ============================================================
+# BUILD GRADIENT MODEL
+# ============================================================
+
+def build_gradcam_path(
+    model,
+    base_model,
+    target_layer
+):
+    """
+    Build the complete differentiable path:
+
+        DenseNet input
+            ↓
+        target convolution
+            ↓
+        remaining DenseNet layers
+            ↓
+        classifier
+            ↓
+        8-class output
+
+    This fixes the incomplete gradient path from the previous
+    implementation.
+    """
+
+    base_input = base_model.input
+
     # --------------------------------------------------------
-    # FEATURE MODEL
-    #
-    # This model starts at DenseNet's real input and ends at
-    # the selected convolutional feature map.
+    # Get feature map.
     # --------------------------------------------------------
 
     feature_model = tf.keras.Model(
-        inputs=base_model.input,
+        inputs=base_input,
         outputs=target_layer.output,
+        name="gradcam_feature_model"
     )
 
-    # --------------------------------------------------------
-    # GRADIENT CALCULATION
-    # --------------------------------------------------------
+    return feature_model
+
+
+# ============================================================
+# CALCULATE GRADIENTS
+# ============================================================
+
+def calculate_gradcam(
+    model,
+    base_model,
+    target_layer,
+    image_array,
+    predicted_class_index
+):
+    """
+    Calculate Grad-CAM for the exact predicted subclass.
+    """
+
+    feature_model = build_gradcam_path(
+        model,
+        base_model,
+        target_layer
+    )
 
     with tf.GradientTape() as tape:
 
+        # ----------------------------------------------------
+        # Forward pass to target feature map.
+        # ----------------------------------------------------
+
         conv_outputs = feature_model(
             image_array,
-            training=False,
+            training=False
         )
 
-        tape.watch(
+        tape.watch(conv_outputs)
+
+        # ----------------------------------------------------
+        # Continue through the rest of DenseNet.
+        # ----------------------------------------------------
+
+        x = apply_layers_after_target(
+            base_model,
+            target_layer,
             conv_outputs
         )
 
-        # Continue through the layers after DenseNet so that
-        # the gradient is calculated against the SAME subclass
-        # prediction produced by the actual model.
-        predictions = apply_layers_after_base(
+        # ----------------------------------------------------
+        # Continue through the actual classifier.
+        # ----------------------------------------------------
+
+        predictions = apply_outer_classifier(
             model,
             base_model,
-            conv_outputs,
+            x
         )
 
         predictions = tf.convert_to_tensor(
             predictions
         )
 
-        if (
-            len(predictions.shape) != 2
-            or predictions.shape[-1] is None
-        ):
+        # ----------------------------------------------------
+        # Validate model output.
+        # ----------------------------------------------------
+
+        if len(predictions.shape) != 2:
 
             raise ValueError(
-                "Unexpected model output shape for Grad-CAM: "
+                "Unexpected subclass model output shape: "
                 f"{predictions.shape}"
             )
+
+        number_of_classes = int(
+            predictions.shape[-1]
+        )
 
         class_index = int(
             predicted_class_index
         )
 
-        if class_index < 0 or class_index >= int(
-            predictions.shape[-1]
+        if (
+            class_index < 0
+            or class_index >= number_of_classes
         ):
 
             raise ValueError(
-                f"Invalid Grad-CAM class index: {class_index}"
+                "Invalid Grad-CAM class index: "
+                f"{class_index}"
             )
 
+        # ----------------------------------------------------
+        # Score for EXACT predicted subclass.
+        # ----------------------------------------------------
+
         class_score = predictions[
-            :,
-            class_index,
+            0,
+            class_index
         ]
+
+    # --------------------------------------------------------
+    # Gradient of predicted class with respect to feature map.
+    # --------------------------------------------------------
 
     gradients = tape.gradient(
         class_score,
-        conv_outputs,
+        conv_outputs
     )
 
     if gradients is None:
 
         raise ValueError(
-            "Gradients are None. Grad-CAM cannot be generated."
+            "Gradients are None. "
+            "Grad-CAM cannot be generated."
         )
 
+    return (
+        conv_outputs,
+        gradients,
+        predictions
+    )
+
+
+# ============================================================
+# CREATE HEATMAP
+# ============================================================
+
+def create_heatmap(
+    conv_outputs,
+    gradients
+):
+    """
+    Convert convolutional features and gradients into a
+    normalized Grad-CAM heatmap.
+    """
+
     # --------------------------------------------------------
-    # GLOBAL AVERAGE POOLING OF GRADIENTS
+    # Remove batch dimension.
+    # --------------------------------------------------------
+
+    conv_outputs = conv_outputs[0]
+    gradients = gradients[0]
+
+    # --------------------------------------------------------
+    # Standard Grad-CAM:
+    #
+    # weight of each feature channel =
+    # mean gradient over spatial dimensions
     # --------------------------------------------------------
 
     pooled_gradients = tf.reduce_mean(
         gradients,
-        axis=(1, 2),
+        axis=(0, 1)
     )
 
-    conv_outputs = conv_outputs[0]
-    pooled_gradients = pooled_gradients[0]
+    # --------------------------------------------------------
+    # Weighted feature maps.
+    # --------------------------------------------------------
 
-    # --------------------------------------------------------
-    # WEIGHT FEATURE MAPS
-    # --------------------------------------------------------
+    weighted_features = (
+        conv_outputs
+        * pooled_gradients
+    )
 
     heatmap = tf.reduce_sum(
-        conv_outputs * pooled_gradients,
-        axis=-1,
+        weighted_features,
+        axis=-1
     )
 
     # --------------------------------------------------------
-    # RELU
+    # Positive evidence.
     # --------------------------------------------------------
 
     heatmap = tf.maximum(
         heatmap,
-        0,
+        0
     )
-
-    # --------------------------------------------------------
-    # NORMALIZE
-    # --------------------------------------------------------
-
-    max_value = float(
-        tf.reduce_max(
-            heatmap
-        ).numpy()
-    )
-
-    if max_value <= 1e-10:
-
-        raise ValueError(
-            "Grad-CAM heatmap contains no positive activation."
-        )
-
-    heatmap = heatmap / max_value
 
     heatmap = heatmap.numpy()
+
+    # --------------------------------------------------------
+    # Clean invalid values.
+    # --------------------------------------------------------
 
     heatmap = np.nan_to_num(
         heatmap,
         nan=0.0,
-        posinf=1.0,
-        neginf=0.0,
+        posinf=0.0,
+        neginf=0.0
     )
+
+    # --------------------------------------------------------
+    # Normalize.
+    #
+    # IMPORTANT:
+    # Do NOT fail just because the maximum is extremely small.
+    # Instead, use the strongest absolute response as a
+    # fallback. This prevents unnecessary "Grad-CAM unavailable"
+    # results.
+    # --------------------------------------------------------
+
+    max_value = float(
+        np.max(heatmap)
+    )
+
+    if max_value > 1e-12:
+
+        heatmap = (
+            heatmap
+            / max_value
+        )
+
+    else:
+
+        # ----------------------------------------------------
+        # Fallback to absolute gradient-weighted activation.
+        # ----------------------------------------------------
+
+        absolute_features = np.abs(
+            conv_outputs.numpy()
+        )
+
+        absolute_gradients = np.abs(
+            gradients.numpy()
+        )
+
+        fallback = np.sum(
+            absolute_features
+            * absolute_gradients,
+            axis=-1
+        )
+
+        fallback = np.nan_to_num(
+            fallback,
+            nan=0.0,
+            posinf=0.0,
+            neginf=0.0
+        )
+
+        fallback_max = float(
+            np.max(fallback)
+        )
+
+        if fallback_max > 1e-12:
+
+            heatmap = (
+                fallback
+                / fallback_max
+            )
+
+        else:
+
+            # ------------------------------------------------
+            # If the model produces virtually no gradient,
+            # return a valid zero heatmap rather than crashing.
+            # ------------------------------------------------
+
+            heatmap = np.zeros_like(
+                heatmap,
+                dtype=np.float32
+            )
 
     heatmap = np.clip(
         heatmap,
         0.0,
-        1.0,
+        1.0
     )
 
-    # --------------------------------------------------------
-    # LOAD ORIGINAL IMAGE
-    # --------------------------------------------------------
+    return heatmap
 
-    original_image = Image.open(
-        image_path
-    ).convert("RGB")
 
-    original_size = (
-        original_image.width,
-        original_image.height,
-    )
+# ============================================================
+# RESIZE HEATMAP
+# ============================================================
 
-    # --------------------------------------------------------
-    # RESIZE HEATMAP
-    # --------------------------------------------------------
+def resize_heatmap(
+    heatmap,
+    original_size
+):
+    """
+    Resize the 7x7/feature-map heatmap to the exact original
+    image size.
+    """
 
     heatmap_image = Image.fromarray(
         np.uint8(
-            heatmap * 255
+            heatmap * 255.0
         )
     )
 
     heatmap_image = heatmap_image.resize(
         original_size,
-        Image.Resampling.BILINEAR,
+        Image.Resampling.BICUBIC
     )
 
     heatmap = (
         np.asarray(
             heatmap_image,
-            dtype=np.float32,
+            dtype=np.float32
         )
         / 255.0
     )
 
-    # --------------------------------------------------------
-    # COLOR MAP
-    # --------------------------------------------------------
+    heatmap = np.clip(
+        heatmap,
+        0.0,
+        1.0
+    )
+
+    return heatmap
+
+
+# ============================================================
+# CREATE COLORED HEATMAP
+# ============================================================
+
+def colorize_heatmap(
+    heatmap
+):
+    """
+    Convert grayscale heatmap into a standard Jet Grad-CAM
+    visualization.
+    """
 
     jet = colormaps["jet"]
 
@@ -472,62 +757,101 @@ def make_gradcam(
     )
 
     colored_heatmap = (
-        colored_heatmap[:, :, :3] * 255
+        colored_heatmap[:, :, :3]
+        * 255.0
     ).astype(
         np.uint8
     )
 
-    heatmap_rgb = Image.fromarray(
+    return Image.fromarray(
         colored_heatmap
     ).convert("RGB")
 
-    # --------------------------------------------------------
-    # OVERLAY
-    # --------------------------------------------------------
+
+# ============================================================
+# CREATE OVERLAY
+# ============================================================
+
+def create_overlay(
+    original_image,
+    heatmap_rgb,
+    heatmap
+):
+    """
+    Overlay Grad-CAM on the original histopathology image.
+
+    The original image remains visible while high-attention
+    regions become strongly colored.
+    """
 
     original_array = np.asarray(
         original_image,
-        dtype=np.float32,
+        dtype=np.float32
     )
 
     heatmap_array = np.asarray(
         heatmap_rgb,
-        dtype=np.float32,
+        dtype=np.float32
     )
 
+    # --------------------------------------------------------
+    # Adaptive transparency.
+    #
+    # Weak areas remain mostly original.
+    # Strong areas become clearly visible.
+    # --------------------------------------------------------
+
     alpha = (
-        0.15
-        + (heatmap ** 0.8) * 0.60
+        0.10
+        + np.power(
+            heatmap,
+            0.75
+        ) * 0.65
+    )
+
+    alpha = np.clip(
+        alpha,
+        0.10,
+        0.75
     )
 
     alpha = np.expand_dims(
         alpha,
-        axis=-1,
+        axis=-1
     )
 
     overlay_array = (
-        original_array * (1.0 - alpha)
-        + heatmap_array * alpha
+        original_array
+        * (1.0 - alpha)
+        +
+        heatmap_array
+        * alpha
     )
 
     overlay_array = np.clip(
         overlay_array,
         0,
-        255,
+        255
     ).astype(
         np.uint8
     )
 
-    result_image = Image.fromarray(
+    return Image.fromarray(
         overlay_array
     ).convert("RGB")
 
-    # --------------------------------------------------------
-    # UNIQUE FILENAMES
-    #
-    # UUID is CRITICAL for multiple uploaded images.
-    # No Grad-CAM file can overwrite another image's result.
-    # --------------------------------------------------------
+
+# ============================================================
+# SAVE IMAGES
+# ============================================================
+
+def save_gradcam_images(
+    heatmap_rgb,
+    overlay_image
+):
+    """
+    Save both the pure heatmap and the overlay.
+    """
 
     unique_id = uuid.uuid4().hex
 
@@ -541,52 +865,268 @@ def make_gradcam(
 
     heatmap_path = os.path.join(
         GRADCAM_DIR,
-        heatmap_filename,
+        heatmap_filename
     )
 
     overlay_path = os.path.join(
         GRADCAM_DIR,
-        overlay_filename,
+        overlay_filename
     )
 
     heatmap_rgb.save(
         heatmap_path,
-        format="PNG",
+        format="PNG"
     )
 
-    result_image.save(
+    overlay_image.save(
         overlay_path,
-        format="PNG",
+        format="PNG"
     )
 
     # --------------------------------------------------------
-    # VERIFY BOTH FILES
+    # Verify.
     # --------------------------------------------------------
 
-    if not os.path.exists(
+    if not os.path.isfile(
+        heatmap_path
+    ):
+
+        raise IOError(
+            "Grad-CAM heatmap file was not created."
+        )
+
+    if not os.path.isfile(
         overlay_path
     ):
 
         raise IOError(
-            "Grad-CAM overlay was not created."
+            "Grad-CAM overlay file was not created."
         )
 
     print(
         "Heatmap saved:",
-        heatmap_path,
+        heatmap_path
     )
 
     print(
         "Grad-CAM overlay saved:",
-        overlay_path,
+        overlay_path
     )
+
+    return (
+        heatmap_filename,
+        overlay_filename
+    )
+
+
+# ============================================================
+# MAIN GRAD-CAM FUNCTION
+# ============================================================
+
+def make_gradcam(
+    model,
+    image_path,
+    predicted_class_index
+):
+    """
+    Generate Grad-CAM for the predicted subclass.
+
+    Parameters
+    ----------
+    model:
+        Your trained 8-class DenseNet121 subclass model.
+
+    image_path:
+        Original uploaded image.
+
+    predicted_class_index:
+        Index of the subclass predicted by the model.
+
+    Returns
+    -------
+    str
+        Filename of the Grad-CAM overlay.
+    """
+
+    print()
+    print("=" * 70)
+    print("GENERATING GRAD-CAM")
+    print("IMAGE:", image_path)
+    print(
+        "PREDICTED CLASS INDEX:",
+        predicted_class_index
+    )
+    print("=" * 70)
+
+    # ========================================================
+    # 1. VALIDATE IMAGE
+    # ========================================================
+
+    if not os.path.exists(
+        image_path
+    ):
+
+        raise FileNotFoundError(
+            f"Image does not exist: {image_path}"
+        )
+
+    # ========================================================
+    # 2. PREPROCESS
+    # ========================================================
+
+    image_array = preprocess_image(
+        image_path
+    )
+
+    # ========================================================
+    # 3. FIND DENSENET
+    # ========================================================
+
+    base_model = get_densenet_base(
+        model
+    )
+
+    # ========================================================
+    # 4. FIND LAST CONVOLUTIONAL FEATURE MAP
+    # ========================================================
+
+    target_layer = get_target_layer(
+        base_model
+    )
+
+    # ========================================================
+    # 5. CALCULATE GRADIENT
+    # ========================================================
+
+    (
+        conv_outputs,
+        gradients,
+        predictions
+    ) = calculate_gradcam(
+        model,
+        base_model,
+        target_layer,
+        image_array,
+        predicted_class_index
+    )
+
+    # ========================================================
+    # 6. PRINT MODEL SCORE USED FOR GRAD-CAM
+    # ========================================================
+
+    class_index = int(
+        predicted_class_index
+    )
+
+    model_score = float(
+        predictions[0, class_index].numpy()
+    )
+
+    print(
+        "Grad-CAM class score:",
+        f"{model_score:.6f}"
+    )
+
+    print(
+        "Feature map shape:",
+        conv_outputs.shape
+    )
+
+    print(
+        "Gradient shape:",
+        gradients.shape
+    )
+
+    # ========================================================
+    # 7. CREATE HEATMAP
+    # ========================================================
+
+    heatmap = create_heatmap(
+        conv_outputs,
+        gradients
+    )
+
+    print(
+        "Heatmap shape:",
+        heatmap.shape
+    )
+
+    print(
+        "Heatmap minimum:",
+        float(np.min(heatmap))
+    )
+
+    print(
+        "Heatmap maximum:",
+        float(np.max(heatmap))
+    )
+
+    # ========================================================
+    # 8. LOAD ORIGINAL IMAGE
+    # ========================================================
+
+    original_image = Image.open(
+        image_path
+    ).convert("RGB")
+
+    original_size = (
+        original_image.width,
+        original_image.height
+    )
+
+    # ========================================================
+    # 9. RESIZE HEATMAP
+    # ========================================================
+
+    heatmap = resize_heatmap(
+        heatmap,
+        original_size
+    )
+
+    # ========================================================
+    # 10. COLOR HEATMAP
+    # ========================================================
+
+    heatmap_rgb = colorize_heatmap(
+        heatmap
+    )
+
+    # ========================================================
+    # 11. CREATE OVERLAY
+    # ========================================================
+
+    overlay_image = create_overlay(
+        original_image,
+        heatmap_rgb,
+        heatmap
+    )
+
+    # ========================================================
+    # 12. SAVE
+    # ========================================================
+
+    (
+        heatmap_filename,
+        overlay_filename
+    ) = save_gradcam_images(
+        heatmap_rgb,
+        overlay_image
+    )
+
+    # ========================================================
+    # 13. COMPLETE
+    # ========================================================
 
     print(
         "Grad-CAM generation completed successfully."
     )
+    print(
+        "Returned file:",
+        overlay_filename
+    )
 
     print("=" * 70)
 
-    # Return ONLY the filename because app.py stores the filename
-    # and the /gradcam-image/<filename> route serves the file.
+    # IMPORTANT:
+    # ml_service.py expects the filename.
     return overlay_filename

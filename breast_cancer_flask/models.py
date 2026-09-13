@@ -33,7 +33,7 @@ def init_db():
     cursor = connection.cursor()
 
     # --------------------------------------------------------
-    # USERS
+    # USERS TABLE
     # --------------------------------------------------------
 
     cursor.execute("""
@@ -64,7 +64,7 @@ def init_db():
     """)
 
     # --------------------------------------------------------
-    # PREDICTIONS
+    # PREDICTIONS TABLE
     # --------------------------------------------------------
 
     cursor.execute("""
@@ -232,7 +232,7 @@ def get_user(
 
 
 # ============================================================
-# GET USER
+# GET USER BY ID
 # ============================================================
 
 def get_user_by_id(user_id):
@@ -293,7 +293,7 @@ def update_profile(
 
 
 # ============================================================
-# CHECK PROFILE
+# CHECK PROFILE COMPLETION
 # ============================================================
 
 def is_profile_completed(user_id):
@@ -376,7 +376,7 @@ def save_prediction(
 
 
 # ============================================================
-# USER PREDICTIONS
+# GET USER PREDICTIONS
 # ============================================================
 
 def get_user_predictions(user_id):
@@ -399,7 +399,7 @@ def get_user_predictions(user_id):
 
 
 # ============================================================
-# SINGLE PREDICTION
+# GET SINGLE PREDICTION
 # ============================================================
 
 def get_prediction(prediction_id):
@@ -410,11 +410,17 @@ def get_prediction(prediction_id):
         """
         SELECT
             predictions.*,
+
             users.name AS patient_name,
+
             users.email AS patient_email,
+
             users.phone AS patient_phone,
+
             users.age AS patient_age,
+
             users.gender AS patient_gender,
+
             users.address AS patient_address
 
         FROM predictions
@@ -433,7 +439,7 @@ def get_prediction(prediction_id):
 
 
 # ============================================================
-# ADMIN - PATIENTS
+# ADMIN - GET ALL PATIENTS
 # ============================================================
 
 def get_all_patients():
@@ -444,6 +450,7 @@ def get_all_patients():
         """
         SELECT
             users.*,
+
             COUNT(predictions.id)
             AS prediction_count
 
@@ -456,7 +463,7 @@ def get_all_patients():
 
         GROUP BY users.id
 
-        ORDER BY users.id DESC
+        ORDER BY users.id ASC
         """
     ).fetchall()
 
@@ -466,7 +473,7 @@ def get_all_patients():
 
 
 # ============================================================
-# ADMIN - ALL PREDICTIONS
+# ADMIN - GET ALL PREDICTIONS
 # ============================================================
 
 def get_all_predictions():
@@ -477,7 +484,9 @@ def get_all_predictions():
         """
         SELECT
             predictions.*,
+
             users.name AS patient_name,
+
             users.email AS patient_email
 
         FROM predictions
@@ -495,7 +504,7 @@ def get_all_predictions():
 
 
 # ============================================================
-# COUNTS
+# COUNT PATIENTS
 # ============================================================
 
 def count_patients():
@@ -515,6 +524,10 @@ def count_patients():
     return count
 
 
+# ============================================================
+# COUNT PREDICTIONS
+# ============================================================
+
 def count_predictions():
 
     connection = get_db()
@@ -527,4 +540,5 @@ def count_predictions():
     ).fetchone()[0]
 
     connection.close()
+
     return count

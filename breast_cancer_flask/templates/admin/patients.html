@@ -4,7 +4,6 @@
 Patients
 {% endblock %}
 
-
 {% block content %}
 
 <div class="page-content">
@@ -63,27 +62,39 @@ Patients
 
                 <tbody>
 
-                {% for patient in patients %}
+                {% if patients %}
+
+                    {% for patient in patients %}
 
                     <tr>
 
+                        <!--
+                            This is the PATIENT list number.
+                            It is NOT the database user ID.
+                        -->
                         <td>
-                            #{{ patient["id"] }}
+                            #{{ loop.index }}
                         </td>
+
 
                         <td>
                             {{ patient["name"] }}
                         </td>
 
+
                         <td>
                             {{ patient["email"] }}
                         </td>
 
+
                         <td>
+
                             <span class="status">
                                 {{ patient["role"] }}
                             </span>
+
                         </td>
+
 
                         <td>
 
@@ -101,7 +112,22 @@ Patients
 
                     </tr>
 
-                {% endfor %}
+                    {% endfor %}
+
+                {% else %}
+
+                    <tr>
+
+                        <td
+                            colspan="5"
+                            style="text-align: center; padding: 40px;"
+                        >
+                            No patients registered yet.
+                        </td>
+
+                    </tr>
+
+                {% endif %}
 
                 </tbody>
 

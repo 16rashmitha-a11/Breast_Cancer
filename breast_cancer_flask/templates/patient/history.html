@@ -4,25 +4,16 @@
 Prediction History
 {% endblock %}
 
-
 {% block content %}
 
 <div class="page-content">
 
     <div class="page-heading">
+        <div class="eyebrow">RECORDS</div>
 
-        <div class="eyebrow">
-            RECORDS
-        </div>
+        <h1>Prediction History</h1>
 
-        <h1>
-            Prediction History
-        </h1>
-
-        <p>
-            View your previous breast tissue analyses.
-        </p>
-
+        <p>View your previous breast tissue analyses.</p>
     </div>
 
 
@@ -35,7 +26,6 @@ Prediction History
             <table class="data-table">
 
                 <thead>
-
                     <tr>
                         <th>Date</th>
                         <th>Image</th>
@@ -44,13 +34,12 @@ Prediction History
                         <th>Confidence</th>
                         <th>Action</th>
                     </tr>
-
                 </thead>
 
 
                 <tbody>
 
-                {% for item in predictions %}
+                    {% for item in predictions %}
 
                     <tr>
 
@@ -58,47 +47,41 @@ Prediction History
                             {{ item["created_at"] }}
                         </td>
 
+
                         <td>
                             {{ item["original_filename"] }}
                         </td>
 
-                        <td>
 
+                        <td>
                             <span class="status">
                                 {{ item["binary_prediction"] }}
                             </span>
-
                         </td>
 
+
                         <td>
-                            {{ item["subclass_prediction"]
-                                .replace("_", " ")
-                                .title() }}
+                            {{ item["subclass_prediction"].replace("_", " ").title() }}
                         </td>
 
+
                         <td>
-                            {{ "%.2f"|format(
-                                item["binary_confidence"]|float
-                            ) }}%
+                            {{ "%.2f"|format(item["binary_confidence"]|float) }}%
                         </td>
 
-                        <td>
 
+                        <td>
                             <a
-                                href="{{ url_for(
-                                    'prediction_detail',
-                                    prediction_id=item['id']
-                                ) }}"
+                                href="{{ url_for('prediction_detail', prediction_id=item['id']) }}"
                                 class="btn btn-secondary"
                             >
                                 View
                             </a>
-
                         </td>
 
                     </tr>
 
-                {% endfor %}
+                    {% endfor %}
 
                 </tbody>
 
@@ -108,21 +91,18 @@ Prediction History
 
     </div>
 
+
     {% else %}
 
     <div class="table-card">
 
-        <div style="
-            padding:60px;
-            text-align:center;
-            color:#777;
-        ">
+        <div style="padding: 60px; text-align: center; color: #777;">
 
-            <div style="font-size:40px;">
+            <div style="font-size: 40px;">
                 🔬
             </div>
 
-            <h3 style="margin:15px 0 8px;">
+            <h3 style="margin: 15px 0 8px;">
                 No predictions yet
             </h3>
 

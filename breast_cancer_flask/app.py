@@ -42,37 +42,33 @@ from ml_service import predict_image
 from report_service import generate_report
 
 
-# ============================================================
+# =========================================================
 # FLASK APPLICATION
-# ============================================================
+# =========================================================
 
 app = Flask(__name__)
 app.secret_key = SECRET_KEY
 
 
-# ============================================================
+# =========================================================
 # DATABASE
-# ============================================================
+# =========================================================
 
 init_db()
 
 
-# ============================================================
+# =========================================================
 # DIRECTORIES
-# ============================================================
+# =========================================================
 
 os.makedirs(ORIGINAL_FOLDER, exist_ok=True)
 os.makedirs(GRADCAM_FOLDER, exist_ok=True)
 os.makedirs(REPORT_FOLDER, exist_ok=True)
 
 
-# ============================================================
+# =========================================================
 # CANCER INFORMATION
-#
-# IMPORTANT:
-# KEEP YOUR EXISTING CANCER_INFORMATION DICTIONARY HERE.
-# Do NOT delete it.
-# ============================================================
+# =========================================================
 
 CANCER_INFORMATION = {
 
@@ -81,8 +77,7 @@ CANCER_INFORMATION = {
         "category": "Benign Breast Condition",
         "description": (
             "Adenosis is a benign breast condition in which the glands "
-            "(lobules) become enlarged or more numerous. Some forms can "
-            "look unusual on imaging or under a microscope."
+            "(lobules) become enlarged or more numerous."
         ),
         "features": [
             "Usually benign",
@@ -314,11 +309,12 @@ CANCER_INFORMATION = {
 }
 
 
-# ============================================================
-# HELPERS
-# ============================================================
+# =========================================================
+# HELPER - ALLOWED FILE
+# =========================================================
 
 def allowed_file(filename):
+
     return (
         "." in filename
         and filename.rsplit(".", 1)[1].lower()
@@ -326,7 +322,12 @@ def allowed_file(filename):
     )
 
 
+# =========================================================
+# HELPER - PATIENT AUTHENTICATION
+# =========================================================
+
 def patient_required():
+
     if "user_id" not in session:
         return redirect(url_for("login"))
 
@@ -336,7 +337,12 @@ def patient_required():
     return None
 
 
+# =========================================================
+# HELPER - ADMIN AUTHENTICATION
+# =========================================================
+
 def admin_required():
+
     if "user_id" not in session:
         return redirect(url_for("login"))
 
@@ -345,6 +351,10 @@ def admin_required():
 
     return None
 
+
+# =========================================================
+# HELPER - CANCER INFORMATION
+# =========================================================
 
 def get_cancer_info(name):
 
@@ -358,148 +368,297 @@ def get_cancer_info(name):
     return CANCER_INFORMATION.get(key)
 
 
+# =========================================================
+# VERY IMPORTANT
+# PREPARE PREDICTION FOR HTML TEMPLATES
+# =========================================================
+
 def prepare_prediction_for_template(prediction_data):
 
     """
-    Convert database prediction into a template-friendly dictionary.
+    Converts database prediction data into a normal dictionary
+    and creates all variables required by the HTML templates.
 
-    This is especially important for multiple-image results.
+    This fixes:
+        UndefinedError: 'probabilities' is undefined
+        UndefinedError: 'value' is undefined
+        UndefinedError: 'binary_confidence_percent' is undefined
+        UndefinedError: 'subclass_confidence_percent' is undefined
     """
 
     if prediction_data is None:
         return None
 
-    # Convert sqlite Row / mapping into normal dictionary
+    # -----------------------------------------------------
+    # Convert sqlite3.Row / dict-like object to dictionary
+    # -----------------------------------------------------
+
     try:
         prediction = dict(prediction_data)
     except Exception:
         prediction = prediction_data
 
-    # --------------------------------------------------------
-    # Original image filename
-    # --------------------------------------------------------
-
-    image_path = prediction.get("image_path")
-
-    if image_path:
-        prediction["original_image_filename"] = os.path.basename(
-            image_path
-        )
-    else:
-        prediction["original_image_filename"] = None
-
-    # --------------------------------------------------------
-    # Grad-CAM filename
-    # --------------------------------------------------------
-
-    gradcam_path = prediction.get("gradcam_path")
-
-    if gradcam_path:
-        prediction["gradcam_filename"] = os.path.basename(
-            gradcam_path
-        )
-    else:
-        prediction["gradcam_filename"] = None
-
-    # --------------------------------------------------------
-    # Cancer information
-    # --------------------------------------------------------
-
-    prediction["cancer_info"] = get_cancer_info(
-        prediction.get("subclass_prediction")
-    )
-
-    # --------------------------------------------------------
-    # Binary confidence
-    # --------------------------------------------------------
+    # -----------------------------------------------------
+    # BINARY CONFIDENCE
+    # -----------------------------------------------------
 
     try:
         binary_confidence = float(
-            prediction.get("binary_confidence", 0)
+            prediction.get("binary_confidence", 0) or 0
         )
-    except Exception:
-        binary_confidence = 0
+    except (TypeError, ValueError):
+        binary_confidence = 0.0
 
+    # If model stored probability as 0-1,
+    # convert it to percentage.
     if binary_confidence <= 1:
-        binary_confidence *= 100
+        binary_confidence_percent = binary_confidence * 100
+    else:
+        binary_confidence_percent = binary_confidence
 
-    binary_confidence = max(
-        0,
-        min(100, binary_confidence)
+    # Keep inside 0-100
+    binary_confidence_percent = max(
+        0.0,
+        min(100.0, binary_confidence_percent)
     )
 
-    prediction["binary_confidence_percent"] = binary_confidence
-
-    # --------------------------------------------------------
-    # Subclass confidence
-    # --------------------------------------------------------
+    # -----------------------------------------------------
+    # SUBCLASS CONFIDENCE
+    # -----------------------------------------------------
 
     try:
         subclass_confidence = float(
-            prediction.get("subclass_confidence", 0)
+            prediction.get("subclass_confidence", 0) or 0
         )
-    except Exception:
-        subclass_confidence = 0
+    except (TypeError, ValueError):
+        subclass_confidence = 0.0
 
     if subclass_confidence <= 1:
-        subclass_confidence *= 100
+        subclass_confidence_percent = subclass_confidence * 100
+    else:
+        subclass_confidence_percent = subclass_confidence
 
-    subclass_confidence = max(
-        0,
-        min(100, subclass_confidence)
+    subclass_confidence_percent = max(
+        0.0,
+        min(100.0, subclass_confidence_percent)
     )
 
-    prediction["subclass_confidence_percent"] = subclass_confidence
+    # -----------------------------------------------------
+    # ADD CLEAN PERCENTAGE VARIABLES
+    # -----------------------------------------------------
 
-    # --------------------------------------------------------
-    # Subclass probabilities
-    # --------------------------------------------------------
+    prediction["binary_confidence_percent"] = round(
+        binary_confidence_percent,
+        2
+    )
 
-    probabilities = prediction.get(
+    prediction["subclass_confidence_percent"] = round(
+        subclass_confidence_percent,
+        2
+    )
+
+    # -----------------------------------------------------
+    # PARSE SUBCLASS PROBABILITIES
+    # -----------------------------------------------------
+
+    raw_probabilities = prediction.get(
         "subclass_probabilities",
         {}
     )
 
-    if isinstance(probabilities, str):
+    probabilities = {}
+
+    if raw_probabilities:
 
         try:
-            probabilities = json.loads(probabilities)
-        except Exception:
+
+            if isinstance(raw_probabilities, str):
+
+                probabilities = json.loads(
+                    raw_probabilities
+                )
+
+            elif isinstance(raw_probabilities, dict):
+
+                probabilities = raw_probabilities
+
+        except Exception as error:
+
+            print(
+                "Probability JSON parsing error:",
+                repr(error)
+            )
+
             probabilities = {}
 
-    prediction["subclass_probabilities_dict"] = probabilities
+    # -----------------------------------------------------
+    # MAKE SURE probabilities IS ALWAYS DEFINED
+    # -----------------------------------------------------
+
+    if not isinstance(probabilities, dict):
+        probabilities = {}
+
+    # -----------------------------------------------------
+    # CONVERT PROBABILITIES TO PERCENTAGES
+    # -----------------------------------------------------
+
+    probability_percentages = {}
+
+    for class_name, probability in probabilities.items():
+
+        try:
+
+            probability = float(probability)
+
+            if probability <= 1:
+                percentage = probability * 100
+            else:
+                percentage = probability
+
+            percentage = max(
+                0.0,
+                min(100.0, percentage)
+            )
+
+            probability_percentages[
+                class_name
+            ] = round(
+                percentage,
+                2
+            )
+
+        except (TypeError, ValueError):
+
+            probability_percentages[
+                class_name
+            ] = 0.0
+
+    # -----------------------------------------------------
+    # BOTH VARIABLES ARE PROVIDED
+    #
+    # Some templates may use:
+    # probabilities
+    #
+    # Others may use:
+    # probability_percentages
+    # -----------------------------------------------------
+
+    prediction["probabilities"] = probabilities
+
+    prediction[
+        "probability_percentages"
+    ] = probability_percentages
+
+    # -----------------------------------------------------
+    # SORTED PROBABILITIES
+    # -----------------------------------------------------
+
+    prediction[
+        "sorted_probabilities"
+    ] = sorted(
+        probability_percentages.items(),
+        key=lambda x: x[1],
+        reverse=True
+    )
+
+    # -----------------------------------------------------
+    # IMAGE FILENAMES
+    # -----------------------------------------------------
+
+    image_path = prediction.get(
+        "image_path",
+        ""
+    )
+
+    if image_path:
+        prediction[
+            "original_image_filename"
+        ] = os.path.basename(
+            image_path
+        )
+    else:
+        prediction[
+            "original_image_filename"
+        ] = None
+
+    # -----------------------------------------------------
+    # GRAD-CAM FILENAME
+    # -----------------------------------------------------
+
+    gradcam_path = prediction.get(
+        "gradcam_path"
+    )
+
+    if gradcam_path:
+
+        prediction[
+            "gradcam_filename"
+        ] = os.path.basename(
+            gradcam_path
+        )
+
+    else:
+
+        prediction[
+            "gradcam_filename"
+        ] = None
+
+    # -----------------------------------------------------
+    # CANCER INFORMATION
+    # -----------------------------------------------------
+
+    prediction[
+        "cancer_info"
+    ] = get_cancer_info(
+        prediction.get(
+            "subclass_prediction"
+        )
+    )
+
+    # -----------------------------------------------------
+    # RETURN FINAL DICTIONARY
+    # -----------------------------------------------------
 
     return prediction
 
 
-# ============================================================
+# =========================================================
 # HOME
-# ============================================================
+# =========================================================
 
 @app.route("/")
 def home():
-    return render_template("home.html")
+
+    return render_template(
+        "home.html"
+    )
 
 
-# ============================================================
+# =========================================================
 # REGISTER
-# ============================================================
+# =========================================================
 
-@app.route("/register", methods=["GET", "POST"])
+@app.route(
+    "/register",
+    methods=["GET", "POST"]
+)
 def register():
 
     if request.method == "POST":
 
         name = request.form.get(
-            "name", ""
+            "name",
+            ""
         ).strip()
 
         email = request.form.get(
-            "email", ""
+            "email",
+            ""
         ).strip()
 
         password = request.form.get(
-            "password", ""
+            "password",
+            ""
         )
 
         if not name or not email or not password:
@@ -545,21 +704,26 @@ def register():
     )
 
 
-# ============================================================
+# =========================================================
 # LOGIN
-# ============================================================
+# =========================================================
 
-@app.route("/login", methods=["GET", "POST"])
+@app.route(
+    "/login",
+    methods=["GET", "POST"]
+)
 def login():
 
     if request.method == "POST":
 
         email = request.form.get(
-            "email", ""
+            "email",
+            ""
         ).strip()
 
         password = request.form.get(
-            "password", ""
+            "password",
+            ""
         )
 
         user = get_user(
@@ -599,9 +763,9 @@ def login():
     )
 
 
-# ============================================================
+# =========================================================
 # LOGOUT
-# ============================================================
+# =========================================================
 
 @app.route("/logout")
 def logout():
@@ -613,9 +777,9 @@ def logout():
     )
 
 
-# ============================================================
+# =========================================================
 # PATIENT DASHBOARD
-# ============================================================
+# =========================================================
 
 @app.route("/dashboard")
 def patient_dashboard():
@@ -631,9 +795,9 @@ def patient_dashboard():
     )
 
 
-# ============================================================
-# UPLOAD PAGE
-# ============================================================
+# =========================================================
+# NEW PREDICTION PAGE
+# =========================================================
 
 @app.route("/prediction")
 def prediction():
@@ -648,11 +812,14 @@ def prediction():
     )
 
 
-# ============================================================
+# =========================================================
 # MULTIPLE IMAGE PREDICTION
-# ============================================================
+# =========================================================
 
-@app.route("/predict", methods=["POST"])
+@app.route(
+    "/predict",
+    methods=["POST"]
+)
 def predict():
 
     check = patient_required()
@@ -660,38 +827,41 @@ def predict():
     if check:
         return check
 
-    # --------------------------------------------------------
-    # GET ALL FILES
-    # --------------------------------------------------------
+    # -----------------------------------------------------
+    # GET MULTIPLE IMAGES
+    # -----------------------------------------------------
 
-    files = request.files.getlist("images")
+    files = request.files.getlist(
+        "images"
+    )
 
-    # Compatibility with old HTML
+    # Fallback for old HTML
     if not files:
 
-        single_file = request.files.get("image")
+        single_file = request.files.get(
+            "image"
+        )
 
         if single_file:
             files = [single_file]
 
-    # --------------------------------------------------------
+    # -----------------------------------------------------
     # VALID FILES
-    # --------------------------------------------------------
+    # -----------------------------------------------------
 
     valid_files = []
 
     for file in files:
 
-        if not file:
-            continue
+        if file and file.filename:
 
-        if not file.filename:
-            continue
+            if allowed_file(
+                file.filename
+            ):
 
-        if not allowed_file(file.filename):
-            continue
-
-        valid_files.append(file)
+                valid_files.append(
+                    file
+                )
 
     if not valid_files:
 
@@ -704,27 +874,36 @@ def predict():
             url_for("prediction")
         )
 
-    # --------------------------------------------------------
-    # IMPORTANT
-    #
-    # A NEW list is created for EVERY upload operation.
-    # --------------------------------------------------------
+    # -----------------------------------------------------
+    # STORE ALL PREDICTION IDS
+    # -----------------------------------------------------
 
     batch_prediction_ids = []
 
     failed_images = []
 
-    total_images = len(valid_files)
+    total_images = len(
+        valid_files
+    )
 
-    print("\n")
-    print("=" * 60)
-    print("MULTIPLE IMAGE ANALYSIS")
-    print("TOTAL UPLOADED:", total_images)
-    print("=" * 60)
+    print("")
+    print(
+        "=========================================="
+    )
+    print(
+        "MULTI IMAGE ANALYSIS STARTED"
+    )
+    print(
+        "TOTAL IMAGES:",
+        total_images
+    )
+    print(
+        "=========================================="
+    )
 
-    # --------------------------------------------------------
+    # -----------------------------------------------------
     # PROCESS EACH IMAGE
-    # --------------------------------------------------------
+    # -----------------------------------------------------
 
     for index, file in enumerate(
         valid_files,
@@ -735,8 +914,9 @@ def predict():
             file.filename
         )
 
+        print("")
         print(
-            f"\nProcessing {index}/{total_images}: "
+            f"Processing image {index}/{total_images}: "
             f"{original_filename}"
         )
 
@@ -753,30 +933,23 @@ def predict():
 
         try:
 
-            # =================================================
             # SAVE IMAGE
-            # =================================================
-
-            file.save(image_path)
-
-            print(
-                "Saved image:",
+            file.save(
                 image_path
             )
 
-            # =================================================
+            print(
+                "Image saved:",
+                image_path
+            )
+
+            # -------------------------------------------------
             # AI PREDICTION
-            # =================================================
+            # -------------------------------------------------
 
             result = predict_image(
                 image_path
             )
-
-            if not result:
-
-                raise Exception(
-                    "predict_image() returned empty result"
-                )
 
             print(
                 "Binary:",
@@ -806,9 +979,9 @@ def predict():
                 )
             )
 
-            # =================================================
+            # -------------------------------------------------
             # GRAD-CAM
-            # =================================================
+            # -------------------------------------------------
 
             gradcam_path = result.get(
                 "gradcam_path"
@@ -824,25 +997,27 @@ def predict():
             else:
 
                 print(
-                    "WARNING: Grad-CAM path is empty"
+                    "Grad-CAM was not generated."
                 )
 
-            # =================================================
-            # PROBABILITIES
-            # =================================================
+            # -------------------------------------------------
+            # SUBCLASS PROBABILITIES
+            # -------------------------------------------------
 
             subclass_probabilities = result.get(
                 "subclass_probabilities",
                 {}
             )
 
-            # =================================================
+            # -------------------------------------------------
             # SAVE DATABASE RECORD
-            # =================================================
+            # -------------------------------------------------
 
             prediction_id = save_prediction(
 
-                user_id=session["user_id"],
+                user_id=session[
+                    "user_id"
+                ],
 
                 original_filename=original_filename,
 
@@ -850,58 +1025,39 @@ def predict():
 
                 gradcam_path=gradcam_path,
 
-                binary_prediction=result.get(
+                binary_prediction=result[
                     "binary_prediction"
-                ),
+                ],
 
-                binary_confidence=result.get(
+                binary_confidence=result[
                     "binary_confidence"
-                ),
+                ],
 
-                subclass_prediction=result.get(
+                subclass_prediction=result[
                     "subclass_prediction"
-                ),
+                ],
 
-                subclass_confidence=result.get(
+                subclass_confidence=result[
                     "subclass_confidence"
-                ),
+                ],
 
                 subclass_probabilities=json.dumps(
                     subclass_probabilities
                 )
             )
 
-            # =================================================
-            # VERIFY DATABASE ID
-            # =================================================
-
-            if prediction_id is None:
-
-                raise Exception(
-                    "save_prediction() returned None"
-                )
-
-            print(
-                "DATABASE PREDICTION ID:",
+            batch_prediction_ids.append(
                 prediction_id
             )
 
-            # =================================================
-            # ADD ID TO CURRENT BATCH
-            # =================================================
-
-            batch_prediction_ids.append(
-                int(prediction_id)
-            )
-
             print(
-                "CURRENT BATCH IDS:",
-                batch_prediction_ids
+                "Prediction saved:",
+                prediction_id
             )
 
-            # =================================================
+            # -------------------------------------------------
             # GENERATE REPORT
-            # =================================================
+            # -------------------------------------------------
 
             try:
 
@@ -911,30 +1067,28 @@ def predict():
 
                 if saved_prediction:
 
-                    report_path = generate_report(
+                    generated_report = generate_report(
                         saved_prediction
                     )
 
                     print(
-                        "Report generated:",
-                        report_path
+                        "Report created:",
+                        generated_report
                     )
 
             except Exception as report_error:
 
                 print(
-                    "REPORT ERROR:",
+                    "REPORT GENERATION ERROR:",
                     repr(report_error)
                 )
 
-                # Report failure must NOT destroy
-                # the prediction result.
-
         except Exception as error:
 
+            print("")
             print(
-                "\nERROR PROCESSING:",
-                original_filename
+                f"ERROR PROCESSING IMAGE "
+                f"{index}/{total_images}"
             )
 
             print(
@@ -945,13 +1099,11 @@ def predict():
                 original_filename
             )
 
-            # IMPORTANT:
-            # Continue processing remaining images.
             continue
 
-    # ========================================================
+    # =====================================================
     # NO SUCCESSFUL IMAGE
-    # ========================================================
+    # =====================================================
 
     if not batch_prediction_ids:
 
@@ -964,57 +1116,66 @@ def predict():
             url_for("prediction")
         )
 
-    # ========================================================
-    # STORE COMPLETE BATCH IN SESSION
-    #
-    # Example:
-    # [41, 42]
-    #
-    # ========================================================
+    # =====================================================
+    # STORE IDS
+    # =====================================================
 
-    session["batch_prediction_ids"] = (
-        batch_prediction_ids
-    )
+    session[
+        "batch_prediction_ids"
+    ] = [
+        int(prediction_id)
+        for prediction_id in batch_prediction_ids
+    ]
 
     session.modified = True
 
-    print("\n")
-    print("=" * 60)
-    print("ANALYSIS FINISHED")
-    print("SUCCESSFUL:", len(batch_prediction_ids))
-    print("FAILED:", len(failed_images))
+    print("")
     print(
-        "BATCH IDS:",
+        "=========================================="
+    )
+    print(
+        "MULTI IMAGE ANALYSIS COMPLETED"
+    )
+    print(
+        "SUCCESSFUL:",
+        len(batch_prediction_ids)
+    )
+    print(
+        "FAILED:",
+        len(failed_images)
+    )
+    print(
+        "PREDICTION IDS:",
         batch_prediction_ids
     )
-    print("=" * 60)
-
-    # ========================================================
-    # WARNING
-    # ========================================================
+    print(
+        "=========================================="
+    )
 
     if failed_images:
 
         flash(
             "Some images could not be analyzed: "
-            + ", ".join(failed_images),
+            + ", ".join(
+                failed_images
+            ),
             "error"
         )
 
-    # ========================================================
-    # GO TO MULTI RESULT PAGE
-    # ========================================================
-
     return redirect(
-        url_for("prediction_results")
+        url_for(
+            "prediction_results"
+        )
     )
 
 
-# ============================================================
-# MULTIPLE IMAGE RESULTS
-# ============================================================
+# =========================================================
+# MULTIPLE PREDICTION RESULTS
+# =========================================================
 
-@app.route("/prediction-results")
+@app.route(
+    "/prediction-results"
+)
 def prediction_results():
 
     check = patient_required()
@@ -1022,23 +1183,25 @@ def prediction_results():
     if check:
         return check
 
-    # ========================================================
-    # GET CURRENT UPLOAD BATCH
-    # ========================================================
-
     prediction_ids = session.get(
-        "batch_prediction_ids"
+        "batch_prediction_ids",
+        []
     )
 
-    print("\n")
-    print("=" * 60)
-    print("LOADING RESULT PAGE")
-    print("SESSION BATCH:", prediction_ids)
-    print("=" * 60)
-
-    # ========================================================
-    # NO BATCH
-    # ========================================================
+    print("")
+    print(
+        "=========================================="
+    )
+    print(
+        "LOADING MULTI IMAGE RESULTS"
+    )
+    print(
+        "SESSION IDS:",
+        prediction_ids
+    )
+    print(
+        "=========================================="
+    )
 
     if not prediction_ids:
 
@@ -1048,135 +1211,38 @@ def prediction_results():
             total=0
         )
 
-    # ========================================================
-    # ENSURE LIST
-    # ========================================================
-
-    if not isinstance(
-        prediction_ids,
-        list
-    ):
-
-        prediction_ids = [
-            prediction_ids
-        ]
-
-    # ========================================================
-    # LOAD EVERY PREDICTION
-    # IN EXACT UPLOAD ORDER
-    # ========================================================
-
     predictions = []
 
-    for position, prediction_id in enumerate(
-        prediction_ids,
-        start=1
-    ):
+    for prediction_id in prediction_ids:
 
-        print(
-            f"Loading result {position}: "
-            f"ID={prediction_id}"
+        prediction_data = get_prediction(
+            prediction_id
         )
 
-        try:
-
-            prediction_data = get_prediction(
-                int(prediction_id)
-            )
-
-        except Exception as error:
-
-            print(
-                "DATABASE LOAD ERROR:",
-                repr(error)
-            )
-
-            continue
-
         if prediction_data is None:
-
-            print(
-                "Prediction not found:",
-                prediction_id
-            )
-
             continue
 
-        # ====================================================
-        # SECURITY CHECK
-        # ====================================================
-
-        if int(
-            prediction_data["user_id"]
-        ) != int(
-            session["user_id"]
-        ):
-
-            print(
-                "SECURITY: prediction does not "
-                "belong to current patient"
-            )
+        if prediction_data[
+            "user_id"
+        ] != session[
+            "user_id"
+        ]:
 
             continue
-
-        # ====================================================
-        # PREPARE FOR TEMPLATE
-        # ====================================================
 
         prepared = prepare_prediction_for_template(
             prediction_data
         )
 
-        # ====================================================
-        # ADD SERIAL NUMBER
-        # ====================================================
+        if prepared:
 
-        prepared["display_number"] = position
-
-        predictions.append(
-            prepared
-        )
-
-    # ========================================================
-    # PRINT FINAL RESULTS
-    # ========================================================
-
-    print("\nFINAL RESULTS COUNT:")
-    print(len(predictions))
-
-    for prediction_item in predictions:
-
-        print(
-            "Result:",
-            prediction_item.get(
-                "display_number"
-            ),
-            "ID:",
-            prediction_item.get(
-                "id"
-            ),
-            "Image:",
-            prediction_item.get(
-                "original_filename"
+            predictions.append(
+                prepared
             )
-        )
 
-    # ========================================================
-    # IMPORTANT
-    #
-    # DO NOT CLEAR SESSION BEFORE TEMPLATE RENDERING.
-    #
-    # We clear it only AFTER making a copy of the data.
-    # ========================================================
-
-    result_count = len(
-        predictions
-    )
-
-    # Make a completely independent copy
-    # before removing the session value.
-    final_predictions = list(
-        predictions
+    print(
+        "RESULTS FOUND:",
+        len(predictions)
     )
 
     session.pop(
@@ -1184,25 +1250,16 @@ def prediction_results():
         None
     )
 
-    session.modified = True
-
-    # ========================================================
-    # RENDER MULTIPLE RESULTS
-    # ========================================================
-
     return render_template(
-
         "patient/prediction_results.html",
-
-        predictions=final_predictions,
-
-        total=result_count
+        predictions=predictions,
+        total=len(predictions)
     )
 
 
-# ============================================================
+# =========================================================
 # HISTORY
-# ============================================================
+# =========================================================
 
 @app.route("/history")
 def history():
@@ -1212,9 +1269,22 @@ def history():
     if check:
         return check
 
-    predictions = get_user_predictions(
+    raw_predictions = get_user_predictions(
         session["user_id"]
     )
+
+    predictions = []
+
+    for prediction_data in raw_predictions:
+
+        prepared = prepare_prediction_for_template(
+            prediction_data
+        )
+
+        if prepared:
+            predictions.append(
+                prepared
+            )
 
     return render_template(
         "patient/history.html",
@@ -1222,11 +1292,13 @@ def history():
     )
 
 
-# ============================================================
-# SINGLE PREDICTION DETAIL
-# ============================================================
+# =========================================================
+# PATIENT PREDICTION DETAIL
+# =========================================================
 
-@app.route("/prediction/<int:prediction_id>")
+@app.route(
+    "/prediction/<int:prediction_id>"
+)
 def prediction_detail(
     prediction_id
 ):
@@ -1251,11 +1323,11 @@ def prediction_detail(
             url_for("history")
         )
 
-    if int(
-        prediction_data["user_id"]
-    ) != int(
-        session["user_id"]
-    ):
+    if prediction_data[
+        "user_id"
+    ] != session[
+        "user_id"
+    ]:
 
         flash(
             "Access denied.",
@@ -1266,6 +1338,10 @@ def prediction_detail(
             url_for("history")
         )
 
+    # -----------------------------------------------------
+    # PREPARE EVERYTHING FOR TEMPLATE
+    # -----------------------------------------------------
+
     prediction_data = prepare_prediction_for_template(
         prediction_data
     )
@@ -1273,23 +1349,25 @@ def prediction_detail(
     return render_template(
         "patient/prediction_detail.html",
         prediction=prediction_data,
-        original_image_filename=prediction_data.get(
+        original_image_filename=prediction_data[
             "original_image_filename"
-        ),
-        gradcam_filename=prediction_data.get(
+        ],
+        gradcam_filename=prediction_data[
             "gradcam_filename"
-        ),
-        cancer_info=prediction_data.get(
+        ],
+        cancer_info=prediction_data[
             "cancer_info"
-        )
+        ]
     )
 
 
-# ============================================================
+# =========================================================
 # CANCER INFORMATION
-# ============================================================
+# =========================================================
 
-@app.route("/cancer-information")
+@app.route(
+    "/cancer-information"
+)
 def cancer_information():
 
     check = patient_required()
@@ -1303,8 +1381,16 @@ def cancer_information():
     )
 
 
-@app.route("/cancer-information/<name>")
-def cancer_information_detail(name):
+# =========================================================
+# CANCER INFORMATION DETAIL
+# =========================================================
+
+@app.route(
+    "/cancer-information/<name>"
+)
+def cancer_information_detail(
+    name
+):
 
     check = patient_required()
 
@@ -1318,7 +1404,9 @@ def cancer_information_detail(name):
     if cancer_info is None:
 
         return redirect(
-            url_for("cancer_information")
+            url_for(
+                "cancer_information"
+            )
         )
 
     return render_template(
@@ -1327,9 +1415,9 @@ def cancer_information_detail(name):
     )
 
 
-# ============================================================
+# =========================================================
 # PROFILE
-# ============================================================
+# =========================================================
 
 @app.route("/profile")
 def profile():
@@ -1349,11 +1437,13 @@ def profile():
     )
 
 
-# ============================================================
+# =========================================================
 # ADMIN DASHBOARD
-# ============================================================
+# =========================================================
 
-@app.route("/admin/dashboard")
+@app.route(
+    "/admin/dashboard"
+)
 def admin_dashboard():
 
     check = admin_required()
@@ -1363,16 +1453,20 @@ def admin_dashboard():
 
     return render_template(
         "admin/dashboard.html",
+
         patient_count=count_patients(),
+
         prediction_count=count_predictions()
     )
 
 
-# ============================================================
+# =========================================================
 # ADMIN PATIENTS
-# ============================================================
+# =========================================================
 
-@app.route("/admin/patients")
+@app.route(
+    "/admin/patients"
+)
 def admin_patients():
 
     check = admin_required()
@@ -1388,11 +1482,13 @@ def admin_patients():
     )
 
 
-# ============================================================
+# =========================================================
 # ADMIN PREDICTIONS
-# ============================================================
+# =========================================================
 
-@app.route("/admin/predictions")
+@app.route(
+    "/admin/predictions"
+)
 def admin_predictions():
 
     check = admin_required()
@@ -1400,7 +1496,21 @@ def admin_predictions():
     if check:
         return check
 
-    predictions = get_all_predictions()
+    raw_predictions = get_all_predictions()
+
+    predictions = []
+
+    for prediction_data in raw_predictions:
+
+        prepared = prepare_prediction_for_template(
+            prediction_data
+        )
+
+        if prepared:
+
+            predictions.append(
+                prepared
+            )
 
     return render_template(
         "admin/predictions.html",
@@ -1408,12 +1518,16 @@ def admin_predictions():
     )
 
 
-# ============================================================
+# =========================================================
 # ADMIN PATIENT DETAIL
-# ============================================================
+# =========================================================
 
-@app.route("/admin/patient/<int:user_id>")
-def admin_patient_detail(user_id):
+@app.route(
+    "/admin/patient/<int:user_id>"
+)
+def admin_patient_detail(
+    user_id
+):
 
     check = admin_required()
 
@@ -1427,12 +1541,28 @@ def admin_patient_detail(user_id):
     if user is None:
 
         return redirect(
-            url_for("admin_patients")
+            url_for(
+                "admin_patients"
+            )
         )
 
-    predictions = get_user_predictions(
+    raw_predictions = get_user_predictions(
         user_id
     )
+
+    predictions = []
+
+    for prediction_data in raw_predictions:
+
+        prepared = prepare_prediction_for_template(
+            prediction_data
+        )
+
+        if prepared:
+
+            predictions.append(
+                prepared
+            )
 
     return render_template(
         "admin/patient_detail.html",
@@ -1441,9 +1571,9 @@ def admin_patient_detail(user_id):
     )
 
 
-# ============================================================
+# =========================================================
 # ADMIN PREDICTION DETAIL
-# ============================================================
+# =========================================================
 
 @app.route(
     "/admin/prediction/<int:prediction_id>"
@@ -1463,12 +1593,68 @@ def admin_prediction_detail(
 
     if prediction_data is None:
 
-        return redirect(
-            url_for("admin_predictions")
+        flash(
+            "Prediction not found.",
+            "error"
         )
+
+        return redirect(
+            url_for(
+                "admin_predictions"
+            )
+        )
+
+    # =====================================================
+    # THIS IS THE IMPORTANT FIX
+    # =====================================================
 
     prediction_data = prepare_prediction_for_template(
         prediction_data
+    )
+
+    print("")
+    print(
+        "=========================================="
+    )
+    print(
+        "ADMIN PREDICTION DETAIL"
+    )
+    print(
+        "Prediction ID:",
+        prediction_data.get("id")
+    )
+    print(
+        "Binary:",
+        prediction_data.get(
+            "binary_prediction"
+        )
+    )
+    print(
+        "Binary confidence:",
+        prediction_data.get(
+            "binary_confidence_percent"
+        )
+    )
+    print(
+        "Subclass:",
+        prediction_data.get(
+            "subclass_prediction"
+        )
+    )
+    print(
+        "Subclass confidence:",
+        prediction_data.get(
+            "subclass_confidence_percent"
+        )
+    )
+    print(
+        "Probabilities:",
+        prediction_data.get(
+            "probabilities"
+        )
+    )
+    print(
+        "=========================================="
     )
 
     return render_template(
@@ -1477,9 +1663,9 @@ def admin_prediction_detail(
     )
 
 
-# ============================================================
-# ORIGINAL IMAGE
-# ============================================================
+# =========================================================
+# SERVE ORIGINAL IMAGE
+# =========================================================
 
 @app.route(
     "/uploaded-image/<path:filename>"
@@ -1492,9 +1678,9 @@ def uploaded_image(filename):
     )
 
 
-# ============================================================
-# GRAD-CAM IMAGE
-# ============================================================
+# =========================================================
+# SERVE GRAD-CAM
+# =========================================================
 
 @app.route(
     "/gradcam-image/<path:filename>"
@@ -1507,9 +1693,9 @@ def gradcam_image(filename):
     )
 
 
-# ============================================================
-# DOWNLOAD PATIENT REPORT
-# ============================================================
+# =========================================================
+# PATIENT DOWNLOAD REPORT
+# =========================================================
 
 @app.route(
     "/download-report/<int:prediction_id>"
@@ -1538,11 +1724,11 @@ def download_report(
             url_for("history")
         )
 
-    if int(
-        prediction_data["user_id"]
-    ) != int(
-        session["user_id"]
-    ):
+    if prediction_data[
+        "user_id"
+    ] != session[
+        "user_id"
+    ]:
 
         flash(
             "Access denied.",
@@ -1577,7 +1763,7 @@ def download_report(
         except Exception as error:
 
             print(
-                "REPORT ERROR:",
+                "REPORT RE-GENERATION ERROR:",
                 repr(error)
             )
 
@@ -1617,9 +1803,9 @@ def download_report(
     )
 
 
-# ============================================================
+# =========================================================
 # ADMIN DOWNLOAD REPORT
-# ============================================================
+# =========================================================
 
 @app.route(
     "/admin/download-report/<int:prediction_id>"
@@ -1645,7 +1831,9 @@ def admin_download_report(
         )
 
         return redirect(
-            url_for("admin_predictions")
+            url_for(
+                "admin_predictions"
+            )
         )
 
     report_filename = (
@@ -1712,9 +1900,10 @@ def admin_download_report(
     )
 
 
-# ============================================================
+# =========================================================
 # RUN
-# ============================================================
+# =========================================================
+
 if __name__ == "__main__":
 
     app.run(

@@ -2,547 +2,773 @@
 
 {% block title %}AI Analysis Results{% endblock %}
 
+{% block topbar_title %}
+AI Analysis Results
+{% endblock %}
+
 {% block content %}
 
 <style>
 
-    * {
-        box-sizing: border-box;
-    }
+/* =========================================================
+   RESULTS PAGE
+   ========================================================= */
 
-    .results-page {
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 30px 24px 60px;
-    }
+.results-page {
+    max-width: 1250px;
+    margin: 0 auto;
+    padding: 32px 28px 60px;
+}
 
-    /* =====================================================
-       TOP BAR
-       ===================================================== */
 
-    .results-topbar {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 28px;
-        gap: 20px;
-    }
+/* =========================================================
+   HEADER
+   ========================================================= */
 
-    .back-link {
-        text-decoration: none;
-        color: #8f315f;
-        font-weight: 700;
-    }
+.results-header {
+    margin-bottom: 30px;
+}
 
-    .back-link:hover {
-        color: #6f2348;
-    }
+.results-header h1 {
+    margin: 0;
+    color: #4a2638;
+    font-size: 31px;
+    font-weight: 800;
+}
 
-    .page-label {
-        font-size: 13px;
-        color: #777;
-        font-weight: 700;
-        letter-spacing: 0.5px;
-    }
+.results-header p {
+    margin: 8px 0 0;
+    color: #777;
+    font-size: 15px;
+}
 
-    /* =====================================================
-       HEADER
-       ===================================================== */
+.result-count {
+    display: inline-block;
+    margin-top: 15px;
+    padding: 9px 15px;
+    border-radius: 20px;
+    background: #f8eaf0;
+    color: #8f315f;
+    font-size: 13px;
+    font-weight: 700;
+}
 
-    .results-header {
-        margin-bottom: 28px;
-    }
 
-    .results-header h1 {
-        margin: 0;
-        color: #4a2638;
-        font-size: 31px;
-        font-weight: 800;
-    }
+/* =========================================================
+   EMPTY RESULT
+   ========================================================= */
 
-    .results-header p {
-        margin: 8px 0 0;
-        color: #777;
-        font-size: 15px;
-    }
+.empty-results {
+    background: white;
+    border: 1px solid #eadbe2;
+    border-radius: 18px;
+    padding: 60px 25px;
+    text-align: center;
+    box-shadow: 0 8px 25px rgba(80, 35, 58, 0.06);
+}
 
-    .result-count {
-        margin-top: 15px;
-        display: inline-block;
-        background: #f8eaf0;
-        color: #8f315f;
-        padding: 9px 15px;
-        border-radius: 20px;
-        font-size: 14px;
-        font-weight: 700;
-    }
+.empty-results-icon {
+    font-size: 45px;
+    margin-bottom: 15px;
+}
 
-    /* =====================================================
-       EMPTY RESULT
-       ===================================================== */
+.empty-results h2 {
+    color: #4a2638;
+    margin-bottom: 10px;
+}
 
-    .empty-results {
-        background: white;
-        border: 1px solid #eadbe2;
-        border-radius: 18px;
-        padding: 55px 25px;
-        text-align: center;
-        box-shadow: 0 8px 25px rgba(80, 35, 58, 0.06);
-    }
+.empty-results p {
+    color: #777;
+    margin-bottom: 25px;
+}
 
-    .empty-results h2 {
-        color: #4a2638;
-        margin-bottom: 10px;
-    }
 
-    .empty-results p {
-        color: #777;
-        margin-bottom: 25px;
-    }
+/* =========================================================
+   EACH PREDICTION
+   ========================================================= */
 
-    /* =====================================================
-       EACH IMAGE RESULT
-       ===================================================== */
+.prediction-result {
+    background: white;
+    border: 1px solid #eadbe2;
+    border-radius: 22px;
+    margin-bottom: 30px;
+    padding: 26px;
+    box-shadow: 0 10px 30px rgba(80, 35, 58, 0.07);
+}
 
-    .prediction-result {
-        background: white;
-        border: 1px solid #eadbe2;
-        border-radius: 22px;
-        margin-bottom: 35px;
-        padding: 25px;
-        box-shadow: 0 10px 30px rgba(80, 35, 58, 0.08);
-    }
 
-    /* =====================================================
-       RESULT NUMBER
-       ===================================================== */
+/* =========================================================
+   RESULT HEADER
+   ========================================================= */
 
-    .result-number {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 22px;
-        padding-bottom: 16px;
-        border-bottom: 1px solid #eee5e9;
-    }
+.result-number {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
 
-    .result-number h2 {
-        margin: 0;
-        color: #633148;
-        font-size: 21px;
-    }
+    margin-bottom: 24px;
+    padding-bottom: 17px;
 
-    .result-number span {
-        background: #f8eaf0;
-        color: #8f315f;
-        padding: 7px 12px;
-        border-radius: 8px;
-        font-size: 12px;
-        font-weight: 700;
-    }
+    border-bottom: 1px solid #eee5e9;
+}
 
-    /* =====================================================
-       MAIN RESULT GRID
-       ===================================================== */
+.result-number h2 {
+    margin: 0;
+    color: #633148;
+    font-size: 21px;
+}
+
+.result-number span {
+    background: #f8eaf0;
+    color: #8f315f;
+    padding: 7px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+
+/* =========================================================
+   ORIGINAL IMAGE + CLASSIFICATION
+   ========================================================= */
+
+.result-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+}
+
+
+/* =========================================================
+   CARD
+   ========================================================= */
+
+.result-card {
+    background: #fff;
+    border: 1px solid #eadbe2;
+    border-radius: 17px;
+    padding: 21px;
+}
+
+.card-title {
+    font-size: 13px;
+    font-weight: 800;
+    color: #7d5267;
+    text-transform: uppercase;
+    letter-spacing: .7px;
+    margin-bottom: 15px;
+}
+
+
+/* =========================================================
+   ORIGINAL IMAGE
+   ========================================================= */
+
+.image-box {
+    width: 100%;
+    height: 380px;
+
+    background: #f8f3f6;
+
+    border-radius: 13px;
+
+    overflow: hidden;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.image-box img {
+    width: 100%;
+    height: 100%;
+
+    object-fit: contain;
+
+    display: block;
+}
+
+.image-unavailable {
+    text-align: center;
+    color: #8a7881;
+    font-size: 13px;
+    padding: 20px;
+}
+
+
+/* =========================================================
+   FILE NAME
+   ========================================================= */
+
+.file-name {
+    margin-top: 12px;
+
+    padding: 10px 12px;
+
+    background: #fcf8fa;
+
+    border-radius: 8px;
+
+    color: #6f5b64;
+
+    font-size: 12px;
+
+    word-break: break-all;
+}
+
+
+/* =========================================================
+   CLASSIFICATION
+   ========================================================= */
+
+.prediction-status {
+    background: #fbf3f7;
+
+    border: 1px solid #ecd6e1;
+
+    border-radius: 14px;
+
+    padding: 19px;
+
+    margin-bottom: 18px;
+}
+
+.status-label {
+    font-size: 11px;
+
+    color: #866174;
+
+    text-transform: uppercase;
+
+    font-weight: 800;
+
+    letter-spacing: .6px;
+
+    margin-bottom: 7px;
+}
+
+.status-value {
+    font-size: 29px;
+
+    font-weight: 800;
+
+    color: #8f315f;
+
+    text-transform: capitalize;
+}
+
+.status-value.malignant {
+    color: #a8325c;
+}
+
+.status-value.benign {
+    color: #557b68;
+}
+
+
+/* =========================================================
+   DETAILS
+   ========================================================= */
+
+.detail-item {
+    padding: 15px 0;
+
+    border-bottom: 1px solid #eee5e9;
+}
+
+.detail-item:last-child {
+    border-bottom: none;
+}
+
+.detail-label {
+    color: #8a7881;
+
+    font-size: 12px;
+
+    margin-bottom: 6px;
+
+    font-weight: 600;
+}
+
+.detail-value {
+    color: #412b36;
+
+    font-size: 17px;
+
+    font-weight: 700;
+}
+
+
+/* =========================================================
+   CONFIDENCE
+   ========================================================= */
+
+.confidence-number {
+    font-size: 23px;
+
+    color: #8f315f;
+
+    font-weight: 800;
+
+    margin-bottom: 9px;
+}
+
+.confidence-bar {
+    width: 100%;
+
+    height: 10px;
+
+    background: #eadde3;
+
+    border-radius: 20px;
+
+    overflow: hidden;
+}
+
+.confidence-fill {
+    height: 100%;
+
+    width: 0;
+
+    background: #8d3f61;
+
+    border-radius: 20px;
+
+    transition: width .7s ease;
+}
+
+
+/* =========================================================
+   GRAD-CAM SECTION
+   ========================================================= */
+
+.gradcam-section {
+    margin-top: 30px;
+}
+
+.gradcam-section-header {
+    margin-bottom: 15px;
+}
+
+.gradcam-section-header h3 {
+    margin: 0;
+
+    color: #4a2638;
+
+    font-size: 22px;
+}
+
+.gradcam-section-header p {
+    color: #777;
+
+    font-size: 14px;
+
+    margin: 6px 0 0;
+}
+
+
+/* =========================================================
+   GRAD-CAM CARD
+   ========================================================= */
+
+.gradcam-card {
+    background: #fff;
+
+    border: 1px solid #eadbe2;
+
+    border-radius: 17px;
+
+    padding: 20px;
+}
+
+
+/* =========================================================
+   GRAD-CAM BOX
+   SAME HEIGHT AS ORIGINAL IMAGE
+   ========================================================= */
+
+.gradcam-box {
+    width: 100%;
+
+    height: 380px;
+
+    background: #f8f3f6;
+
+    border-radius: 13px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    overflow: hidden;
+
+    padding: 0;
+}
+
+
+/* =========================================================
+   GRAD-CAM IMAGE
+   SAME SIZE AS ORIGINAL IMAGE
+   ========================================================= */
+
+.gradcam-box img {
+    display: block;
+
+    width: 100%;
+
+    height: 100%;
+
+    max-width: 100%;
+
+    max-height: 100%;
+
+    object-fit: contain;
+
+    border-radius: 10px;
+
+    box-shadow: 0 5px 20px rgba(60, 30, 50, 0.12);
+}
+
+
+/* =========================================================
+   GRAD-CAM FULL SIZE LINK
+   ========================================================= */
+
+.gradcam-actions {
+    margin-top: 14px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: flex-start;
+
+    gap: 10px;
+}
+
+.gradcam-view-button {
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    padding: 9px 14px;
+
+    border-radius: 9px;
+
+    background: #f8eaf0;
+
+    color: #8f315f;
+
+    font-size: 12px;
+
+    font-weight: 700;
+
+    text-decoration: none;
+}
+
+.gradcam-view-button:hover {
+    background: #f1dce5;
+}
+
+
+/* =========================================================
+   NO GRAD-CAM
+   ========================================================= */
+
+.no-gradcam {
+    width: 100%;
+
+    text-align: center;
+
+    color: #8a7881;
+
+    font-size: 14px;
+
+    padding: 70px 20px;
+}
+
+.no-gradcam-icon {
+    font-size: 38px;
+
+    margin-bottom: 10px;
+}
+
+
+/* =========================================================
+   CANCER INFORMATION
+   ========================================================= */
+
+.information-section {
+    margin-top: 30px;
+}
+
+.information-card {
+    background: #fcf9fb;
+
+    border: 1px solid #eee4e9;
+
+    border-radius: 16px;
+
+    padding: 22px;
+}
+
+.cancer-title-row {
+    display: flex;
+
+    align-items: center;
+
+    gap: 14px;
+
+    margin-bottom: 18px;
+
+    padding-bottom: 15px;
+
+    border-bottom: 1px solid #eee5e9;
+}
+
+.cancer-icon {
+    width: 45px;
+    height: 45px;
+
+    border-radius: 12px;
+
+    background: #f6e8ef;
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+    font-size: 21px;
+
+    flex-shrink: 0;
+}
+
+.cancer-title h3 {
+    margin: 0;
+
+    color: #4a2638;
+
+    font-size: 21px;
+}
+
+.cancer-category {
+    margin-top: 4px;
+
+    color: #8f315f;
+
+    font-size: 12px;
+
+    font-weight: 700;
+}
+
+.description {
+    color: #62535a;
+
+    font-size: 14px;
+
+    line-height: 1.7;
+
+    margin-bottom: 20px;
+}
+
+.info-grid {
+    display: grid;
+
+    grid-template-columns: 1fr 1fr;
+
+    gap: 15px;
+}
+
+.info-box {
+    background: white;
+
+    border: 1px solid #eee4e9;
+
+    border-radius: 12px;
+
+    padding: 16px;
+}
+
+.info-box h4 {
+    margin: 0 0 10px;
+
+    color: #633c50;
+
+    font-size: 14px;
+}
+
+.info-box ul {
+    margin: 0;
+
+    padding-left: 18px;
+}
+
+.info-box li {
+    color: #665860;
+
+    font-size: 13px;
+
+    line-height: 1.6;
+
+    margin-bottom: 5px;
+}
+
+
+/* =========================================================
+   ACTION BUTTONS
+   ========================================================= */
+
+.result-actions {
+    display: flex;
+
+    justify-content: flex-start;
+
+    align-items: center;
+
+    gap: 12px;
+
+    margin-top: 22px;
+
+    flex-wrap: wrap;
+}
+
+.action-button {
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    padding: 11px 18px;
+
+    border-radius: 10px;
+
+    text-decoration: none;
+
+    font-size: 13px;
+
+    font-weight: 700;
+
+    transition: .2s ease;
+}
+
+.download-button {
+    background: #8f315f;
+
+    color: white;
+
+    border: 1px solid #8f315f;
+}
+
+.download-button:hover {
+    background: #74264d;
+
+    color: white;
+
+    transform: translateY(-1px);
+}
+
+.analyze-button {
+    background: white;
+
+    color: #8f315f;
+
+    border: 1px solid #d9b8c9;
+}
+
+.analyze-button:hover {
+    background: #fbf3f7;
+}
+
+
+/* =========================================================
+   BOTTOM ACTION
+   ========================================================= */
+
+.analyze-more {
+    text-align: center;
+
+    margin-top: 35px;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 900px) {
 
     .result-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 24px;
-    }
-
-    .result-card {
-        background: #fff;
-        border: 1px solid #eadbe2;
-        border-radius: 17px;
-        padding: 20px;
-    }
-
-    .card-title {
-        font-size: 13px;
-        font-weight: 800;
-        color: #7d5267;
-        text-transform: uppercase;
-        letter-spacing: 0.7px;
-        margin-bottom: 15px;
-    }
-
-    /* =====================================================
-       ORIGINAL IMAGE
-       ===================================================== */
-
-    .image-box {
-        width: 100%;
-        height: 350px;
-        background: #f8f3f6;
-        border-radius: 13px;
-        overflow: hidden;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
-
-    .image-box img {
-        width: 100%;
-        height: 100%;
-        object-fit: contain;
-        display: block;
-    }
-
-    /* =====================================================
-       FILE NAME
-       ===================================================== */
-
-    .file-name {
-        margin-top: 12px;
-        padding: 10px 12px;
-        background: #fcf8fa;
-        border-radius: 8px;
-        color: #6f5b64;
-        font-size: 13px;
-        word-break: break-all;
-    }
-
-    /* =====================================================
-       CLASSIFICATION
-       ===================================================== */
-
-    .prediction-status {
-        background: #fbf3f7;
-        border: 1px solid #ecd6e1;
-        border-radius: 14px;
-        padding: 18px;
-        margin-bottom: 18px;
-    }
-
-    .status-label {
-        font-size: 11px;
-        color: #866174;
-        text-transform: uppercase;
-        font-weight: 800;
-        letter-spacing: 0.6px;
-        margin-bottom: 7px;
-    }
-
-    .status-value {
-        font-size: 29px;
-        font-weight: 800;
-        color: #8f315f;
-        text-transform: capitalize;
-    }
-
-    .status-value.malignant {
-        color: #a8325c;
-    }
-
-    .status-value.benign {
-        color: #557b68;
-    }
-
-    /* =====================================================
-       DETAIL
-       ===================================================== */
-
-    .detail-item {
-        padding: 15px 0;
-        border-bottom: 1px solid #eee5e9;
-    }
-
-    .detail-item:last-child {
-        border-bottom: none;
-    }
-
-    .detail-label {
-        color: #8a7881;
-        font-size: 12px;
-        margin-bottom: 6px;
-        font-weight: 600;
-    }
-
-    .detail-value {
-        color: #412b36;
-        font-size: 17px;
-        font-weight: 700;
-    }
-
-    /* =====================================================
-       CONFIDENCE
-       ===================================================== */
-
-    .confidence-number {
-        font-size: 23px;
-        color: #8f315f;
-        font-weight: 800;
-        margin-bottom: 9px;
-    }
-
-    .confidence-bar {
-        width: 100%;
-        height: 10px;
-        background: #eadde3;
-        border-radius: 20px;
-        overflow: hidden;
-    }
-
-    .confidence-fill {
-        height: 100%;
-        background: #8d3f61;
-        border-radius: 20px;
-        transition: width 0.6s ease;
-    }
-
-    /* =====================================================
-       GRAD-CAM
-       ===================================================== */
-
-    .gradcam-section {
-        margin-top: 25px;
-    }
-
-    .gradcam-section h3 {
-        margin: 0 0 7px;
-        color: #4a2638;
-        font-size: 21px;
-    }
-
-    .gradcam-section p {
-        color: #777;
-        font-size: 14px;
-        margin-bottom: 15px;
-    }
-
-    .gradcam-card {
-        background: #fff;
-        border: 1px solid #eadbe2;
-        border-radius: 17px;
-        padding: 20px;
-    }
-
-    .gradcam-box {
-        width: 100%;
-        min-height: 390px;
-        background: #f8f3f6;
-        border-radius: 13px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        overflow: hidden;
-    }
-
-    .gradcam-box img {
-        width: 100%;
-        max-height: 500px;
-        object-fit: contain;
-        display: block;
-    }
-
-    .no-gradcam {
-        text-align: center;
-        padding: 50px 20px;
-        color: #8a7881;
-    }
-
-    /* =====================================================
-       CANCER INFORMATION
-       ===================================================== */
-
-    .information-section {
-        margin-top: 25px;
-    }
-
-    .information-card {
-        background: #fcf9fb;
-        border: 1px solid #eee4e9;
-        border-radius: 16px;
-        padding: 22px;
-    }
-
-    .cancer-title-row {
-        display: flex;
-        align-items: center;
-        gap: 14px;
-        margin-bottom: 18px;
-        padding-bottom: 15px;
-        border-bottom: 1px solid #eee5e9;
-    }
-
-    .cancer-icon {
-        width: 45px;
-        height: 45px;
-        border-radius: 12px;
-        background: #f6e8ef;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        font-size: 21px;
-    }
-
-    .cancer-title h3 {
-        margin: 0;
-        color: #4a2638;
-        font-size: 21px;
-    }
-
-    .cancer-category {
-        margin-top: 4px;
-        color: #8f315f;
-        font-size: 12px;
-        font-weight: 700;
-    }
-
-    .description {
-        color: #62535a;
-        font-size: 14px;
-        line-height: 1.7;
-        margin-bottom: 20px;
+        grid-template-columns: 1fr;
     }
 
     .info-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 15px;
+        grid-template-columns: 1fr;
     }
 
-    .info-box {
-        background: white;
-        border: 1px solid #eee4e9;
-        border-radius: 12px;
-        padding: 16px;
+    .gradcam-box {
+        height: 380px;
     }
 
-    .info-box h4 {
-        margin: 0 0 10px;
-        color: #633c50;
-        font-size: 14px;
+}
+
+
+@media (max-width: 600px) {
+
+    .results-page {
+        padding: 22px 15px 45px;
     }
 
-    .info-box ul {
-        margin: 0;
-        padding-left: 18px;
+    .prediction-result {
+        padding: 17px;
     }
 
-    .info-box li {
-        color: #665860;
-        font-size: 13px;
-        line-height: 1.6;
-        margin-bottom: 5px;
+    .result-number {
+        flex-direction: column;
+
+        align-items: flex-start;
     }
 
-    /* =====================================================
-       ACTIONS
-       ===================================================== */
+    .image-box {
+        height: 280px;
+    }
+
+    .gradcam-box {
+        height: 280px;
+    }
+
+    .gradcam-box img {
+        max-height: 100%;
+    }
 
     .result-actions {
-        display: flex;
-        justify-content: flex-end;
-        gap: 12px;
-        margin-top: 22px;
+        flex-direction: column;
+
+        align-items: stretch;
     }
 
     .action-button {
-        display: inline-flex;
-        justify-content: center;
-        align-items: center;
-        padding: 11px 18px;
-        border-radius: 10px;
-        text-decoration: none;
-        font-size: 13px;
-        font-weight: 700;
+        width: 100%;
     }
 
-    .download-button {
-        background: #8f315f;
-        color: white;
-    }
-
-    .download-button:hover {
-        background: #74264d;
-        color: white;
-    }
-
-    /* =====================================================
-       RESPONSIVE
-       ===================================================== */
-
-    @media (max-width: 850px) {
-
-        .result-grid {
-            grid-template-columns: 1fr;
-        }
-
-        .info-grid {
-            grid-template-columns: 1fr;
-        }
-
-        .results-topbar {
-            flex-direction: column;
-            align-items: flex-start;
-        }
-
-    }
-
-    @media (max-width: 600px) {
-
-        .results-page {
-            padding: 20px 14px 40px;
-        }
-
-        .prediction-result {
-            padding: 17px;
-        }
-
-        .image-box {
-            height: 280px;
-        }
-
-        .gradcam-box {
-            min-height: 280px;
-        }
-
-        .result-number {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 8px;
-        }
-
-        .result-actions {
-            justify-content: stretch;
-        }
-
-        .action-button {
-            width: 100%;
-        }
-
-    }
+}
 
 </style>
 
 
 <div class="results-page">
 
-    <!-- =================================================
-         TOP BAR
-         ================================================= -->
 
-    <div class="results-topbar">
-
-        <a
-            href="{{ url_for('patient_dashboard') }}"
-            class="back-link"
-        >
-            ← Dashboard
-        </a>
-
-        <div class="page-label">
-            AI ANALYSIS REPORT
-        </div>
-
-    </div>
-
-
-    <!-- =================================================
-         HEADER
-         ================================================= -->
+    <!-- =====================================================
+         PAGE HEADER
+         ===================================================== -->
 
     <div class="results-header">
 
@@ -557,7 +783,9 @@
         <div class="result-count">
 
             {{ total }}
+
             image{% if total != 1 %}s{% endif %}
+
             successfully analyzed
 
         </div>
@@ -565,21 +793,25 @@
     </div>
 
 
-    <!-- =================================================
-         NO RESULTS
-         ================================================= -->
+    <!-- =====================================================
+         EMPTY RESULTS
+         ===================================================== -->
 
     {% if not predictions %}
 
         <div class="empty-results">
 
+            <div class="empty-results-icon">
+                🔬
+            </div>
+
             <h2>
-                No analysis results found
+                No Analysis Results Found
             </h2>
 
             <p>
                 The uploaded images could not be loaded.
-                Please try the analysis again.
+                Please perform a new analysis.
             </p>
 
             <a
@@ -591,16 +823,19 @@
 
         </div>
 
+
     {% else %}
 
 
         <!-- =================================================
-             LOOP THROUGH EVERY IMAGE
+             LOOP THROUGH ALL PREDICTIONS
              ================================================= -->
 
         {% for prediction in predictions %}
 
+
         <div class="prediction-result">
+
 
             <!-- =================================================
                  RESULT NUMBER
@@ -620,7 +855,7 @@
 
 
             <!-- =================================================
-                 ORIGINAL + CLASSIFICATION
+                 ORIGINAL IMAGE + CLASSIFICATION
                  ================================================= -->
 
             <div class="result-grid">
@@ -636,7 +871,19 @@
                         Original Histopathology Image
                     </div>
 
+
                     <div class="image-box">
+
+
+                        {#
+                           Your backend/template preparation may
+                           provide original_image_filename or
+                           original_filename.
+
+                           We first use original_image_filename
+                           because that is what your existing
+                           prediction_detail.html uses.
+                        #}
 
                         {% if prediction.original_image_filename %}
 
@@ -645,13 +892,36 @@
                                     'uploaded_image',
                                     filename=prediction.original_image_filename
                                 ) }}"
-                                alt="Uploaded histopathology image {{ loop.index }}"
+                                alt="Original histopathology image"
                             >
+
+
+                        {% elif prediction.original_filename %}
+
+                            <img
+                                src="{{ url_for(
+                                    'uploaded_image',
+                                    filename=prediction.original_filename
+                                ) }}"
+                                alt="Original histopathology image"
+                            >
+
+
+                        {% elif prediction.image_path %}
+
+                            <img
+                                src="{{ url_for(
+                                    'uploaded_image',
+                                    filename=prediction.image_path
+                                ) }}"
+                                alt="Original histopathology image"
+                            >
+
 
                         {% else %}
 
-                            <div class="no-gradcam">
-                                Original image not available.
+                            <div class="image-unavailable">
+                                Original image is not available.
                             </div>
 
                         {% endif %}
@@ -659,13 +929,17 @@
                     </div>
 
 
-                    <div class="file-name">
+                    {% if prediction.original_filename %}
 
-                        <strong>File:</strong>
+                        <div class="file-name">
 
-                        {{ prediction.original_filename }}
+                            <strong>File:</strong>
 
-                    </div>
+                            {{ prediction.original_filename }}
+
+                        </div>
+
+                    {% endif %}
 
                 </div>
 
@@ -688,6 +962,7 @@
                         <div class="status-label">
                             Binary Prediction
                         </div>
+
 
                         <div
                             class="status-value
@@ -713,19 +988,26 @@
                             Model Confidence
                         </div>
 
+
                         {% set binary_confidence =
                             prediction['binary_confidence']|float
                         %}
 
+
                         {% if binary_confidence <= 1 %}
+
                             {% set binary_percent =
                                 binary_confidence * 100
                             %}
+
                         {% else %}
+
                             {% set binary_percent =
                                 binary_confidence
                             %}
+
                         {% endif %}
+
 
                         <div class="confidence-number">
 
@@ -733,10 +1015,11 @@
 
                         </div>
 
+
                         <div class="confidence-bar">
 
                             <div
-                                class="confidence-fill binary-bar"
+                                class="confidence-fill"
                                 data-confidence="{{ binary_percent }}"
                             ></div>
 
@@ -752,6 +1035,7 @@
                         <div class="detail-label">
                             Detected Histopathological Subtype
                         </div>
+
 
                         <div class="detail-value">
 
@@ -770,19 +1054,26 @@
                             Subtype Confidence
                         </div>
 
+
                         {% set subclass_confidence =
                             prediction['subclass_confidence']|float
                         %}
 
+
                         {% if subclass_confidence <= 1 %}
+
                             {% set subclass_percent =
                                 subclass_confidence * 100
                             %}
+
                         {% else %}
+
                             {% set subclass_percent =
                                 subclass_confidence
                             %}
+
                         {% endif %}
+
 
                         <div class="confidence-number">
 
@@ -790,10 +1081,11 @@
 
                         </div>
 
+
                         <div class="confidence-bar">
 
                             <div
-                                class="confidence-fill subclass-bar"
+                                class="confidence-fill"
                                 data-confidence="{{ subclass_percent }}"
                             ></div>
 
@@ -812,19 +1104,41 @@
 
             <div class="gradcam-section">
 
-                <h3>
-                    Grad-CAM Explainability
-                </h3>
 
-                <p>
-                    The highlighted visualization shows regions
-                    that contributed to the model's prediction.
-                </p>
+                <div class="gradcam-section-header">
+
+                    <h3>
+                        Grad-CAM Explainability
+                    </h3>
+
+                    <p>
+                        The highlighted visualization shows the
+                        regions that contributed to the model's prediction.
+                    </p>
+
+                </div>
 
 
                 <div class="gradcam-card">
 
+
+                    {#
+                       IMPORTANT FIX:
+
+                       Your existing prediction_detail.html uses:
+
+                           prediction.gradcam_filename
+
+                       Your ML service/database flow also uses:
+
+                           gradcam_path
+
+                       Therefore this template supports BOTH.
+                    #}
+
+
                     {% if prediction.gradcam_filename %}
+
 
                         <div class="gradcam-box">
 
@@ -833,25 +1147,81 @@
                                     'gradcam_image',
                                     filename=prediction.gradcam_filename
                                 ) }}"
-                                alt="Grad-CAM visualization {{ loop.index }}"
+                                alt="Grad-CAM visualization"
                             >
 
                         </div>
 
+
+                        <div class="gradcam-actions">
+
+                            <a
+                                href="{{ url_for(
+                                    'gradcam_image',
+                                    filename=prediction.gradcam_filename
+                                ) }}"
+                                target="_blank"
+                                class="gradcam-view-button"
+                            >
+                                ↗ View Grad-CAM Full Size
+                            </a>
+
+                        </div>
+
+
+                    {% elif prediction.gradcam_path %}
+
+
+                        <div class="gradcam-box">
+
+                            <img
+                                src="{{ url_for(
+                                    'gradcam_image',
+                                    filename=prediction.gradcam_path
+                                ) }}"
+                                alt="Grad-CAM visualization"
+                            >
+
+                        </div>
+
+
+                        <div class="gradcam-actions">
+
+                            <a
+                                href="{{ url_for(
+                                    'gradcam_image',
+                                    filename=prediction.gradcam_path
+                                ) }}"
+                                target="_blank"
+                                class="gradcam-view-button"
+                            >
+                                ↗ View Grad-CAM Full Size
+                            </a>
+
+                        </div>
+
+
                     {% else %}
+
 
                         <div class="no-gradcam">
 
+                            <div class="no-gradcam-icon">
+                                🔬
+                            </div>
+
                             <strong>
-                                Grad-CAM visualization is not available
-                                for this image.
+                                Grad-CAM visualization is not available.
                             </strong>
 
-                            <br><br>
+                            <br>
 
-                            The prediction itself was successfully stored.
+                            The prediction was stored successfully,
+                            but no Grad-CAM filename was returned
+                            to the result template.
 
                         </div>
+
 
                     {% endif %}
 
@@ -870,11 +1240,13 @@
 
                 <div class="information-card">
 
+
                     <div class="cancer-title-row">
 
                         <div class="cancer-icon">
                             🔬
                         </div>
+
 
                         <div class="cancer-title">
 
@@ -883,7 +1255,9 @@
                             </h3>
 
                             <div class="cancer-category">
+
                                 {{ prediction.cancer_info['category'] }}
+
                             </div>
 
                         </div>
@@ -908,6 +1282,7 @@
                             <h4>
                                 Common Features
                             </h4>
+
 
                             {% if prediction.cancer_info['features'] %}
 
@@ -938,6 +1313,7 @@
                                 Diagnosis
                             </h4>
 
+
                             {% if prediction.cancer_info['diagnosis'] %}
 
                                 <ul>
@@ -966,6 +1342,7 @@
                             <h4>
                                 Early Detection
                             </h4>
+
 
                             {% if prediction.cancer_info['detection'] %}
 
@@ -996,6 +1373,7 @@
                                 Precautions
                             </h4>
 
+
                             {% if prediction.cancer_info['precautions'] %}
 
                                 <ul>
@@ -1016,6 +1394,7 @@
 
                         </div>
 
+
                     </div>
 
                 </div>
@@ -1026,10 +1405,13 @@
 
 
             <!-- =================================================
-                 DOWNLOAD REPORT
+                 ACTION BUTTONS
                  ================================================= -->
 
             <div class="result-actions">
+
+
+                <!-- DOWNLOAD PDF REPORT -->
 
                 <a
                     href="{{ url_for(
@@ -1038,28 +1420,36 @@
                     ) }}"
                     class="action-button download-button"
                 >
-↓ Download PDF Report
+                    ↓ Download PDF Report
                 </a>
+
+
+                <!-- BACK TO HISTORY -->
+
+                <a
+                    href="{{ url_for('history') }}"
+                    class="action-button analyze-button"
+                >
+                    ◷ Prediction History
+                </a>
+
 
             </div>
 
+
         </div>
+
 
         {% endfor %}
 
     {% endif %}
 
 
-    <!-- =================================================
-         ANALYZE MORE
-         ================================================= -->
+    <!-- =====================================================
+         ANALYZE MORE IMAGES
+         ===================================================== -->
 
-    <div
-        style="
-            text-align:center;
-            margin-top:35px;
-        "
-    >
+    <div class="analyze-more">
 
         <a
             href="{{ url_for('prediction') }}"
@@ -1070,12 +1460,14 @@
 
     </div>
 
+
 </div>
 
 
-<!-- =====================================================
-     CONFIDENCE BAR JAVASCRIPT
-     ===================================================== -->
+{% endblock %}
+
+
+{% block scripts %}
 
 <script>
 
@@ -1083,10 +1475,15 @@ document.addEventListener(
     "DOMContentLoaded",
     function () {
 
+        /*
+         * Confidence bars
+         */
+
         const bars =
             document.querySelectorAll(
                 ".confidence-fill"
             );
+
 
         bars.forEach(
             function (bar) {
@@ -1098,9 +1495,11 @@ document.addEventListener(
                         )
                     );
 
+
                 if (isNaN(value)) {
                     value = 0;
                 }
+
 
                 value =
                     Math.max(
@@ -1110,6 +1509,7 @@ document.addEventListener(
                             value
                         )
                     );
+
 
                 bar.style.width =
                     value + "%";

@@ -13,3 +13,7 @@ models/
 
 app/
 archive/
+
+# Application generated files
+breast_cancer_flask/reports/
+breast_cancer_flask/uploads/breast_cancer_flask/breast_cancer.db

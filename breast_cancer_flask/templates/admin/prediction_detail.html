@@ -1,346 +1,888 @@
 {% extends "base.html" %}
 
-{% block title %}
-Prediction Details | BreastCare AI
-{% endblock %}
+{% block title %}Prediction Details | BreastCare AI{% endblock %}
 
 {% block content %}
 
-<div class="result-header">
-
-    <span class="section-label">
-        AI ANALYSIS RESULT
-    </span>
-
-    <h1>
-        Prediction Details
-    </h1>
-
-    <p>
-        Your breast histopathology image has been analyzed
-        using the deep learning model.
-    </p>
-
-</div>
-
-
-<!-- =====================================================
-     MAIN RESULT
-====================================================== -->
-
-<div class="result-grid">
-
-    <!-- BINARY RESULT -->
-
-    <div class="result-card">
-
-        <span>
-            Binary Classification
-        </span>
-
-        <h2>
-            {{ prediction["binary_prediction"] }}
-        </h2>
-
-        <div class="confidence-box">
-
-            <span>
-                Confidence
-            </span>
-
-            <strong>
-                {{ "%.2f"|format(
-                    prediction["binary_confidence"]
-                ) }}%
-            </strong>
-
-        </div>
-
-    </div>
-
-
-    <!-- SUBCLASS RESULT -->
-
-    <div class="result-card highlight">
-
-        <span>
-            8-Class Classification
-        </span>
-
-        <h2>
-            {{ prediction["subclass_prediction"]
-                .replace("_", " ")
-                .title()
-            }}
-        </h2>
-
-        <div class="confidence-box">
-
-            <span>
-                Confidence
-            </span>
-
-            <strong>
-                {{ "%.2f"|format(
-                    prediction["subclass_confidence"]
-                ) }}%
-            </strong>
-
-        </div>
-
-    </div>
-
-</div>
-
-
-<!-- =====================================================
-     PREDICTION INFORMATION
-====================================================== -->
-
-<div class="detail-card">
-
-    <h2>
-        📋 Prediction Information
-    </h2>
-
-    <div class="detail-grid">
-
-        <div>
-
-            <span>
-                Image
-            </span>
-
-            <strong>
-                {{ prediction["original_filename"] }}
-            </strong>
-
-        </div>
-
-
-        <div>
-
-            <span>
-                Date
-            </span>
-
-            <strong>
-                {{ prediction["created_at"] }}
-            </strong>
-
-        </div>
-
-    </div>
-
-</div>
-
-
-<!-- =====================================================
-     SUBCLASS PROBABILITIES
-====================================================== -->
-
-<div class="detail-card">
-
-    <h2>
-        📊 Subclass Probabilities
-    </h2>
-
-    <p class="small-text">
-        Probability distribution across all eight breast
-        histopathology subclasses.
-    </p>
-
-
-    {% for name, probability in probabilities.items() %}
-
-    <div class="probability-row">
-
-        <div class="probability-name">
-
-            {{ name.replace(
-                "_",
-                " "
-            ).title() }}
-
-        </div>
-
-
-        <div class="probability-bar">
-
-            <div
-                class="progress-fill"
-                data-probability="{{ probability|default(0) }}"
-            ></div>
-
-        </div>
-
-
-        <strong class="probability-value">
-
-            {{ "%.2f"|format(
-                probability
-            ) }}%
-
-        </strong>
-
-    </div>
-
-    {% endfor %}
-
-</div>
-
-
-<!-- =====================================================
-     ORIGINAL IMAGE
-====================================================== -->
-
-<div class="result-card">
-
-    <h2>
-        🖼️ Original Histopathology Image
-    </h2>
-
-    <p>
-        Image uploaded for AI analysis.
-    </p>
-
-    <div class="image-container">
-
-        <img
-            src="{{ url_for(
-                'uploaded_image',
-                filename=original_image_filename
-            ) }}"
-            alt="Original Histopathology Image"
-            class="result-image"
+<style>
+
+.prediction-page {
+    max-width: 1250px;
+    margin: 0 auto;
+    padding: 35px 40px 60px;
+}
+
+/* HEADER */
+
+.prediction-header {
+    margin-bottom: 25px;
+}
+
+.back-link {
+    color: #8f315f;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.prediction-header small {
+    display: block;
+    margin-top: 25px;
+    color: #a03d68;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1.3px;
+}
+
+.prediction-header h1 {
+    margin: 7px 0;
+    color: #382538;
+    font-size: 32px;
+}
+
+.prediction-header p {
+    margin: 0;
+    color: #847780;
+    font-size: 14px;
+}
+
+/* TOP GRID */
+
+.top-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 22px;
+    margin-bottom: 22px;
+}
+
+/* CARD */
+
+.card {
+    background: white;
+    border: 1px solid #eadde5;
+    border-radius: 18px;
+    padding: 24px;
+    box-shadow: 0 8px 28px rgba(65,38,54,.06);
+}
+
+.card-title {
+    color: #6f5262;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: .8px;
+    text-transform: uppercase;
+    margin-bottom: 17px;
+}
+
+/* IMAGE */
+
+.image-box {
+    width: 100%;
+    height: 350px;
+    border-radius: 13px;
+    background: #f8f3f6;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.image-box img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.no-image {
+    color: #91838b;
+    font-size: 13px;
+}
+
+/* RESULT */
+
+.result-highlight {
+    background: #fbf3f7;
+    border: 1px solid #ecd8e2;
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 17px;
+}
+
+.result-label {
+    color: #89707c;
+    font-size: 11px;
+    text-transform: uppercase;
+    font-weight: 800;
+    letter-spacing: .7px;
+}
+
+.result-value {
+    margin-top: 6px;
+    font-size: 29px;
+    font-weight: 800;
+    color: #8f315f;
+    text-transform: capitalize;
+}
+
+.result-value.benign {
+    color: #557b68;
+}
+
+.result-value.malignant {
+    color: #a8325c;
+}
+
+/* DETAILS */
+
+.detail-list {
+    display: grid;
+    gap: 0;
+}
+
+.detail-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 0;
+    border-bottom: 1px solid #eee6ea;
+    gap: 20px;
+}
+
+.detail-row:last-child {
+    border-bottom: none;
+}
+
+.detail-label {
+    color: #8a7c84;
+    font-size: 13px;
+}
+
+.detail-value {
+    color: #3f2d39;
+    font-size: 14px;
+    font-weight: 700;
+    text-align: right;
+}
+
+/* CONFIDENCE */
+
+.confidence-section {
+    margin-top: 20px;
+}
+
+.confidence-top {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.confidence-title {
+    color: #75616b;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.confidence-number {
+    color: #8f315f;
+    font-weight: 800;
+}
+
+.progress {
+    width: 100%;
+    height: 9px;
+    background: #eadfe4;
+    border-radius: 20px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: #8f315f;
+    border-radius: 20px;
+}
+
+/* PROBABILITIES */
+
+.probabilities-card {
+    margin-top: 22px;
+}
+
+.probability-row {
+    margin-bottom: 17px;
+}
+
+.probability-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 7px;
+}
+
+.probability-name {
+    color: #4a3742;
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: capitalize;
+}
+
+.probability-value {
+    color: #8f315f;
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.probability-bar {
+    width: 100%;
+    height: 8px;
+    background: #eee5e9;
+    border-radius: 20px;
+    overflow: hidden;
+}
+
+.probability-fill {
+    height: 100%;
+    background: #a24d76;
+    border-radius: 20px;
+}
+
+/* GRAD CAM */
+
+.gradcam-card {
+    margin-top: 22px;
+}
+
+.gradcam-box {
+    width: 100%;
+    min-height: 380px;
+    background: #f8f3f6;
+    border-radius: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.gradcam-box img {
+    width: 100%;
+    max-height: 520px;
+    object-fit: contain;
+}
+
+/* INFO */
+
+.info-card {
+    margin-top: 22px;
+}
+
+.info-title {
+    display: flex;
+    gap: 13px;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.info-icon {
+    width: 46px;
+    height: 46px;
+    background: #f5e5ed;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 21px;
+}
+
+.info-title h2 {
+    margin: 0;
+    color: #402c39;
+    font-size: 22px;
+}
+
+.info-category {
+    color: #8f315f;
+    font-size: 12px;
+    font-weight: 700;
+    margin-top: 3px;
+}
+
+.description {
+    color: #665861;
+    line-height: 1.7;
+    font-size: 14px;
+    margin-bottom: 22px;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.info-box {
+    background: #fcf9fb;
+    border: 1px solid #eee4e9;
+    border-radius: 13px;
+    padding: 18px;
+}
+
+.info-box h3 {
+    color: #624255;
+    font-size: 14px;
+    margin: 0 0 10px;
+}
+
+.info-box ul {
+    margin: 0;
+    padding-left: 18px;
+}
+
+.info-box li {
+    color: #706169;
+    font-size: 13px;
+    line-height: 1.65;
+    margin-bottom: 5px;
+}
+
+/* ACTIONS */
+
+.actions {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 28px;
+}
+
+.button {
+    text-decoration: none;
+    border-radius: 10px;
+    padding: 12px 20px;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.primary {
+    color: white;
+    background: #8f315f;
+}
+
+.primary:hover {
+    background: #74264d;
+}
+
+.secondary {
+    color: #8f315f;
+    background: white;
+    border: 1px solid #d9bac9;
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 850px) {
+
+    .prediction-page {
+        padding: 25px 18px 40px;
+    }
+
+    .top-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .info-grid {
+        grid-template-columns: 1fr;
+    }
+
+}
+
+@media (max-width: 600px) {
+
+    .image-box {
+        height: 280px;
+    }
+
+    .prediction-header h1 {
+        font-size: 27px;
+    }
+
+    .actions {
+        flex-direction: column;
+    }
+
+    .button {
+        text-align: center;
+    }
+
+}
+
+</style>
+
+
+<div class="prediction-page">
+
+
+    <!-- HEADER -->
+
+    <div class="prediction-header">
+
+        <a
+            href="{{ url_for('admin_predictions') }}"
+            class="back-link"
         >
+            ← Back to Predictions
+        </a>
 
-    </div>
+        <small>AI ANALYSIS RECORD</small>
 
-</div>
-
-
-<!-- =====================================================
-     GRAD-CAM
-====================================================== -->
-
-<div class="result-card">
-
-    <h2>
-        🔬 AI Attention Visualization
-    </h2>
-
-    <p>
-        Grad-CAM highlights the regions of the image
-        that contributed to the model's prediction.
-    </p>
-
-
-    {% if gradcam_filename %}
-
-    <div class="image-container">
-
-        <img
-            src="{{ url_for(
-                'gradcam_image',
-                filename=gradcam_filename
-            ) }}"
-            alt="Grad-CAM Visualization"
-            class="result-image"
-        >
-
-    </div>
-
-
-    <p class="small-text">
-
-        Grad-CAM is an explainability visualization
-        showing areas receiving attention from the
-        deep learning model. It is intended for
-        research and educational purposes and is not
-        a medical diagnosis.
-
-    </p>
-
-
-    {% else %}
-
-    <div class="empty-state">
-
-        <h3>
-            Grad-CAM Not Available
-        </h3>
+        <h1>
+            Prediction Details
+        </h1>
 
         <p>
-            A Grad-CAM visualization could not be
-            generated for this prediction.
+            Detailed histopathology analysis performed by BreastCare AI.
         </p>
+
+    </div>
+
+
+    <!-- TOP -->
+
+    <div class="top-grid">
+
+
+        <!-- IMAGE -->
+
+        <div class="card">
+
+            <div class="card-title">
+                Original Histopathology Image
+            </div>
+
+            <div class="image-box">
+
+                {% if prediction["original_image_filename"] %}
+
+                    <img
+                        src="{{ url_for(
+                            'uploaded_image',
+                            filename=prediction['original_image_filename']
+                        ) }}"
+                        alt="Original histopathology image"
+                    >
+
+                {% else %}
+
+                    <div class="no-image">
+                        Image not available
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+
+        <!-- RESULT -->
+
+        <div class="card">
+
+            <div class="card-title">
+                AI Classification
+            </div>
+
+
+            <div class="result-highlight">
+
+                <div class="result-label">
+                    Binary Prediction
+                </div>
+
+                <div
+                    class="result-value
+                    {% if prediction['binary_prediction']|lower == 'benign' %}
+                        benign
+                    {% elif prediction['binary_prediction']|lower == 'malignant' %}
+                        malignant
+                    {% endif %}"
+                >
+                    {{ prediction["binary_prediction"] }}
+                </div>
+
+            </div>
+
+
+            <div class="detail-list">
+
+
+                <div class="detail-row">
+
+                    <div class="detail-label">
+                        Detected Subtype
+                    </div>
+
+                    <div class="detail-value">
+                        {{ prediction["subclass_prediction"] or "—" }}
+                    </div>
+
+                </div>
+
+
+                <div class="detail-row">
+
+                    <div class="detail-label">
+                        Binary Confidence
+                    </div>
+
+                    <div class="detail-value">
+                        {{ "%.2f"|format(
+                            prediction["binary_confidence_percent"]
+                        ) }}%
+                    </div>
+
+                </div>
+
+
+                <div class="detail-row">
+
+                    <div class="detail-label">
+                        Subtype Confidence
+                    </div>
+
+                    <div class="detail-value">
+                        {{ "%.2f"|format(
+                            prediction["subclass_confidence_percent"]
+                        ) }}%
+                    </div>
+
+                </div>
+
+
+                <div class="detail-row">
+
+                    <div class="detail-label">
+                        Prediction ID
+                    </div>
+
+                    <div class="detail-value">
+                        #{{ prediction["id"] }}
+                    </div>
+
+                </div>
+
+
+                <div class="detail-row">
+
+                    <div class="detail-label">
+                        Original File
+                    </div>
+
+                    <div class="detail-value">
+                        {{ prediction["original_filename"] }}
+                    </div>
+
+                </div>
+
+
+            </div>
+
+
+            <!-- BINARY CONFIDENCE -->
+
+            <div class="confidence-section">
+
+                <div class="confidence-top">
+
+                    <div class="confidence-title">
+                        Binary Model Confidence
+                    </div>
+
+                    <div class="confidence-number">
+                        {{ "%.2f"|format(
+                            prediction["binary_confidence_percent"]
+                        ) }}%
+                    </div>
+
+                </div>
+
+                <div class="confidence-bar">
+    <div
+        class="confidence-fill"
+        style="--width: {{ prediction.get('binary_confidence_percent', 0)|float }}%;"
+    ></div>
+</div>
+
+            </div>
+
+
+            <!-- SUBCLASS CONFIDENCE -->
+
+            <div class="confidence-section">
+
+                <div class="confidence-top">
+
+                    <div class="confidence-title">
+                        Subclass Model Confidence
+                    </div>
+
+                    <div class="confidence-number">
+                        {{ "%.2f"|format(
+                            prediction["subclass_confidence_percent"]
+                        ) }}%
+                    </div>
+
+                </div>
+
+                <div class="confidence-bar">
+    <div
+        class="confidence-fill"
+        style="--width: {{ prediction.get('subclass_confidence_percent', 0)|float }}%;"
+    ></div>
+</div>
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+
+    <!-- SUBCLASS PROBABILITIES -->
+
+    <div class="card probabilities-card">
+
+        <div class="card-title">
+            Subclass Probability Distribution
+        </div>
+
+
+        {% if probabilities %}
+
+            {% for name, value in probabilities.items() %}
+
+                <div class="probability-row">
+
+                    <div class="probability-header">
+
+                        <div class="probability-name">
+                            {{ name.replace("_", " ") }}
+                        </div>
+
+                        <div class="probability-value">
+                            {{ "%.2f"|format(value) }}%
+                        </div>
+
+                    </div>
+
+
+                    <div class="probability-bar">
+
+                        <div
+                            class="probability-fill"
+                            style="--width: {{ value }}%;"
+                        ></div>
+
+                    </div>
+
+                </div>
+
+            {% endfor %}
+
+        {% else %}
+
+            <div class="no-image">
+                Subclass probability details are not available
+                for this prediction.
+            </div>
+
+        {% endif %}
+
+    </div>
+
+
+    <!-- GRAD CAM -->
+
+    <div class="card gradcam-card">
+
+        <div class="card-title">
+            Grad-CAM Explainability
+        </div>
+
+
+        <div class="gradcam-box">
+
+            {% if prediction["gradcam_filename"] %}
+
+                <img
+                    src="{{ url_for(
+                        'gradcam_image',
+                        filename=prediction['gradcam_filename']
+                    ) }}"
+                    alt="Grad-CAM visualization"
+                >
+
+            {% else %}
+
+                <div class="no-image">
+                    Grad-CAM visualization is not available.
+                </div>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+
+    <!-- CANCER INFORMATION -->
+
+    {% if prediction["cancer_info"] %}
+
+    <div class="card info-card">
+
+        <div class="info-title">
+
+            <div class="info-icon">
+                🔬
+            </div>
+
+            <div>
+
+                <h2>
+                    {{ prediction["cancer_info"]["title"] }}
+                </h2>
+
+                <div class="info-category">
+                    {{ prediction["cancer_info"]["category"] }}
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="description">
+            {{ prediction["cancer_info"]["description"] }}
+        </div>
+
+
+        <div class="info-grid">
+
+
+            <div class="info-box">
+
+                <h3>
+                    Common Features
+                </h3>
+
+                <ul>
+
+                    {% for item in prediction["cancer_info"]["features"] %}
+
+                        <li>
+                            {{ item }}
+                        </li>
+
+                    {% endfor %}
+
+                </ul>
+
+            </div>
+
+
+            <div class="info-box">
+
+                <h3>
+                    Diagnosis
+                </h3>
+
+                <ul>
+
+                    {% for item in prediction["cancer_info"]["diagnosis"] %}
+
+                        <li>
+                            {{ item }}
+                        </li>
+
+                    {% endfor %}
+
+                </ul>
+
+            </div>
+
+
+            <div class="info-box">
+
+                <h3>
+                    Early Detection
+                </h3>
+
+                <ul>
+
+                    {% for item in prediction["cancer_info"]["detection"] %}
+
+                        <li>
+                            {{ item }}
+                        </li>
+
+                    {% endfor %}
+
+                </ul>
+
+            </div>
+
+
+            <div class="info-box">
+
+                <h3>
+                    Precautions
+                </h3>
+
+                <ul>
+
+                    {% for item in prediction["cancer_info"]["precautions"] %}
+
+                        <li>
+                            {{ item }}
+                        </li>
+
+                    {% endfor %}
+
+                </ul>
+
+            </div>
+
+
+        </div>
 
     </div>
 
     {% endif %}
 
-</div>
+
+    <!-- ACTIONS -->
+
+    <div class="actions">
+
+        <a
+            href="{{ url_for(
+                'admin_download_report',
+                prediction_id=prediction['id']
+            ) }}"
+            class="button primary"
+        >
+            ↓ Download PDF Report
+        </a>
 
 
-<!-- =====================================================
-     ACTION BUTTONS
-====================================================== -->
+        <a
+            href="{{ url_for('admin_predictions') }}"
+            class="button secondary"
+        >
+            Back to Predictions
+        </a>
 
-<div class="action-row">
+    </div>
 
-    <a
-        href="{{ url_for(
-            'download_report',
-            prediction_id=prediction['id']
-        ) }}"
-        class="primary-btn"
-    >
-
-        📄 Download PDF Report
-
-    </a>
-
-
-    <a
-        href="{{ url_for('history') }}"
-        class="secondary-btn"
-    >
-
-        ← Back to History
-
-    </a>
 
 </div>
-
-
-<script>
-
-/* =====================================================
-   PROBABILITY BARS
-====================================================== */
-
-document.querySelectorAll(
-    ".progress-fill"
-).forEach(function(bar) {
-
-    const probability = parseFloat(
-        bar.dataset.probability
-    ) || 0;
-
-    const safeProbability = Math.max(
-        0,
-        Math.min(
-            probability,
-            100
-        )
-    );
-
-    bar.style.width =
-        safeProbability + "%";
-
-});
-
-</script>
 
 {% endblock %}
