@@ -1,5 +1,9 @@
 {% extends "base.html" %}
 
+{% block title %}
+Prediction History | BreastCare AI
+{% endblock %}
+
 {% block topbar_title %}
 Prediction History
 {% endblock %}
@@ -9,11 +13,19 @@ Prediction History
 <div class="page-content">
 
     <div class="page-heading">
-        <div class="eyebrow">RECORDS</div>
 
-        <h1>Prediction History</h1>
+        <div class="eyebrow">
+            RECORDS
+        </div>
 
-        <p>View your previous breast tissue analyses.</p>
+        <h1>
+            Prediction History
+        </h1>
+
+        <p>
+            View your previous breast tissue analyses.
+        </p>
+
     </div>
 
 
@@ -26,62 +38,111 @@ Prediction History
             <table class="data-table">
 
                 <thead>
+
                     <tr>
+
                         <th>Date</th>
                         <th>Image</th>
                         <th>Classification</th>
                         <th>Subtype</th>
                         <th>Confidence</th>
                         <th>Action</th>
+
                     </tr>
+
                 </thead>
 
 
                 <tbody>
 
-                    {% for item in predictions %}
+                {% for item in predictions %}
 
                     <tr>
 
                         <td>
-                            {{ item["created_at"] }}
-                        </td>
-
-
-                        <td>
-                            {{ item["original_filename"] }}
-                        </td>
-
-
-                        <td>
-                            <span class="status">
-                                {{ item["binary_prediction"] }}
+                            <span class="table-date">
+                                {{ item["created_at"] }}
                             </span>
                         </td>
 
 
                         <td>
-                            {{ item["subclass_prediction"].replace("_", " ").title() }}
+
+                            <span class="table-file">
+                                {{ item["original_filename"] }}
+                            </span>
+
                         </td>
 
 
                         <td>
-                            {{ "%.2f"|format(item["binary_confidence"]|float) }}%
+
+                            {% if item["binary_prediction"]|lower == "malignant" %}
+
+                                <span class="status-badge malignant">
+                                    Malignant
+                                </span>
+
+                            {% else %}
+
+                                <span class="status-badge benign">
+                                    Benign
+                                </span>
+
+                            {% endif %}
+
                         </td>
 
 
                         <td>
+
+                            {% if item["subclass_prediction"] %}
+
+                                {{
+                                    item["subclass_prediction"]
+                                    .replace("_", " ")
+                                    .title()
+                                }}
+
+                            {% else %}
+
+                                —
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <td>
+
+                            {{
+                                "%.2f"|format(
+                                    item["binary_confidence"]|float
+                                    if item["binary_confidence"]|float > 1
+                                    else item["binary_confidence"]|float * 100
+                                )
+                            }}%
+
+                        </td>
+
+
+                        <td>
+
                             <a
-                                href="{{ url_for('prediction_detail', prediction_id=item['id']) }}"
-                                class="btn btn-secondary"
+                                href="{{ url_for(
+                                    'prediction_detail',
+                                    prediction_id=item['id']
+                                ) }}"
+                                class="table-action"
                             >
                                 View
                             </a>
+
                         </td>
 
                     </tr>
 
-                    {% endfor %}
+                {% endfor %}
 
                 </tbody>
 
@@ -91,35 +152,28 @@ Prediction History
 
     </div>
 
-
     {% else %}
 
-    <div class="table-card">
+    <div class="empty-state">
 
-        <div style="padding: 60px; text-align: center; color: #777;">
-
-            <div style="font-size: 40px;">
-                🔬
-            </div>
-
-            <h3 style="margin: 15px 0 8px;">
-                No predictions yet
-            </h3>
-
-            <p>
-                Start your first histopathology analysis.
-            </p>
-
-            <br>
-
-            <a
-                href="{{ url_for('prediction') }}"
-                class="btn btn-primary"
-            >
-                Start Analysis
-            </a>
-
+        <div class="empty-state-code">
+            NO RECORDS
         </div>
+
+        <h2>
+            No prediction history
+        </h2>
+
+        <p>
+            You have not completed any histopathology analysis yet.
+        </p>
+
+        <a href="{{ url_for('prediction') }}"
+           class="primary-button">
+
+            Start New Analysis
+
+        </a>
 
     </div>
 

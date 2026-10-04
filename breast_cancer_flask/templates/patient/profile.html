@@ -5,162 +5,958 @@ Profile | BreastCare AI
 {% endblock %}
 
 {% block topbar_title %}
-My Profile
+Profile
 {% endblock %}
 
 {% block content %}
 
-<div class="page-container">
+<style>
 
-    <div class="page-header">
+/* =========================================================
+   PROFILE PAGE
+   ========================================================= */
 
-        <span class="eyebrow">
-            Account
-        </span>
+.profile-page {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 8px 48px 40px 48px;
+}
+
+
+/* =========================================================
+   HEADING
+   ========================================================= */
+
+.profile-heading {
+    margin-bottom: 28px;
+}
+
+.profile-heading .eyebrow {
+    color: #1769c2;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    margin-bottom: 7px;
+}
+
+.profile-heading h1 {
+    margin: 0;
+    color: #10243d;
+    font-size: 32px;
+    line-height: 1.2;
+    font-weight: 800;
+}
+
+.profile-heading p {
+    margin: 8px 0 0;
+    color: #718197;
+    font-size: 14px;
+}
+
+
+/* =========================================================
+   SINGLE PROFILE CARD
+   ========================================================= */
+
+.profile-card {
+    width: 100%;
+    background: #ffffff;
+    border: 1px solid #e2e9f0;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 3px 14px rgba(25, 55, 85, 0.055);
+}
+
+
+/* =========================================================
+   PROFILE HEADER
+   ========================================================= */
+
+.profile-card-top {
+    min-height: 145px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 27px 30px;
+    box-sizing: border-box;
+    border-bottom: 1px solid #e7edf3;
+}
+
+.profile-identity {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+}
+
+.profile-avatar {
+    width: 70px;
+    height: 70px;
+    flex-shrink: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 15px;
+
+    background: #eaf3ff;
+    border: 1px solid #d7e7f8;
+
+    color: #1769c2;
+
+    font-size: 27px;
+    font-weight: 800;
+}
+
+.profile-user h2 {
+    margin: 0;
+    color: #10243d;
+    font-size: 22px;
+    font-weight: 800;
+}
+
+.profile-email {
+    margin-top: 6px;
+    color: #718197;
+    font-size: 13px;
+}
+
+.profile-role {
+    display: inline-flex;
+    align-items: center;
+
+    margin-top: 9px;
+    padding: 5px 11px;
+
+    border-radius: 20px;
+
+    background: #f8eaf0;
+    border: 1px solid #efd8e3;
+
+    color: #8f315f;
+
+    font-size: 10px;
+    font-weight: 800;
+
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+}
+
+.profile-active {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    margin-right: 4px;
+
+    color: #16804b;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.active-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #20a464;
+}
+
+
+/* =========================================================
+   INFORMATION SECTION
+   ========================================================= */
+
+.profile-information {
+    padding: 25px 30px 0;
+}
+
+.profile-information-header {
+    padding-bottom: 16px;
+    border-bottom: 1px solid #e7edf3;
+}
+
+.profile-information-label {
+    color: #1769c2;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1.8px;
+    margin-bottom: 5px;
+}
+
+.profile-information-header h3 {
+    margin: 0;
+    color: #18304a;
+    font-size: 18px;
+    font-weight: 800;
+}
+
+.profile-information-header p {
+    margin: 5px 0 0;
+    color: #8491a2;
+    font-size: 12px;
+}
+
+
+/* =========================================================
+   INFORMATION ROWS
+   ========================================================= */
+
+.profile-info-row {
+    min-height: 58px;
+
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+
+    gap: 45px;
+
+    padding: 0 2px;
+
+    box-sizing: border-box;
+
+    border-bottom: 1px solid #e9eef3;
+}
+
+.profile-info-row:last-child {
+    border-bottom: none;
+}
+
+.profile-info-label {
+    width: 145px;
+    flex-shrink: 0;
+
+    color: #7e8da0;
+
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.profile-info-value {
+    color: #182e47;
+
+    font-size: 14px;
+    font-weight: 700;
+
+    text-align: left;
+
+    word-break: break-word;
+}
+
+.profile-info-value.blue {
+    color: #1769c2;
+}
+
+.profile-info-value.green {
+    color: #16804b;
+}
+
+.profile-info-value.muted {
+    color: #9aa6b4;
+    font-weight: 500;
+}
+
+
+/* =========================================================
+   EDIT INPUTS
+   ========================================================= */
+
+.edit-input {
+    display: none;
+
+    width: 300px;
+
+    height: 38px;
+
+    box-sizing: border-box;
+
+    padding: 8px 11px;
+
+    border: 1px solid #d8e2eb;
+
+    border-radius: 7px;
+
+    background: #ffffff;
+
+    color: #182e47;
+
+    font-family: inherit;
+
+    font-size: 13px;
+
+    outline: none;
+}
+
+.edit-input:focus {
+    border-color: #1769c2;
+    box-shadow: 0 0 0 3px rgba(23, 105, 194, 0.08);
+}
+
+
+/* =========================================================
+   BUTTONS
+   ========================================================= */
+
+.profile-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+
+    gap: 10px;
+
+    padding: 21px 30px 27px;
+}
+
+.profile-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    height: 40px;
+
+    padding: 0 18px;
+
+    box-sizing: border-box;
+
+    border-radius: 8px;
+
+    text-decoration: none;
+
+    font-family: inherit;
+
+    font-size: 13px;
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        transform 0.2s ease;
+}
+
+.profile-button.edit {
+    background: #1769c2;
+    border: 1px solid #1769c2;
+    color: #ffffff;
+}
+
+.profile-button.edit:hover {
+    background: #125aa7;
+    border-color: #125aa7;
+    transform: translateY(-1px);
+}
+
+.profile-button.save {
+    display: none;
+
+    background: #16804b;
+    border: 1px solid #16804b;
+    color: #ffffff;
+}
+
+.profile-button.save:hover {
+    background: #116b3e;
+    border-color: #116b3e;
+}
+
+.profile-button.cancel {
+    display: none;
+
+    background: #ffffff;
+    border: 1px solid #d8e2eb;
+    color: #36516d;
+}
+
+.profile-button.cancel:hover {
+    background: #f7fafc;
+}
+
+.profile-button.logout {
+    background: #ffffff;
+    border: 1px solid #d8e2eb;
+    color: #36516d;
+}
+
+.profile-button.logout:hover {
+    background: #f7fafc;
+    border-color: #cbd8e3;
+    transform: translateY(-1px);
+}
+
+
+/* =========================================================
+   EDIT MODE
+   ========================================================= */
+
+.profile-card.editing .display-value {
+    display: none;
+}
+
+.profile-card.editing .edit-input {
+    display: block;
+}
+
+.profile-card.editing .edit-button {
+    display: none;
+}
+
+.profile-card.editing .save-button {
+    display: inline-flex;
+}
+
+.profile-card.editing .cancel-button {
+    display: inline-flex;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 1000px) {
+
+    .profile-page {
+        padding-left: 32px;
+        padding-right: 32px;
+    }
+
+    .profile-info-row {
+        gap: 35px;
+    }
+}
+
+@media (max-width: 700px) {
+
+    .profile-page {
+        padding-left: 22px;
+        padding-right: 22px;
+    }
+
+    .profile-card-top {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 18px;
+        padding: 23px;
+    }
+
+    .profile-active {
+        margin-left: 88px;
+        margin-right: 0;
+    }
+
+    .profile-information {
+        padding-left: 22px;
+        padding-right: 22px;
+    }
+
+    .profile-info-row {
+        gap: 25px;
+    }
+
+    .edit-input {
+        width: 220px;
+    }
+
+    .profile-actions {
+        padding-left: 22px;
+        padding-right: 22px;
+    }
+}
+
+@media (max-width: 500px) {
+
+    .profile-page {
+        padding-left: 16px;
+        padding-right: 16px;
+    }
+
+    .profile-heading h1 {
+        font-size: 28px;
+    }
+
+    .profile-card-top {
+        padding: 21px;
+    }
+
+    .profile-identity {
+        gap: 13px;
+    }
+
+    .profile-avatar {
+        width: 58px;
+        height: 58px;
+        border-radius: 13px;
+        font-size: 22px;
+    }
+
+    .profile-user h2 {
+        font-size: 19px;
+    }
+
+    .profile-email {
+        font-size: 12px;
+    }
+
+    .profile-information {
+        padding-left: 18px;
+        padding-right: 18px;
+    }
+
+    .profile-info-row {
+        min-height: 58px;
+        gap: 20px;
+    }
+
+    .profile-info-label {
+        width: 115px;
+    }
+
+    .edit-input {
+        width: 100%;
+        max-width: 200px;
+    }
+
+    .profile-actions {
+        padding-left: 18px;
+        padding-right: 18px;
+        flex-wrap: wrap;
+    }
+}
+
+</style>
+
+
+<div class="profile-page">
+
+
+    <!-- =====================================================
+         HEADING
+         ===================================================== -->
+
+    <div class="profile-heading">
+
+        <div class="eyebrow">
+            ACCOUNT
+        </div>
 
         <h1>
-            My Profile
+            Profile
         </h1>
 
         <p>
-            View your BreastCare AI account information.
+            View your personal and account information.
         </p>
 
     </div>
 
 
-    <div class="profile-card">
+    <!-- =====================================================
+         SINGLE PROFILE BOX
+         ===================================================== -->
 
-        <div class="profile-top">
+    <section class="profile-card" id="profileCard">
 
-            <div class="profile-avatar">
 
-                {{ user.name[0]|upper }}
+        <!-- =================================================
+             PROFILE HEADER
+             ================================================= -->
+
+        <div class="profile-card-top">
+
+            <div class="profile-identity">
+
+                <div class="profile-avatar">
+                    {{ user.name[0]|upper if user and user.name else "U" }}
+                </div>
+
+                <div class="profile-user">
+
+                    <h2>
+                        {{ user.name if user and user.name else "User" }}
+                    </h2>
+
+                    <div class="profile-email">
+                        {{ user.email if user and user.email else "—" }}
+                    </div>
+
+                    <span class="profile-role">
+                        {{ user.role|capitalize if user and user.role else "Patient" }}
+                    </span>
+
+                </div>
 
             </div>
 
-            <div>
 
-                <h2 class="profile-name">
-                    {{ user.name }}
-                </h2>
+            <div class="profile-active">
 
-                <div class="profile-email">
-                    {{ user.email }}
-                </div>
+                <span class="active-dot"></span>
 
-                <span class="profile-badge">
-                    {{ user.role }}
-                </span>
+                Active
 
             </div>
 
         </div>
 
 
-        <div class="profile-info-grid">
+        <!-- =================================================
+             ACCOUNT INFORMATION
+             ================================================= -->
 
-            <div class="profile-info">
+        <div class="profile-information">
 
-                <span>
+            <div class="profile-information-header">
+
+                <div class="profile-information-label">
+                    ACCOUNT INFORMATION
+                </div>
+
+                <h3>
+                    Personal Details
+                </h3>
+
+                <p>
+                    Information associated with your BreastCare AI account.
+                </p>
+
+            </div>
+
+
+            <!-- FULL NAME -->
+
+            <div class="profile-info-row">
+
+                <span class="profile-info-label">
                     Full Name
                 </span>
 
-                <strong>
-                    {{ user.name }}
+                <strong class="profile-info-value display-value">
+                    {{ user.name if user and user.name else "Not provided" }}
                 </strong>
+
+                <input
+                    type="text"
+                    class="edit-input"
+                    value="{{ user.name if user and user.name else '' }}"
+                    readonly
+                >
 
             </div>
 
 
-            <div class="profile-info">
+            <!-- EMAIL -->
 
-                <span>
+            <div class="profile-info-row">
+
+                <span class="profile-info-label">
                     Email Address
                 </span>
 
-                <strong>
-                    {{ user.email }}
+                <strong class="profile-info-value display-value">
+                    {{ user.email if user and user.email else "Not provided" }}
                 </strong>
+
+                <input
+                    type="email"
+                    class="edit-input"
+                    value="{{ user.email if user and user.email else '' }}"
+                    readonly
+                >
 
             </div>
 
 
-            <div class="profile-info">
+            <!-- PHONE -->
 
-                <span>
-                    Account Type
+            <div class="profile-info-row">
+
+                <span class="profile-info-label">
+                    Phone Number
                 </span>
 
-                <strong>
-                    {{ user.role|capitalize }}
-                </strong>
+                {% if user.phone %}
+
+                    <strong class="profile-info-value display-value">
+                        {{ user.phone }}
+                    </strong>
+
+                    <input
+                        type="tel"
+                        class="edit-input"
+                        value="{{ user.phone }}"
+                    >
+
+                {% else %}
+
+                    <strong class="profile-info-value muted display-value">
+                        Not provided
+                    </strong>
+
+                    <input
+                        type="tel"
+                        class="edit-input"
+                        placeholder="Enter phone number"
+                    >
+
+                {% endif %}
 
             </div>
 
 
-            <div class="profile-info">
+            <!-- AGE -->
 
-                <span>
+            <div class="profile-info-row">
+
+                <span class="profile-info-label">
+                    Age
+                </span>
+
+                {% if user.age %}
+
+                    <strong class="profile-info-value display-value">
+                        {{ user.age }} years
+                    </strong>
+
+                    <input
+                        type="number"
+                        class="edit-input"
+                        value="{{ user.age }}"
+                        min="1"
+                        max="120"
+                    >
+
+                {% else %}
+
+                    <strong class="profile-info-value muted display-value">
+                        Not provided
+                    </strong>
+
+                    <input
+                        type="number"
+                        class="edit-input"
+                        placeholder="Enter age"
+                        min="1"
+                        max="120"
+                    >
+
+                {% endif %}
+
+            </div>
+
+
+            <!-- ADDRESS -->
+
+            <div class="profile-info-row">
+
+                <span class="profile-info-label">
+                    Address
+                </span>
+
+                {% if user.address %}
+
+                    <strong class="profile-info-value display-value">
+                        {{ user.address }}
+                    </strong>
+
+                    <input
+                        type="text"
+                        class="edit-input"
+                        value="{{ user.address }}"
+                    >
+
+                {% else %}
+
+                    <strong class="profile-info-value muted display-value">
+                        Not provided
+                    </strong>
+
+                    <input
+                        type="text"
+                        class="edit-input"
+                        placeholder="Enter address"
+                    >
+
+                {% endif %}
+
+            </div>
+
+
+            <!-- ACCOUNT ROLE -->
+
+            <div class="profile-info-row">
+
+                <span class="profile-info-label">
+                    Account Role
+                </span>
+
+                <strong class="profile-info-value display-value">
+                    {{ user.role|capitalize if user and user.role else "Patient" }}
+                </strong>
+
+                <input
+                    type="text"
+                    class="edit-input"
+                    value="{{ user.role|capitalize if user and user.role else 'Patient' }}"
+                    readonly
+                >
+
+            </div>
+
+
+            <!-- PATIENT ID -->
+
+            <div class="profile-info-row">
+
+                <span class="profile-info-label">
+                    Patient ID
+                </span>
+
+                <strong class="profile-info-value blue display-value">
+                    {{ user.id if user and user.id is defined else "—" }}
+                </strong>
+
+                <input
+                    type="text"
+                    class="edit-input"
+                    value="{{ user.id if user and user.id is defined else '' }}"
+                    readonly
+                >
+
+            </div>
+
+
+            <!-- ACCOUNT STATUS -->
+
+            <div class="profile-info-row">
+
+                <span class="profile-info-label">
                     Account Status
                 </span>
 
-                <strong>
+                <strong class="profile-info-value green">
                     Active
                 </strong>
 
             </div>
 
-        </div>
 
+            <!-- ANALYSIS ACCESS -->
 
-        <div
-            class="info-section"
-            style="margin-top:25px;margin-bottom:0;"
-        >
+            <div class="profile-info-row">
 
-            <div class="info-section-header">
+                <span class="profile-info-label">
+                    Analysis Access
+                </span>
 
-                <div class="info-section-icon">
-                    🔐
-                </div>
-
-                <h2>
-                    Account Security
-                </h2>
+                <strong class="profile-info-value green">
+                    Enabled
+                </strong>
 
             </div>
 
-            <p>
-                Your account is protected through authenticated
-                access. Prediction records are associated with
-                your account so that your analysis history can
-                be viewed from the Prediction History section.
-            </p>
 
         </div>
 
 
-        <div class="action-row">
+        <!-- =================================================
+             BUTTONS
+             ================================================= -->
 
-            <a
-                href="{{ url_for('history') }}"
-                class="secondary-btn"
+        <div class="profile-actions">
+
+            <button
+                type="button"
+                class="profile-button edit edit-button"
+                onclick="enableEditing()"
             >
-                View Prediction History
-            </a>
+                Edit Profile
+            </button>
+
+
+            <button
+                type="button"
+                class="profile-button save save-button"
+                onclick="saveProfile()"
+            >
+                Save Changes
+            </button>
+
+
+            <button
+                type="button"
+                class="profile-button cancel cancel-button"
+                onclick="cancelEditing()"
+            >
+                Cancel
+            </button>
+
 
             <a
                 href="{{ url_for('logout') }}"
-                class="primary-btn"
+                class="profile-button logout"
             >
                 Logout
             </a>
 
         </div>
 
-    </div>
+
+    </section>
 
 </div>
+
+
+<script>
+
+function enableEditing() {
+    const card = document.getElementById("profileCard");
+    card.classList.add("editing");
+}
+
+
+function cancelEditing() {
+    const card = document.getElementById("profileCard");
+    card.classList.remove("editing");
+}
+
+
+function saveProfile() {
+
+    const card = document.getElementById("profileCard");
+
+    const form = document.createElement("form");
+
+    form.method = "POST";
+    form.action = "{{ url_for('profile') }}";
+
+    const phoneInput = card.querySelector('input[type="tel"]');
+    const ageInput = card.querySelector('input[type="number"]');
+    const addressInput = card.querySelectorAll('input[type="text"]')[1];
+
+    const phone = document.createElement("input");
+    phone.type = "hidden";
+    phone.name = "phone";
+    phone.value = phoneInput ? phoneInput.value.trim() : "";
+
+    const age = document.createElement("input");
+    age.type = "hidden";
+    age.name = "age";
+    age.value = ageInput ? ageInput.value.trim() : "";
+
+    const address = document.createElement("input");
+    address.type = "hidden";
+    address.name = "address";
+    address.value = addressInput ? addressInput.value.trim() : "";
+
+    form.appendChild(phone);
+    form.appendChild(age);
+    form.appendChild(address);
+
+    document.body.appendChild(form);
+
+    form.submit();
+}
+
+</script>
 
 {% endblock %}

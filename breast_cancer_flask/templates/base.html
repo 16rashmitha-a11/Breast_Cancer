@@ -3,21 +3,15 @@
 <head>
     <meta charset="UTF-8">
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
 
     <title>
-        {% block title %}
-        BreastCare AI
-        {% endblock %}
+        {% block title %}BreastCare AI{% endblock %}
     </title>
 
-    <link
-        rel="stylesheet"
-        href="{{ url_for('static', filename='css/style.css') }}"
-    >
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 
 <body>
@@ -28,15 +22,15 @@
 
     <!-- ================= SIDEBAR ================= -->
 
-    <aside class="sidebar">
+    <aside class="sidebar" id="sidebar">
 
-        <div class="sidebar-brand">
+        <div class="brand">
 
-            <div class="sidebar-brand-icon">
-                🩷
+            <div class="brand-mark">
+                BC
             </div>
 
-            <div class="sidebar-brand-text">
+            <div class="brand-text">
                 <strong>BreastCare AI</strong>
                 <span>Breast Cancer Analysis</span>
             </div>
@@ -44,139 +38,152 @@
         </div>
 
 
-        <!-- MAIN -->
+        <div class="sidebar-scroll">
 
-        <div class="sidebar-section">
+            <!-- MAIN -->
 
-            <div class="sidebar-section-title">
-                Main
-            </div>
+            <div class="nav-section">
 
-            <nav class="sidebar-nav">
+                <div class="nav-section-title">
+                    Main
+                </div>
 
                 {% if session.get("role") == "admin" %}
 
-                <a
-                    href="{{ url_for('admin_dashboard') }}"
-                    class="sidebar-link"
-                >
-                    <span class="sidebar-icon">⌂</span>
-                    <span>Dashboard</span>
-                </a>
+                    <a href="{{ url_for('admin_dashboard') }}"
+                       class="nav-link">
 
-                <a
-                    href="{{ url_for('admin_patients') }}"
-                    class="sidebar-link"
-                >
-                    <span class="sidebar-icon">♙</span>
-                    <span>Patients</span>
-                </a>
+                        <span class="nav-number">01</span>
+                        <span>Dashboard</span>
 
-                <a
-                    href="{{ url_for('admin_predictions') }}"
-                    class="sidebar-link"
-                >
-                    <span class="sidebar-icon">◉</span>
-                    <span>Predictions</span>
-                </a>
+                    </a>
+
+                    <a href="{{ url_for('admin_patients') }}"
+                       class="nav-link">
+
+                        <span class="nav-number">02</span>
+                        <span>Patients</span>
+
+                    </a>
+
+                    <a href="{{ url_for('admin_predictions') }}"
+                       class="nav-link">
+
+                        <span class="nav-number">03</span>
+                        <span>Predictions</span>
+
+                    </a>
 
                 {% else %}
 
-                <a
-                    href="{{ url_for('patient_dashboard') }}"
-                    class="sidebar-link"
-                >
-                    <span class="sidebar-icon">⌂</span>
-                    <span>Dashboard</span>
-                </a>
+                    <a href="{{ url_for('patient_dashboard') }}"
+                       class="nav-link">
 
-                <a
-                    href="{{ url_for('prediction') }}"
-                    class="sidebar-link"
-                >
-                    <span class="sidebar-icon">⌕</span>
-                    <span>New Prediction</span>
-                </a>
+                        <span class="nav-number">01</span>
+                        <span>Dashboard</span>
 
-                <a
-                    href="{{ url_for('history') }}"
-                    class="sidebar-link"
-                >
-                    <span class="sidebar-icon">◷</span>
-                    <span>Prediction History</span>
-                </a>
+                    </a>
+
+                    <a href="{{ url_for('prediction') }}"
+                       class="nav-link">
+
+                        <span class="nav-number">02</span>
+                        <span>New Prediction</span>
+
+                    </a>
+
+                    <a href="{{ url_for('history') }}"
+                       class="nav-link">
+
+                        <span class="nav-number">03</span>
+                        <span>Prediction History</span>
+
+                    </a>
 
                 {% endif %}
 
-            </nav>
-
-        </div>
-
-
-        <!-- INFORMATION -->
-
-        {% if session.get("role") != "admin" %}
-
-        <div class="sidebar-section">
-
-            <div class="sidebar-section-title">
-                Information
             </div>
 
-            <nav class="sidebar-nav">
 
-                <a
-                    href="{{ url_for('cancer_information') }}"
-                    class="sidebar-link"
-                >
-                    <span class="sidebar-icon">▣</span>
+            <!-- INFORMATION -->
+
+            {% if session.get("role") != "admin" %}
+
+            <div class="nav-section">
+
+                <div class="nav-section-title">
+                    Information
+                </div>
+
+                <a href="{{ url_for('cancer_information') }}"
+                   class="nav-link">
+
+                    <span class="nav-number">04</span>
                     <span>Cancer Information</span>
+
                 </a>
 
-            </nav>
-
-        </div>
-
-        {% endif %}
-
-
-        <!-- ACCOUNT -->
-
-        <div class="sidebar-section">
-
-            <div class="sidebar-section-title">
-                Account
             </div>
 
-            <nav class="sidebar-nav">
+            {% endif %}
+
+
+            <!-- ACCOUNT -->
+
+            <div class="nav-section">
+
+                <div class="nav-section-title">
+                    Account
+                </div>
 
                 {% if session.get("role") != "admin" %}
 
-                <a
-                    href="{{ url_for('profile') }}"
-                    class="sidebar-link"
-                >
-                    <span class="sidebar-icon">○</span>
+                <a href="{{ url_for('profile') }}"
+                   class="nav-link">
+
+                    <span class="nav-number">05</span>
                     <span>Profile</span>
+
                 </a>
 
                 {% endif %}
 
-            </nav>
+            </div>
 
         </div>
 
 
-        <!-- LOGOUT -->
+        <!-- SIDEBAR FOOTER -->
 
-        <div class="sidebar-bottom">
+        <div class="sidebar-footer">
 
-            <a
-                href="{{ url_for('logout') }}"
-                class="sidebar-logout"
-            >
-                <span class="sidebar-icon">↪</span>
+            <div class="sidebar-user">
+
+                <div class="sidebar-user-avatar">
+                    {{ session.get("name", "U")[0]|upper }}
+                </div>
+
+                <div class="sidebar-user-info">
+
+                    <strong>
+                        {{ session.get("name", "User") }}
+                    </strong>
+
+                    <span>
+                        {{ session.get("role", "patient")|capitalize }}
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <a href="{{ url_for('logout') }}"
+               class="logout-link">
+
                 <span>Logout</span>
+                <span>→</span>
+
             </a>
 
         </div>
@@ -184,31 +191,77 @@
     </aside>
 
 
-    <!-- ================= MAIN ================= -->
+    <!-- ================= MAIN AREA ================= -->
 
     <main class="main-area">
 
         <header class="topbar">
 
+            <button class="mobile-menu"
+                    id="mobileMenu"
+                    type="button"
+                    aria-label="Open menu">
+
+                <span></span>
+                <span></span>
+                <span></span>
+
+            </button>
+
+
             <div class="topbar-title">
+
                 {% block topbar_title %}
-                BreastCare AI
+                    BreastCare AI
                 {% endblock %}
+
             </div>
+
 
             <div class="topbar-user">
 
-                <div class="user-avatar-small">
+                <div class="topbar-user-avatar">
                     {{ session.get("name", "U")[0]|upper }}
                 </div>
 
-                <span class="topbar-user-name">
-                    {{ session.get("name", "User") }}
-                </span>
+                <div class="topbar-user-details">
+
+                    <strong>
+                        {{ session.get("name", "User") }}
+                    </strong>
+
+                    <span>
+                        {{ session.get("role", "patient")|capitalize }}
+                    </span>
+
+                </div>
 
             </div>
 
         </header>
+
+
+        <!-- FLASH MESSAGES -->
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+
+            {% if messages %}
+
+                <div class="flash-container">
+
+                    {% for category, message in messages %}
+
+                        <div class="flash {{ category }}">
+                            {{ message }}
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+            {% endif %}
+
+        {% endwith %}
 
 
         {% block content %}
@@ -220,8 +273,31 @@
 
 {% else %}
 
-{% block public_content %}
-{% endblock %}
+    <!-- PUBLIC PAGES -->
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+
+        {% if messages %}
+
+            <div class="public-flash-container">
+
+                {% for category, message in messages %}
+
+                    <div class="flash {{ category }}">
+                        {{ message }}
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+        {% endif %}
+
+    {% endwith %}
+
+
+    {% block public_content %}
+    {% endblock %}
 
 {% endif %}
 

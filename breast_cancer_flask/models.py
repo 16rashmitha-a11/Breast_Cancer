@@ -90,6 +90,16 @@ def init_db():
 
             subclass_probabilities TEXT,
 
+            activation_percentage REAL,
+
+            stage TEXT,
+
+            stage_confidence REAL,
+
+            stage_score REAL,
+
+            stage_notice TEXT,
+
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
             FOREIGN KEY(user_id)
@@ -99,9 +109,11 @@ def init_db():
 
     connection.commit()
 
-    # --------------------------------------------------------
+    # ========================================================
     # MIGRATION FOR OLD DATABASE
-    # --------------------------------------------------------
+    # ========================================================
+
+    # USERS TABLE MIGRATION
 
     columns = cursor.execute(
         "PRAGMA table_info(users)"
@@ -112,23 +124,69 @@ def init_db():
         for column in columns
     }
 
-    required_columns = {
+    required_user_columns = {
+
         "phone": "TEXT",
+
         "age": "INTEGER",
+
         "gender": "TEXT",
+
         "address": "TEXT",
-        "profile_completed": (
+
+        "profile_completed":
             "INTEGER NOT NULL DEFAULT 0"
-        )
     }
 
-    for column_name, column_type in required_columns.items():
+    for column_name, column_type in required_user_columns.items():
 
         if column_name not in existing_columns:
 
             cursor.execute(
                 f"""
                 ALTER TABLE users
+                ADD COLUMN {column_name} {column_type}
+                """
+            )
+
+    # --------------------------------------------------------
+    # PREDICTIONS TABLE MIGRATION
+    # --------------------------------------------------------
+
+    prediction_columns = cursor.execute(
+        "PRAGMA table_info(predictions)"
+    ).fetchall()
+
+    existing_prediction_columns = {
+        column["name"]
+        for column in prediction_columns
+    }
+
+    required_prediction_columns = {
+
+        "activation_percentage":
+            "REAL",
+
+        "stage":
+            "TEXT",
+
+        "stage_confidence":
+            "REAL",
+
+        "stage_score":
+            "REAL",
+
+        "stage_notice":
+            "TEXT"
+    }
+
+    for column_name, column_type in required_prediction_columns.items():
+
+        if column_name not in existing_prediction_columns:
+
+            cursor.execute(
+                f"""
+                ALTER TABLE predictions
                 ADD COLUMN {column_name} {column_type}
                 """
             )
@@ -226,6 +284,7 @@ def get_user(
         ValueError,
         TypeError
     ):
+
         return None
 
     return None
@@ -332,7 +391,12 @@ def save_prediction(
     binary_confidence,
     subclass_prediction,
     subclass_confidence,
-    subclass_probabilities
+    subclass_probabilities,
+    activation_percentage=None,
+    stage=None,
+    stage_confidence=None,
+    stage_score=None,
+    stage_notice=None
 ):
 
     connection = get_db()
@@ -349,9 +413,14 @@ def save_prediction(
             binary_confidence,
             subclass_prediction,
             subclass_confidence,
-            subclass_probabilities
+            subclass_probabilities,
+            activation_percentage,
+            stage,
+            stage_confidence,
+            stage_score,
+            stage_notice
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
         (
             user_id,
@@ -362,7 +431,12 @@ def save_prediction(
             binary_confidence,
             subclass_prediction,
             subclass_confidence,
-            subclass_probabilities
+            subclass_probabilities,
+            activation_percentage,
+            stage,
+            stage_confidence,
+            stage_score,
+            stage_notice
         )
     )
 

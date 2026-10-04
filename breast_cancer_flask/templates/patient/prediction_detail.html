@@ -1,892 +1,301 @@
 {% extends "base.html" %}
 
-{% block title %}Prediction Result{% endblock %}
+{% block title %}
+Prediction Details | BreastCare AI
+{% endblock %}
+
+{% block topbar_title %}
+Prediction Details
+{% endblock %}
 
 {% block content %}
 
-<style>
-    .result-page {
-        max-width: 1180px;
-        margin: 0 auto;
-        padding: 28px 24px 50px;
-    }
+<div class="page-content">
 
-    /* TOP BAR */
-    .result-topbar {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 28px;
-        gap: 20px;
-    }
+    <div class="page-heading">
 
-    .back-link {
-        text-decoration: none;
-        color: #8f315f;
-        font-weight: 600;
-        display: inline-flex;
-        align-items: center;
-        gap: 7px;
-    }
+        <a href="{{ url_for('history') }}"
+           class="back-link">
 
-    .back-link:hover {
-        color: #6f2348;
-    }
+            ← Back to Prediction History
 
-    .page-label {
-        font-size: 13px;
-        color: #777;
-        font-weight: 600;
-        letter-spacing: .5px;
-    }
-
-    /* HEADER */
-    .result-heading {
-        margin-bottom: 25px;
-    }
-
-    .result-heading h1 {
-        margin: 0;
-        color: #4a2638;
-        font-size: 30px;
-        font-weight: 700;
-    }
-
-    .result-heading p {
-        margin: 7px 0 0;
-        color: #777;
-        font-size: 15px;
-    }
-
-    /* MAIN RESULT */
-    .main-result {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 24px;
-        margin-bottom: 28px;
-    }
-
-    .result-card {
-        background: #ffffff;
-        border: 1px solid #eadbe2;
-        border-radius: 18px;
-        padding: 22px;
-        box-shadow: 0 8px 25px rgba(80, 35, 58, 0.07);
-    }
-
-    .card-title {
-        font-size: 14px;
-        font-weight: 700;
-        color: #7d5267;
-        text-transform: uppercase;
-        letter-spacing: .7px;
-        margin-bottom: 17px;
-    }
-
-    /* ORIGINAL IMAGE */
-    .original-image-box {
-        width: 100%;
-        height: 355px;
-        background: #f8f3f6;
-        border-radius: 13px;
-        overflow: hidden;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
-
-    .original-image-box img {
-        width: 100%;
-        height: 100%;
-        object-fit: contain;
-    }
-
-    /* CLASSIFICATION */
-    .classification-card {
-        display: flex;
-        flex-direction: column;
-    }
-
-    .prediction-status {
-        border-radius: 14px;
-        padding: 20px;
-        margin-bottom: 22px;
-        background: #fbf3f7;
-        border: 1px solid #ecd6e1;
-    }
-
-    .status-label {
-        font-size: 12px;
-        color: #866174;
-        text-transform: uppercase;
-        font-weight: 700;
-        letter-spacing: .6px;
-        margin-bottom: 8px;
-    }
-
-    .status-value {
-        font-size: 30px;
-        font-weight: 800;
-        color: #8f315f;
-        text-transform: capitalize;
-    }
-
-    .status-value.malignant {
-        color: #a8325c;
-    }
-
-    .status-value.benign {
-        color: #557b68;
-    }
-
-    .detail-item {
-        padding: 17px 0;
-        border-bottom: 1px solid #eee5e9;
-    }
-
-    .detail-item:last-child {
-        border-bottom: none;
-    }
-
-    .detail-label {
-        color: #8a7881;
-        font-size: 13px;
-        margin-bottom: 6px;
-    }
-
-    .detail-value {
-        color: #412b36;
-        font-size: 18px;
-        font-weight: 700;
-    }
-
-    /* CONFIDENCE */
-    .confidence-number {
-        font-size: 25px;
-        color: #8f315f;
-        font-weight: 800;
-        margin-bottom: 10px;
-    }
-
-    .confidence-bar {
-        width: 100%;
-        height: 9px;
-        background: #eee5e9;
-        border-radius: 20px;
-        overflow: hidden;
-    }
-
-    .confidence-fill {
-        height: 100%;
-        background: #a84d78;
-        border-radius: 20px;
-    }
-
-    /* GRAD CAM */
-    .explain-section {
-        margin-top: 28px;
-    }
-
-    .section-header {
-        margin-bottom: 17px;
-    }
-
-    .section-header h2 {
-        margin: 0;
-        font-size: 23px;
-        color: #4a2638;
-    }
-
-    .section-header p {
-        margin: 6px 0 0;
-        color: #777;
-        font-size: 14px;
-    }
-
-    .gradcam-card {
-        background: #fff;
-        border: 1px solid #eadbe2;
-        border-radius: 18px;
-        padding: 22px;
-        box-shadow: 0 8px 25px rgba(80, 35, 58, 0.06);
-    }
-
-    .gradcam-image-box {
-        width: 100%;
-        min-height: 420px;
-        background: #f8f3f6;
-        border-radius: 13px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        overflow: hidden;
-    }
-
-    .gradcam-image-box img {
-        width: 100%;
-        max-height: 520px;
-        object-fit: contain;
-        display: block;
-    }
-
-    .no-gradcam {
-        color: #8a7881;
-        text-align: center;
-        padding: 50px;
-    }
-
-    /* CANCER INFORMATION */
-    .information-section {
-        margin-top: 35px;
-    }
-
-    .information-card {
-        background: #fff;
-        border: 1px solid #eadbe2;
-        border-radius: 18px;
-        padding: 28px;
-        box-shadow: 0 8px 25px rgba(80, 35, 58, 0.06);
-    }
-
-    .cancer-title-row {
-        display: flex;
-        align-items: center;
-        gap: 15px;
-        padding-bottom: 20px;
-        border-bottom: 1px solid #eee5e9;
-        margin-bottom: 23px;
-    }
-
-    .cancer-icon {
-        width: 48px;
-        height: 48px;
-        border-radius: 13px;
-        background: #f6e8ef;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 23px;
-    }
-
-    .cancer-title h3 {
-        margin: 0;
-        font-size: 25px;
-        color: #4a2638;
-    }
-
-    .cancer-category {
-        margin-top: 4px;
-        font-size: 13px;
-        color: #8f315f;
-        font-weight: 700;
-    }
-
-    .description {
-        font-size: 15px;
-        line-height: 1.8;
-        color: #62535a;
-        margin-bottom: 28px;
-    }
-
-    .info-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 20px;
-    }
-
-    .info-box {
-        background: #fcf9fb;
-        border: 1px solid #eee4e9;
-        border-radius: 14px;
-        padding: 20px;
-    }
-
-    .info-box h4 {
-        margin: 0 0 14px;
-        color: #633c50;
-        font-size: 16px;
-    }
-
-    .info-box ul {
-        padding-left: 19px;
-        margin: 0;
-    }
-
-    .info-box li {
-        color: #665860;
-        font-size: 14px;
-        line-height: 1.7;
-        margin-bottom: 7px;
-    }
-
-    /* NO INFORMATION */
-    .no-information {
-        background: #fff;
-        border: 1px solid #eadbe2;
-        border-radius: 18px;
-        padding: 30px;
-        color: #777;
-        text-align: center;
-    }
-
-    /* ACTION BUTTONS */
-    .result-actions {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        gap: 14px;
-        margin-top: 32px;
-    }
-
-    .action-button {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        min-width: 190px;
-        padding: 13px 22px;
-        border-radius: 11px;
-        text-decoration: none;
-        font-size: 14px;
-        font-weight: 700;
-        transition: .2s ease;
-    }
-
-    .primary-action {
-        background: #8f315f;
-        color: white;
-        border: 1px solid #8f315f;
-    }
-
-    .primary-action:hover {
-        background: #74264d;
-        color: white;
-        transform: translateY(-1px);
-    }
-
-    .secondary-action {
-        background: white;
-        color: #8f315f;
-        border: 1px solid #d9b8c9;
-    }
-
-    .secondary-action:hover {
-        background: #fbf3f7;
-    }
-
-    /* RESPONSIVE */
-    @media (max-width: 850px) {
-        .main-result {
-            grid-template-columns: 1fr;
-        }
-
-        .info-grid {
-            grid-template-columns: 1fr;
-        }
-
-        .result-topbar {
-            align-items: flex-start;
-            flex-direction: column;
-        }
-
-        .result-actions {
-            flex-direction: column;
-        }
-
-        .action-button {
-            width: 100%;
-        }
-    }
-
-    @media (max-width: 600px) {
-        .result-page {
-            padding: 20px 14px 40px;
-        }
-
-        .result-heading h1 {
-            font-size: 25px;
-        }
-
-        .original-image-box {
-            height: 280px;
-        }
-
-        .gradcam-image-box {
-            min-height: 280px;
-        }
-
-        .information-card {
-            padding: 20px;
-        }
-    }
-</style>
-<style>
-    .gradcam-image-container {
-        width: 100%;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        padding: 15px 0;
-    }
-
-    .gradcam-image {
-        width: 55%;
-        max-width: 500px;
-        height: auto;
-        display: block;
-        border-radius: 12px;
-        object-fit: contain;
-    }
-
-    @media (max-width: 768px) {
-        .gradcam-image {
-            width: 85%;
-            max-width: 420px;
-        }
-    }
-    .confidence-bar {
-    width: 100%;
-    height: 12px;
-    background: #eadde3;
-    border-radius: 20px;
-    overflow: hidden;
-}
-
-.confidence-fill {
-    height: 100%;
-    width: 0%;
-    background: #8d3f61;
-    border-radius: 20px;
-    transition: width 0.8s ease;
-}
-</style>
-<style>
-.confidence-bar {
-    width: 100%;
-    height: 10px;
-    background: #eadde3;
-    border-radius: 20px;
-    overflow: hidden;
-    margin-top: 8px;
-}
-
-.confidence-fill {
-    height: 100%;
-    width: 0%;
-    background: #8d3f61;
-    border-radius: 20px;
-    transition: width 0.6s ease;
-}
-</style>
-
-
-<div class="result-page">
-
-    <!-- TOP BAR -->
-    <div class="result-topbar">
-
-        <a href="{{ url_for('history') }}" class="back-link">
-            ← Back to History
         </a>
 
-        <div class="page-label">
-            AI PREDICTION REPORT
+        <div class="eyebrow">
+            AI ANALYSIS RECORD
         </div>
 
-    </div>
-
-
-    <!-- PAGE HEADING -->
-    <div class="result-heading">
-
-        <h1>AI Analysis Result</h1>
+        <h1>
+            Prediction Details
+        </h1>
 
         <p>
-            Your histopathology image has been analyzed by the trained
-            deep learning model.
+            Analysis information and model interpretation.
         </p>
 
     </div>
 
 
-    <!-- MAIN RESULT -->
-    <div class="main-result">
+    <!-- IMAGES -->
 
-        <!-- ORIGINAL IMAGE -->
-        <div class="result-card">
+    <div class="result-image-grid">
 
-            <div class="card-title">
-                Original Histopathology Image
+        <div class="result-image-card">
+
+            <div class="result-card-header">
+                ORIGINAL HISTOPATHOLOGY IMAGE
             </div>
 
-            <div class="original-image-box">
+            <div class="result-image-container">
 
-                <img
-                    src="{{ url_for('uploaded_image', filename=original_image_filename) }}"
-                    alt="Uploaded histopathology image"
-                >
+                {% if prediction.original_image_filename %}
+
+                    <img
+                        src="{{ url_for(
+                            'uploaded_image',
+                            filename=prediction.original_image_filename
+                        ) }}"
+                        alt="Original histopathology image"
+                    >
+
+                {% else %}
+
+                    <div class="image-unavailable">
+                        Original image unavailable
+                    </div>
+
+                {% endif %}
 
             </div>
 
         </div>
 
 
-        <!-- AI CLASSIFICATION -->
-        <div class="result-card classification-card">
+        <div class="result-image-card">
 
-            <div class="card-title">
-                AI Classification
+            <div class="result-card-header">
+                GRAD-CAM EXPLANATION
             </div>
 
+            <div class="result-image-container">
 
-            <!-- BINARY RESULT -->
-            <div class="prediction-status">
+                {% if prediction.gradcam_filename %}
 
-                <div class="status-label">
-                    Binary Prediction
-                </div>
+                    <img
+                        src="{{ url_for(
+                            'gradcam_image',
+                            filename=prediction.gradcam_filename
+                        ) }}"
+                        alt="Grad-CAM explanation"
+                    >
 
-                <div
-                    class="status-value
-                    {% if prediction['binary_prediction']|lower == 'malignant' %}
-                        malignant
-                    {% elif prediction['binary_prediction']|lower == 'benign' %}
-                        benign
-                    {% endif %}"
-                >
-                    {{ prediction['binary_prediction'] }}
-                </div>
-
-            </div>
-
-
-            <!-- BINARY CONFIDENCE -->
-            <div class="detail-item">
-
-                <div class="detail-label">
-                    Model Confidence
-                </div>
-
-                {% set confidence = prediction['binary_confidence']|float %}
-
-                {% if confidence <= 1 %}
-                    {% set confidence_percent = confidence * 100 %}
                 {% else %}
-                    {% set confidence_percent = confidence %}
+
+                    <div class="image-unavailable">
+                        Grad-CAM visualization is not available.
+                    </div>
+
                 {% endif %}
 
-                <div class="confidence-number">
-    {{ "%.2f"|format(confidence_percent) }}%
-</div>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- CLASSIFICATION -->
+
+    <section class="result-section">
+
+        <div class="section-label">
+            AI CLASSIFICATION
+        </div>
+
+
+        <div class="classification-panel">
+
+            <div class="classification-main">
+
+                <div class="classification-item">
+
+                    <span class="classification-label">
+                        Binary Prediction
+                    </span>
+
+                    <strong class="
+                        {% if prediction['binary_prediction']|lower == 'malignant' %}
+                            result-malignant
+                        {% else %}
+                            result-benign
+                        {% endif %}
+                    ">
+                        {{ prediction["binary_prediction"]|upper }}
+                    </strong>
+
+                </div>
+
+
+                <div class="classification-item">
+
+                    <span class="classification-label">
+                        Model Confidence
+                    </span>
+
+                    <strong>
+                        {{
+                            "%.2f"|format(
+                                prediction["binary_confidence"]|float
+                                if prediction["binary_confidence"]|float > 1
+                                else prediction["binary_confidence"]|float * 100
+                            )
+                        }}%
+                    </strong>
+
+                </div>
 
             </div>
 
 
-            <!-- SUBCLASS -->
-            <div class="detail-item">
+            <div class="subtype-panel">
 
-                <div class="detail-label">
+                <span class="classification-label">
                     Detected Histopathological Subtype
-                </div>
+                </span>
 
-                <div class="detail-value">
-                    {{ prediction['subclass_prediction'] }}
-                </div>
+                <strong>
+
+                    {% if prediction["subclass_prediction"] %}
+
+                        {{
+                            prediction["subclass_prediction"]
+                            .replace("_", " ")
+                            .title()
+                        }}
+
+                    {% else %}
+
+                        Not available
+
+                    {% endif %}
+
+                </strong>
 
             </div>
 
 
-            <!-- SUBCLASS CONFIDENCE -->
-            <div class="detail-item">
+            <div class="subtype-confidence">
 
-                <div class="detail-label">
+                <span class="classification-label">
                     Subtype Confidence
-                </div>
+                </span>
 
-                {% set subclass_confidence = prediction['subclass_confidence']|float %}
-
-                {% if subclass_confidence <= 1 %}
-                    {% set subclass_percent = subclass_confidence * 100 %}
-                {% else %}
-                    {% set subclass_percent = subclass_confidence %}
-                {% endif %}
-
-                <div class="detail-value">
-                    {{ "%.2f"|format(subclass_percent) }}%
-                </div>
+                <strong>
+                    {{
+                        "%.2f"|format(
+                            prediction["subclass_confidence"]|float
+                            if prediction["subclass_confidence"]|float > 1
+                            else prediction["subclass_confidence"]|float * 100
+                        )
+                    }}%
+                </strong>
 
             </div>
 
         </div>
 
-    </div>
+    </section>
 
 
-    <!-- GRAD-CAM -->
-    <div class="explain-section">
+    <!-- MODEL INFORMATION -->
 
-        <div class="section-header">
+    <section class="result-section">
 
-            <h2>Grad-CAM Explainability</h2>
-
-            <p>
-                The highlighted visualization shows regions that contributed
-                to the model's prediction.
-            </p>
-
+        <div class="section-label">
+            MODEL INFORMATION
         </div>
 
 
-        <div class="gradcam-card">
+        <div class="model-information">
 
-            {% if gradcam_filename %}
+            <div class="model-info-row">
 
-                <div class="gradcam-image-container">
-    <img
-        src="{{ url_for('gradcam_image', filename=gradcam_filename) }}"
-        alt="Grad-CAM Visualization"
-        class="gradcam-image"
-    >
-</div>
+                <span>
+                    Binary Classification
+                </span>
 
-            {% else %}
-
-                <div class="no-gradcam">
-                    Grad-CAM visualization is not available for this prediction.
-                </div>
-
-            {% endif %}
-
-        </div>
-
-    </div>
-
-
-    <!-- CANCER INFORMATION -->
-    <div class="information-section">
-
-        <div class="section-header">
-
-            <h2>About the Detected Condition</h2>
-
-            <p>
-                Information related to the detected histopathological subtype.
-            </p>
-
-        </div>
-
-
-        {% if cancer_info %}
-
-            <div class="information-card">
-
-                <!-- TITLE -->
-                <div class="cancer-title-row">
-
-                    <div class="cancer-icon">
-                        🔬
-                    </div>
-
-                    <div class="cancer-title">
-
-                        <h3>
-                            {{ cancer_info['title'] }}
-                        </h3>
-
-                        <div class="cancer-category">
-                            {{ cancer_info['category'] }}
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-                <!-- DESCRIPTION -->
-                <div class="description">
-
-                    {{ cancer_info['description'] }}
-
-                </div>
-
-
-                <!-- INFORMATION GRID -->
-                <div class="info-grid">
-
-                    <!-- COMMON FEATURES -->
-                    <div class="info-box">
-
-                        <h4>
-                            Common Features
-                        </h4>
-
-                        {% if cancer_info['features'] %}
-
-                            <ul>
-
-                                {% for item in cancer_info['features'] %}
-
-                                    <li>
-                                        {{ item }}
-                                    </li>
-
-                                {% endfor %}
-
-                            </ul>
-
-                        {% endif %}
-
-                    </div>
-
-
-                    <!-- DIAGNOSIS -->
-                    <div class="info-box">
-
-                        <h4>
-                            Diagnosis
-                        </h4>
-
-                        {% if cancer_info['diagnosis'] %}
-
-                            <ul>
-
-                                {% for item in cancer_info['diagnosis'] %}
-
-                                    <li>
-                                        {{ item }}
-                                    </li>
-
-                                {% endfor %}
-
-                            </ul>
-
-                        {% endif %}
-
-                    </div>
-
-
-                    <!-- EARLY DETECTION -->
-                    <div class="info-box">
-
-                        <h4>
-                            Early Detection
-                        </h4>
-
-                        {% if cancer_info['detection'] %}
-
-                            <ul>
-
-                                {% for item in cancer_info['detection'] %}
-
-                                    <li>
-                                        {{ item }}
-                                    </li>
-
-                                {% endfor %}
-
-                            </ul>
-
-                        {% endif %}
-
-                    </div>
-
-
-                    <!-- PRECAUTIONS -->
-                    <div class="info-box">
-
-                        <h4>
-                            Precautions
-                        </h4>
-
-                        {% if cancer_info['precautions'] %}
-
-                            <ul>
-
-                                {% for item in cancer_info['precautions'] %}
-
-                                    <li>
-                                        {{ item }}
-                                    </li>
-
-                                {% endfor %}
-
-                            </ul>
-
-                        {% endif %}
-
-                    </div>
-
-                </div>
+                <strong>
+                    DenseNet121
+                </strong>
 
             </div>
 
-        {% else %}
 
-            <div class="no-information">
+            <div class="model-info-row">
 
-                No additional information is available for this detected subtype.
+                <span>
+                    Subtype Classification
+                </span>
+
+                <strong>
+                    DenseNet121
+                </strong>
 
             </div>
 
-        {% endif %}
 
-    </div>
+            <div class="model-info-row">
+
+                <span>
+                    Input Resolution
+                </span>
+
+                <strong>
+                    224 × 224
+                </strong>
+
+            </div>
 
 
-    <!-- ACTION BUTTONS -->
+            <div class="model-info-row">
+
+                <span>
+                    Explainability
+                </span>
+
+                <strong>
+                    Grad-CAM
+                </strong>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
     <div class="result-actions">
 
         <a
-            href="{{ url_for('download_report', prediction_id=prediction['id']) }}"
-            class="action-button primary-action"
+            href="{{ url_for(
+                'download_report',
+                prediction_id=prediction['id']
+            ) }}"
+            class="primary-button"
         >
-            ↓ Download PDF Report
+            Download PDF Report
         </a>
 
 
         <a
             href="{{ url_for('history') }}"
-            class="action-button secondary-action"
+            class="secondary-button"
         >
-            Back to History
+            Prediction History
         </a>
 
     </div>
 
 </div>
+
 {% endblock %}
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-
-    const bars = document.querySelectorAll(".confidence-fill");
-
-    bars.forEach(function (bar) {
-
-        let value = parseFloat(
-            bar.getAttribute("data-value")
-        );
-
-        if (isNaN(value)) {
-            value = 0;
-        }
-
-        value = Math.max(0, Math.min(100, value));
-
-        bar.style.width = value + "%";
-    });
-
-});
-</script>
-<script>
-document.querySelectorAll(".confidence-fill").forEach(function(bar) {
-
-    let value = parseFloat(bar.dataset.confidence);
-
-    if (isNaN(value)) {
-        value = 0;
-    }
-
-    value = Math.max(0, Math.min(100, value));
-
-    bar.style.width = value + "%";
-});
-</script>

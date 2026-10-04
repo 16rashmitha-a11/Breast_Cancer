@@ -6,92 +6,148 @@ Login | BreastCare AI
 
 {% block public_content %}
 
-<div class="auth-page">
+<div class="public-page">
 
-    <div class="auth-card">
+    <div class="public-shell">
 
-        <div class="auth-logo">
-            🩷
+
+        <!-- BRAND SIDE -->
+
+        <div class="public-brand-panel">
+
+            <div class="public-brand-mark">
+                BC
+            </div>
+
+            <div class="public-brand-name">
+                BreastCare AI
+            </div>
+
+            <div class="public-brand-subtitle">
+                Breast Cancer Analysis
+            </div>
+
+
+            <div class="public-brand-description">
+
+                AI-assisted histopathological tissue
+                classification and explainable analysis.
+
+            </div>
+
+
+            <div class="public-brand-line"></div>
+
+
+            <div class="public-brand-footer">
+                Deep Learning · Histopathology · Explainable AI
+            </div>
+
         </div>
 
-        <span class="eyebrow">
-            BreastCare AI
-        </span>
 
-        <h1>
-            Welcome Back
-        </h1>
+        <!-- LOGIN -->
 
-        <p>
-            Sign in to continue to your BreastCare AI dashboard.
-        </p>
+        <div class="auth-panel">
+
+            <div class="auth-content">
+
+                <div class="eyebrow">
+                    SECURE ACCESS
+                </div>
+
+                <h1>
+                    Welcome Back
+                </h1>
+
+                <p class="auth-description">
+                    Sign in to continue to your BreastCare AI workspace.
+                </p>
 
 
-        {% with messages = get_flashed_messages(
-            with_categories=true
-        ) %}
+                {% with messages = get_flashed_messages(
+                    with_categories=true
+                ) %}
 
-            {% if messages %}
+                    {% if messages %}
 
-                {% for category, message in messages %}
+                        {% for category, message in messages %}
 
-                    <div class="flash {{ category }}">
-                        {{ message }}
+                            <div class="flash {{ category }}">
+                                {{ message }}
+                            </div>
+
+                        {% endfor %}
+
+                    {% endif %}
+
+                {% endwith %}
+
+
+                <form method="POST"
+                      action="{{ url_for('login') }}"
+                      class="auth-form">
+
+
+                    <div class="form-group">
+
+                        <label for="email">
+                            Email
+                        </label>
+
+                        <input
+                            type="email"
+                            id="email"
+                            name="email"
+                            placeholder="Enter your email"
+                            autocomplete="email"
+                            required
+                        >
+
                     </div>
 
-                {% endfor %}
 
-            {% endif %}
+                    <div class="form-group">
 
-        {% endwith %}
+                        <label for="password">
+                            Password
+                        </label>
 
+                        <input
+                            type="password"
+                            id="password"
+                            name="password"
+                            placeholder="Enter your password"
+                            autocomplete="current-password"
+                            required
+                        >
 
-        <form
-            method="POST"
-            action="{{ url_for('login') }}"
-        >
-
-            <label>
-                Email
-            </label>
-
-            <input
-                type="email"
-                name="email"
-                placeholder="Enter your email"
-                required
-            >
+                    </div>
 
 
-            <label>
-                Password
-            </label>
+                    <button type="submit"
+                            class="auth-submit">
 
-            <input
-                type="password"
-                name="password"
-                placeholder="Enter your password"
-                required
-            >
+                        Login
+
+                    </button>
+
+                </form>
 
 
-            <button
-                type="submit"
-                class="primary-btn"
-            >
-                Login
-            </button>
+                <div class="auth-switch">
 
-        </form>
+                    <span>
+                        Don't have an account?
+                    </span>
 
+                    <a href="{{ url_for('register') }}">
+                        Create Account
+                    </a>
 
-        <div class="auth-bottom">
+                </div>
 
-            Don't have an account?
-
-            <a href="{{ url_for('register') }}">
-                Create Account
-            </a>
+            </div>
 
         </div>
 

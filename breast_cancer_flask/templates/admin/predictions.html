@@ -1,9 +1,12 @@
 {% extends "base.html" %}
 
+{% block title %}
+Predictions | BreastCare AI
+{% endblock %}
+
 {% block topbar_title %}
 Predictions
 {% endblock %}
-
 
 {% block content %}
 
@@ -41,6 +44,10 @@ Predictions
                         </th>
 
                         <th>
+                            Image
+                        </th>
+
+                        <th>
                             Classification
                         </th>
 
@@ -67,35 +74,83 @@ Predictions
 
                 <tbody>
 
-                {% for prediction in predictions %}
+                {% if predictions %}
+
+                    {% for prediction in predictions %}
 
                     <tr>
 
                         <td>
-                            {{ prediction["patient_name"] }}
+                            <strong class="table-primary">
+                                {{ prediction["patient_name"] }}
+                            </strong>
                         </td>
 
+
                         <td>
-                            <span class="status">
-                                {{ prediction["binary_prediction"] }}
+
+                            <span class="table-file">
+                                {{ prediction["original_filename"] }}
                             </span>
+
                         </td>
 
-                        <td>
-                            {{ prediction["subclass_prediction"]
-                                .replace("_", " ")
-                                .title() }}
-                        </td>
 
                         <td>
-                            {{ "%.2f"|format(
-                                prediction["binary_confidence"]|float
-                            ) }}%
+
+                            {% if prediction["binary_prediction"]|lower == "malignant" %}
+
+                                <span class="status-badge malignant">
+                                    Malignant
+                                </span>
+
+                            {% else %}
+
+                                <span class="status-badge benign">
+                                    Benign
+                                </span>
+
+                            {% endif %}
+
                         </td>
+
+
+                        <td>
+
+                            {% if prediction["subclass_prediction"] %}
+
+                                {{
+                                    prediction["subclass_prediction"]
+                                    .replace("_", " ")
+                                    .title()
+                                }}
+
+                            {% else %}
+
+                                —
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <td>
+
+                            {{
+                                "%.2f"|format(
+                                    prediction["binary_confidence"]|float
+                                    if prediction["binary_confidence"]|float > 1
+                                    else prediction["binary_confidence"]|float * 100
+                                )
+                            }}%
+
+                        </td>
+
 
                         <td>
                             {{ prediction["created_at"] }}
                         </td>
+
 
                         <td>
 
@@ -104,7 +159,7 @@ Predictions
                                     'admin_prediction_detail',
                                     prediction_id=prediction['id']
                                 ) }}"
-                                class="btn btn-secondary"
+                                class="table-action"
                             >
                                 View
                             </a>
@@ -113,7 +168,22 @@ Predictions
 
                     </tr>
 
-                {% endfor %}
+                    {% endfor %}
+
+                {% else %}
+
+                    <tr>
+
+                        <td colspan="7"
+                            class="table-empty">
+
+                            No prediction records found.
+
+                        </td>
+
+                    </tr>
+
+                {% endif %}
 
                 </tbody>
 

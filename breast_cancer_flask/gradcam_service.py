@@ -694,6 +694,58 @@ def create_heatmap(
         1.0
     )
 
+    # --------------------------------------------------------
+    # SUPPRESS WEAK / DIFFUSE ACTIVATION
+    #
+    # The DenseNet target feature map is only 7x7. After it is
+    # resized to the original image, very small activations can
+    # visually spread across a large area. Keep the stronger
+    # Grad-CAM responses and suppress the weak background.
+    #
+    # This changes ONLY the visualization of the Grad-CAM.
+    # It does NOT change the model prediction.
+    # --------------------------------------------------------
+
+    positive_values = heatmap[heatmap > 0]
+
+    if positive_values.size > 0:
+        activation_threshold = float(
+            np.percentile(
+                positive_values,
+                75.0
+            )
+        )
+
+        if activation_threshold > 1e-12:
+            heatmap = np.where(
+                heatmap >= activation_threshold,
+                heatmap,
+                0.0
+            )
+
+            remaining_max = float(
+                np.max(heatmap)
+            )
+
+            if remaining_max > 1e-12:
+                heatmap = (
+                    heatmap
+                    / remaining_max
+                )
+
+    # Make strong responses visually more distinct without
+    # changing their locations.
+    heatmap = np.power(
+        np.clip(heatmap, 0.0, 1.0),
+        1.5
+    )
+
+    heatmap = np.clip(
+        heatmap,
+        0.0,
+        1.0
+    )
+
     return heatmap
 
 
@@ -718,7 +770,7 @@ def resize_heatmap(
 
     heatmap_image = heatmap_image.resize(
         original_size,
-        Image.Resampling.BICUBIC
+        Image.Resampling.BILINEAR
     )
 
     heatmap = (
@@ -801,18 +853,33 @@ def create_overlay(
     # Strong areas become clearly visible.
     # --------------------------------------------------------
 
+    # --------------------------------------------------------
+    # Use heatmap strength as the actual visibility mask.
+    #
+    # IMPORTANT:
+    # There is intentionally NO minimum alpha here.
+    # A zero/weak Grad-CAM response must leave the original
+    # histopathology image unchanged.
+    # --------------------------------------------------------
+
     alpha = (
-        0.10
-        + np.power(
-            heatmap,
-            0.75
+        np.power(
+            np.clip(heatmap, 0.0, 1.0),
+            1.0
         ) * 0.65
+    )
+
+    # Completely suppress tiny residual responses.
+    alpha = np.where(
+        heatmap < 0.10,
+        0.0,
+        alpha
     )
 
     alpha = np.clip(
         alpha,
-        0.10,
-        0.75
+        0.0,
+        0.65
     )
 
     alpha = np.expand_dims(
@@ -1060,6 +1127,44 @@ def make_gradcam(
         "Heatmap maximum:",
         float(np.max(heatmap))
     )
+        # ========================================================
+    # 7A. CALCULATE GRAD-CAM ACTIVATION EXTENT
+    # ========================================================
+    #
+    # This measures the percentage of the feature-map
+    # heatmap with strong activation.
+    #
+    # IMPORTANT:
+    # This is NOT tumor size and NOT clinical tumor extent.
+    # It is only an image-based Grad-CAM measurement.
+    #
+
+    activation_threshold = 0.50
+
+    activated_pixels = np.sum(
+        heatmap >= activation_threshold
+    )
+
+    total_pixels = heatmap.size
+
+    if total_pixels > 0:
+        activation_percentage = (
+            float(activated_pixels)
+            / float(total_pixels)
+            * 100.0
+        )
+    else:
+        activation_percentage = 0.0
+
+    activation_percentage = round(
+        activation_percentage,
+        2
+    )
+
+    print(
+        "Grad-CAM activation extent:",
+        f"{activation_percentage:.2f}%"
+    )
 
     # ========================================================
     # 8. LOAD ORIGINAL IMAGE
@@ -1113,7 +1218,7 @@ def make_gradcam(
         overlay_image
     )
 
-    # ========================================================
+# ========================================================
     # 13. COMPLETE
     # ========================================================
 
@@ -1129,4 +1234,7 @@ def make_gradcam(
 
     # IMPORTANT:
     # ml_service.py expects the filename.
-    return overlay_filename
+    return {
+    "gradcam_path": overlay_filename,
+    "activation_percentage": activation_percentage,
+}

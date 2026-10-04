@@ -1,596 +1,154 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "base.html" %}
 
-<head>
+{% block title %}
+New Prediction | BreastCare AI
+{% endblock %}
 
-    <meta charset="UTF-8">
+{% block topbar_title %}
+New Prediction
+{% endblock %}
 
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
+{% block content %}
 
-    <title>AI Breast Tissue Analysis</title>
+<div class="page-content">
 
-    <style>
+    <div class="page-heading">
 
-        * {
-            box-sizing: border-box;
-        }
-
-        body {
-            margin: 0;
-            font-family: Arial, Helvetica, sans-serif;
-            background: #fff7fa;
-            color: #3f2933;
-        }
-
-
-        /* ================= SIDEBAR ================= */
-
-        .sidebar {
-            position: fixed;
-            left: 0;
-            top: 0;
-            width: 245px;
-            height: 100vh;
-            background: #54263f;
-            color: white;
-            padding: 28px 18px;
-            z-index: 1000;
-        }
-
-        .brand {
-            text-align: center;
-            margin-bottom: 35px;
-        }
-
-        .brand-icon {
-            width: 48px;
-            height: 48px;
-            margin: auto;
-            border-radius: 50%;
-            background: #d98aae;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 23px;
-            margin-bottom: 10px;
-        }
-
-        .brand h2 {
-            font-size: 20px;
-            margin-bottom: 4px;
-            color: white;
-        }
-
-        .brand p {
-            font-size: 11px;
-            color: #e9cbd9;
-        }
-
-        .nav {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .nav a {
-            text-decoration: none;
-            color: #f6e8ee;
-            padding: 13px 15px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-size: 14px;
-            transition: 0.2s ease;
-        }
-
-        .nav a:hover {
-            background: #6c3452;
-            color: white;
-        }
-
-        .nav a.active {
-            background: #a94f78;
-            color: white;
-        }
-
-        .nav-icon {
-            width: 22px;
-            text-align: center;
-            font-size: 17px;
-        }
-
-        .logout {
-            position: absolute;
-            bottom: 25px;
-            left: 18px;
-            right: 18px;
-        }
-
-        .logout a {
-            text-decoration: none;
-            color: #f7dce7;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 13px 15px;
-            border-radius: 10px;
-            font-size: 14px;
-        }
-
-        .logout a:hover {
-            background: #6c3452;
-            color: white;
-        }
-
-
-        /* ================= EXISTING PAGE ================= */
-
-        .page {
-            min-height: 100vh;
-            padding: 35px;
-        }
-
-        /* SIDEBAR SPACE - ADDED ONLY */
-        .page {
-            margin-left: 245px;
-        }
-
-        .container {
-            max-width: 1100px;
-            margin: auto;
-        }
-
-        .topbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-        }
-
-        h1 {
-            margin: 0;
-            color: #6f304d;
-            font-size: 30px;
-        }
-
-        .title-area p {
-            color: #806b74;
-            margin-top: 8px;
-        }
-
-        .back-btn {
-            text-decoration: none;
-            padding: 11px 18px;
-            border-radius: 10px;
-            background: #f1d6e0;
-            color: #6f304d;
-            font-weight: 600;
-        }
-
-        .main-card {
-            background: white;
-            border-radius: 22px;
-            padding: 35px;
-            box-shadow: 0 12px 40px rgba(95,45,65,.10);
-        }
-
-        .upload-area {
-            display: block;
-            border: 2px dashed #d7a5b9;
-            border-radius: 18px;
-            padding: 55px 30px;
-            text-align: center;
-            background: #fffafd;
-            cursor: pointer;
-        }
-
-        .upload-area:hover {
-            background: #fff3f7;
-            border-color: #a75b79;
-        }
-
-        .upload-icon {
-            font-size: 48px;
-        }
-
-        .upload-area h2 {
-            color: #633148;
-        }
-
-        .upload-area p {
-            color: #806b74;
-        }
-
-        .file-types {
-            font-size: 13px;
-            color: #9a7d88;
-        }
-
-        #imageInput {
-            display: none;
-        }
-
-        .selected-box {
-            display: none;
-            margin-top: 25px;
-            padding: 20px;
-            border-radius: 14px;
-            background: #fff4f7;
-        }
-
-        .selected-title {
-            font-weight: bold;
-            color: #633148;
-            margin-bottom: 12px;
-        }
-
-        #fileList {
-            margin: 0;
-            padding-left: 20px;
-            color: #725a64;
-        }
-
-        #fileList li {
-            margin: 7px 0;
-        }
-
-        .button-area {
-            text-align: center;
-            margin-top: 28px;
-        }
-
-        .analyze-btn {
-            border: none;
-            border-radius: 12px;
-            padding: 15px 35px;
-            background: #8a0c43;
-            color: white;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        .analyze-btn:hover {
-            background: #8d2e59;
-        }
-
-        .analyze-btn:disabled {
-            opacity: .6;
-            cursor: not-allowed;
-        }
-
-        #processingBox {
-            display: none;
-            margin-top: 30px;
-            padding: 25px;
-            border-radius: 16px;
-            background: #fff4f7;
-            text-align: center;
-        }
-
-        .loader {
-            width: 42px;
-            height: 42px;
-            border: 4px solid #ead0db;
-            border-top-color: #8d3f61;
-            border-radius: 50%;
-            animation: spin .9s linear infinite;
-            margin: 0 auto 15px;
-        }
-
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
-        }
-
-        .processing-title {
-            font-size: 18px;
-            font-weight: bold;
-            color: #633148;
-        }
-
-        .processing-text {
-            margin-top: 8px;
-            color: #806b74;
-        }
-
-        .features {
-            display: grid;
-            grid-template-columns: repeat(3,1fr);
-            gap: 18px;
-            margin-top: 28px;
-        }
-
-        .feature {
-            padding: 20px;
-            border-radius: 15px;
-            background: #fff7fa;
-        }
-
-        .feature h3 {
-            color: #6f304d;
-            font-size: 16px;
-        }
-
-        .feature p {
-            color: #806b74;
-            font-size: 14px;
-            line-height: 1.6;
-        }
-
-
-        /* ================= RESPONSIVE ================= */
-
-        @media(max-width:750px) {
-
-            .sidebar {
-                width: 210px;
-            }
-
-            .page {
-                padding: 18px;
-                margin-left: 210px;
-            }
-
-            .topbar {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 15px;
-            }
-
-            .features {
-                grid-template-columns: 1fr;
-            }
-
-        }
-
-        @media(max-width:550px) {
-
-            .sidebar {
-                position: relative;
-                width: 100%;
-                height: auto;
-            }
-
-            .logout {
-                position: static;
-                margin-top: 20px;
-            }
-
-            .page {
-                margin-left: 0;
-                padding: 20px;
-            }
-
-        }
-
-    </style>
-
-</head>
-
-
-<body>
-
-
-    <!-- ================= SIDEBAR ================= -->
-
-    <aside class="sidebar">
-
-        <div class="brand">
-
-            <div class="brand-icon">
-                🩷
-            </div>
-
-            <h2>BreastCare AI</h2>
-
-            <p>AI-Assisted Breast Analysis</p>
-
+        <div class="eyebrow">
+            AI ANALYSIS
         </div>
 
+        <h1>
+            New Prediction
+        </h1>
 
-        <nav class="nav">
+        <p>
+            Upload a histopathology image for AI-assisted tissue analysis.
+        </p>
 
-            <a href="{{ url_for('patient_dashboard') }}">
-                <span class="nav-icon">⌂</span>
-                Dashboard
-            </a>
-
-            <a href="{{ url_for('prediction') }}" class="active">
-                <span class="nav-icon">🔬</span>
-                New Prediction
-            </a>
-
-            <a href="{{ url_for('history') }}">
-                <span class="nav-icon">◷</span>
-                Patient History
-            </a>
-
-            <a href="{{ url_for('cancer_information') }}">
-                <span class="nav-icon">▣</span>
-                Cancer Information
-            </a>
-
-            <a href="{{ url_for('profile') }}">
-                <span class="nav-icon">◯</span>
-                Profile
-            </a>
-
-        </nav>
+    </div>
 
 
-        <div class="logout">
-
-            <a href="{{ url_for('logout') }}">
-                <span class="nav-icon">↪</span>
-                Logout
-            </a>
-
-        </div>
-
-    </aside>
+    <form method="POST"
+          action="{{ url_for('predict') }}"
+          enctype="multipart/form-data"
+          id="predictionForm">
 
 
-    <!-- ================= YOUR EXISTING PAGE ================= -->
+        <!-- UPLOAD + EXPLANATION -->
 
-    <div class="page">
-
-    <div class="container">
-
-        <div class="topbar">
-
-            <div class="title-area">
-
-                <h1>
-                    AI Breast Tissue Analysis
-                </h1>
-
-                <p>
-                    Upload one or multiple histopathology images for AI-assisted analysis.
-                </p>
-
-            </div>
-
-            
-
-        </div>
+        <div class="upload-analysis-grid">
 
 
-        <div class="main-card">
+            <!-- UPLOAD -->
 
-            <!-- IMPORTANT:
-                 name="images"
-                 matches request.files.getlist("images")
-            -->
+            <div class="upload-panel">
 
-            <form
-                id="predictionForm"
-                action="{{ url_for('predict') }}"
-                method="POST"
-                enctype="multipart/form-data"
-            >
+                <div class="panel-label">
+                    UPLOAD HISTOPATHOLOGY IMAGE
+                </div>
 
-                <label
-                    for="imageInput"
-                    class="upload-area"
-                >
+                <label class="upload-area"
+                       for="imageInput"
+                       id="uploadArea">
 
-                    <div class="upload-icon">
-                        🧬
+                    <div class="upload-symbol">
+                        +
                     </div>
 
-                    <h2>
-                        Select Histopathology Images
-                    </h2>
+                    <strong>
+                        Choose Image
+                    </strong>
 
-                    <p>
-                        Choose one or multiple images from your device
-                    </p>
+                    <span>
+                        PNG / JPG / JPEG
+                    </span>
 
-                    <div class="file-types">
-                        PNG · JPG · JPEG · BMP · TIF · TIFF
-                    </div>
+                    <input
+                        type="file"
+                        id="imageInput"
+                        name="images"
+                        accept=".png,.jpg,.jpeg,image/png,image/jpeg"
+                        multiple
+                        required
+                    >
 
                 </label>
 
-
-                <input
-                    type="file"
-                    id="imageInput"
-                    name="images"
-                    accept=".png,.jpg,.jpeg,.bmp,.tif,.tiff"
-                    multiple
-                >
+            </div>
 
 
-                <div
-                    class="selected-box"
-                    id="selectedBox"
-                >
+            <!-- WHAT HAPPENS -->
 
-                    <div class="selected-title">
-                        Selected Images
-                    </div>
+            <div class="analysis-info-panel">
 
-                    <ul id="fileList"></ul>
-
+                <div class="panel-label">
+                    WHAT HAPPENS AFTER UPLOAD?
                 </div>
 
 
-                <div class="button-area">
+                <div class="analysis-info-step">
 
-                    <button
-                        type="submit"
-                        class="analyze-btn"
-                        id="analyzeButton"
-                        disabled
-                    >
-                        ✦ Start AI Analysis
-                    </button>
+                    <span>
+                        01
+                    </span>
 
-                </div>
+                    <div>
 
+                        <strong>
+                            Image Processing
+                        </strong>
 
-                <div id="processingBox">
+                        <p>
+                            Uploaded image is prepared for
+                            AI analysis.
+                        </p>
 
-                    <div class="loader"></div>
-
-                    <div class="processing-title">
-                        AI Analysis in Progress
-                    </div>
-
-                    <div
-                        class="processing-text"
-                        id="processingText"
-                    >
-                        Preparing your images...
                     </div>
 
                 </div>
 
-            </form>
 
+                <div class="analysis-info-step">
 
-            <div class="features">
+                    <span>
+                        02
+                    </span>
 
-                <div class="feature">
+                    <div>
 
-                    <h3>
-                        🔬 Image Processing
-                    </h3>
+                        <strong>
+                            AI Classification
+                        </strong>
 
-                    <p>
-                        Each uploaded image is prepared and resized before being passed to the trained deep learning models.
-                    </p>
+                        <p>
+                            DenseNet121 predicts classification
+                            and subtype.
+                        </p>
 
-                </div>
-
-
-                <div class="feature">
-
-                    <h3>
-                        🧠 AI Classification
-                    </h3>
-
-                    <p>
-                        Each image is analyzed individually using binary classification and histopathological subtype classification.
-                    </p>
+                    </div>
 
                 </div>
 
 
-                <div class="feature">
+                <div class="analysis-info-step">
 
-                    <h3>
-                        ✨ Explainable AI
-                    </h3>
+                    <span>
+                        03
+                    </span>
 
-                    <p>
-                        Grad-CAM visualization is generated for each successfully analyzed image.
-                    </p>
+                    <div>
+
+                        <strong>
+                            Explainable AI
+                        </strong>
+
+                        <p>
+                            Grad-CAM highlights image regions
+                            that influenced the prediction.
+                        </p>
+
+                    </div>
 
                 </div>
 
@@ -598,143 +156,132 @@
 
         </div>
 
-    </div>
 
-    </div>
+        <!-- SELECTED IMAGE -->
 
+        <div class="selected-image-section"
+             id="selectedImageSection">
+
+            <div class="panel-label">
+                SELECTED IMAGE
+            </div>
+
+
+            <div class="preview-container">
+
+                <div class="image-preview"
+                     id="imagePreview">
+
+                    <div class="preview-placeholder">
+                        Image preview will appear here
+                    </div>
+
+                </div>
+
+
+                <div class="preview-details">
+
+                    <span class="preview-label">
+                        Filename
+                    </span>
+
+                    <strong id="fileName">
+                        No image selected
+                    </strong>
+
+
+                    <span class="preview-label">
+                        Selected Files
+                    </span>
+
+                    <strong id="fileCount">
+                        0
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <!-- ANALYSIS STATUS -->
+
+            <div id="analysisStatus"
+                 style="display: none;">
+
+                <div class="analysis-status-title">
+                    AI ANALYSIS IN PROGRESS
+                </div>
+
+                <div class="analysis-status-text">
+                    Your histopathology image is being analyzed.
+                    Please wait while the result is prepared.
+                </div>
+
+            </div>
+
+
+            <!-- ANALYZE BUTTON -->
+
+            <div class="analysis-action-row">
+
+                <button
+                    type="submit"
+                    class="primary-button"
+                    id="analyzeButton">
+
+                    Analyze Image
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </form>
+
+</div>
+
+
+<!-- ================================================= -->
+<!-- ANALYSIS VOICE -->
+<!-- ================================================= -->
+
+<audio
+    id="analysisVoice"
+    preload="auto">
+
+    <source
+        src="{{ url_for('static', filename='audio/analysis_voice.mp3') }}"
+        type="audio/mpeg">
+
+</audio>
+
+
+<audio id="analysisVoice" preload="auto" autoplay>
+    <source src="{{ url_for('static', filename='audio/analysis_voice.mp3') }}" type="audio/mpeg">
+</audio>
 
 <script>
+document.addEventListener("DOMContentLoaded", function () {
 
-const input =
-    document.getElementById("imageInput");
+    const voice = document.getElementById("analysisVoice");
 
-const selectedBox =
-    document.getElementById("selectedBox");
-
-const fileList =
-    document.getElementById("fileList");
-
-const analyzeButton =
-    document.getElementById("analyzeButton");
-
-const form =
-    document.getElementById("predictionForm");
-
-const processingBox =
-    document.getElementById("processingBox");
-
-const processingText =
-    document.getElementById("processingText");
-
-
-input.addEventListener(
-    "change",
-    function () {
-
-        fileList.innerHTML = "";
-
-        const files = input.files;
-
-        if (files.length === 0) {
-
-            selectedBox.style.display = "none";
-
-            analyzeButton.disabled = true;
-
-            return;
-        }
-
-        selectedBox.style.display = "block";
-
-        analyzeButton.disabled = false;
-
-        for (
-            let i = 0;
-            i < files.length;
-            i++
-        ) {
-
-            const li =
-                document.createElement("li");
-
-            li.textContent =
-                (i + 1) + ". " + files[i].name;
-
-            fileList.appendChild(li);
-        }
-
+    if (!voice) {
+        return;
     }
-);
 
+    // Try to play automatically when New Prediction page opens
+    voice.currentTime = 0;
 
-form.addEventListener(
-    "submit",
-    function () {
+    const playVoice = voice.play();
 
-        if (input.files.length === 0) {
-
-            return;
-        }
-
-        analyzeButton.disabled = true;
-
-        analyzeButton.textContent =
-            "AI Analysis Running...";
-
-        processingBox.style.display =
-            "block";
-
-        const count =
-            input.files.length;
-
-        let messages = [
-
-            "Preparing " + count + " image(s)...",
-
-            "Improving image input quality...",
-
-            "Preprocessing histopathology image...",
-
-            "Running DenseNet deep learning analysis...",
-
-            "Generating Grad-CAM explanation...",
-
-            "Saving prediction result...",
-
-            "Processing the next image..."
-
-        ];
-
-        let index = 0;
-
-        processingText.textContent =
-            messages[0];
-
-        const timer = setInterval(
-            function () {
-
-                index++;
-
-                if (
-                    index >= messages.length
-                ) {
-
-                    index = 0;
-                }
-
-                processingText.textContent =
-                    messages[index];
-
-            },
-            1800
-        );
-
+    if (playVoice !== undefined) {
+        playVoice.catch(function () {
+            console.log("Browser blocked autoplay.");
+        });
     }
-);
-
+});
 </script>
 
 
-</body>
-
-</html>
+{% endblock %}

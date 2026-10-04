@@ -6,67 +6,180 @@ BreastCare AI
 
 {% block public_content %}
 
-<div class="auth-page">
+<div class="landing-page">
 
-    <div
-        class="auth-card"
-        style="
-            max-width: 900px;
-            text-align:center;
-            padding:50px;
-        "
-    >
+    <header class="landing-header">
 
-        <div
-            class="auth-logo"
-            style="margin-left:auto;margin-right:auto;"
-        >
-            🎗️
+        <div class="landing-brand">
+
+            <div class="landing-brand-mark">
+                BC
+            </div>
+
+            <div>
+
+                <strong>
+                    BreastCare AI
+                </strong>
+
+                <span>
+                    Breast Cancer Analysis
+                </span>
+
+            </div>
+
         </div>
 
-        <span class="eyebrow">
+
+        <div class="landing-actions">
+
+            <a href="{{ url_for('login') }}"
+               class="landing-login">
+
+                Login
+
+            </a>
+
+            <a href="{{ url_for('register') }}"
+               class="landing-register">
+
+                Create Account
+
+            </a>
+
+        </div>
+
+    </header>
+
+
+    <main class="landing-main">
+
+        <div class="landing-content">
+
+            <div class="eyebrow">
+                AI-ASSISTED HISTOPATHOLOGY
+            </div>
+
+            <h1>
+                Smart Breast Cancer
+                <span>Detection & Diagnosis</span>
+            </h1>
+
+            <p>
+                BreastCare AI is a deep-learning based research
+                application designed to analyze histopathological
+                breast tissue images and provide AI-assisted
+                classification results.
+            </p>
+
+
+            <div class="landing-buttons">
+
+                <a href="{{ url_for('login') }}"
+                   class="primary-button">
+
+                    Access Platform
+
+                </a>
+
+                <a href="{{ url_for('register') }}"
+                   class="secondary-button">
+
+                    Create Account
+
+                </a>
+
+            </div>
+
+        </div>
+
+
+        <div class="landing-information">
+
+            <div class="landing-info-title">
+                SYSTEM CAPABILITIES
+            </div>
+
+
+            <div class="landing-info-row">
+
+                <span>
+                    01
+                </span>
+
+                <div>
+
+                    <strong>
+                        Tissue Classification
+                    </strong>
+
+                    <p>
+                        Benign / Malignant
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="landing-info-row">
+
+                <span>
+                    02
+                </span>
+
+                <div>
+
+                    <strong>
+                        Subtype Classification
+                    </strong>
+
+                    <p>
+                        8 histopathological categories
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="landing-info-row">
+
+                <span>
+                    03
+                </span>
+
+                <div>
+
+                    <strong>
+                        Explainable AI
+                    </strong>
+
+                    <p>
+                        Grad-CAM visualization
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </main>
+
+
+    <footer class="landing-footer">
+
+        <span>
             BreastCare AI
         </span>
 
-        <h1 style="
-            font-size:40px;
-            margin-top:8px;
-        ">
-            Smart Breast Cancer
-            Detection & Diagnosis
-        </h1>
+        <span>
+            Educational and research use
+        </span>
 
-        <p style="
-            max-width:650px;
-            margin:15px auto 28px;
-            line-height:1.8;
-        ">
-            BreastCare AI is a deep-learning based research
-            application designed to analyze histopathological
-            breast tissue images and provide AI-assisted
-            classification results.
-        </p>
-
-        <div class="action-row"
-             style="justify-content:center;">
-
-            <a
-                href="{{ url_for('login') }}"
-                class="primary-btn"
-            >
-                Login
-            </a>
-
-            <a
-                href="{{ url_for('register') }}"
-                class="secondary-btn"
-            >
-                Create Account
-            </a>
-
-        </div>
-
-    </div>
+    </footer>
 
 </div>
+
 {% endblock %}

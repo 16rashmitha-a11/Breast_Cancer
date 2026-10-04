@@ -1,532 +1,178 @@
 {% extends "base.html" %}
 
-{% block title %}Admin Dashboard | BreastCare AI{% endblock %}
+{% block title %}
+Admin Dashboard | BreastCare AI
+{% endblock %}
+
+{% block topbar_title %}
+Admin Dashboard
+{% endblock %}
 
 {% block content %}
 
-<style>
+<div class="page-content">
 
-.admin-page {
-    max-width: 1250px;
-    margin: 0 auto;
-    padding: 35px 40px 60px;
-}
+    <div class="page-heading">
 
-/* HEADER */
-
-.admin-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-    margin-bottom: 32px;
-}
-
-.admin-header-text small {
-    display: block;
-    color: #a03d68;
-    font-size: 12px;
-    font-weight: 800;
-    letter-spacing: 1.5px;
-    margin-bottom: 8px;
-}
-
-.admin-header-text h1 {
-    margin: 0;
-    color: #352338;
-    font-size: 34px;
-    font-weight: 800;
-}
-
-.admin-header-text p {
-    margin: 8px 0 0;
-    color: #81747d;
-    font-size: 15px;
-}
-
-/* DATE / STATUS */
-
-.admin-status {
-    background: #faf4f7;
-    border: 1px solid #ead9e2;
-    padding: 10px 16px;
-    border-radius: 30px;
-    color: #77435d;
-    font-size: 13px;
-    font-weight: 700;
-}
-
-/* STAT CARDS */
-
-.stats-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
-    margin-bottom: 32px;
-}
-
-.stat-card {
-    background: white;
-    border: 1px solid #eadde5;
-    border-radius: 18px;
-    padding: 24px;
-    box-shadow: 0 8px 28px rgba(65, 38, 54, .07);
-    position: relative;
-    overflow: hidden;
-}
-
-.stat-card::after {
-    content: "";
-    position: absolute;
-    width: 90px;
-    height: 90px;
-    right: -30px;
-    top: -30px;
-    background: #f7e9ef;
-    border-radius: 50%;
-}
-
-.stat-icon {
-    width: 45px;
-    height: 45px;
-    border-radius: 13px;
-    background: #f6e6ee;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 21px;
-    margin-bottom: 17px;
-}
-
-.stat-label {
-    color: #887781;
-    font-size: 13px;
-    font-weight: 600;
-    margin-bottom: 6px;
-}
-
-.stat-number {
-    color: #392637;
-    font-size: 30px;
-    font-weight: 800;
-}
-
-.stat-description {
-    color: #988b92;
-    font-size: 12px;
-    margin-top: 5px;
-}
-
-/* CONTENT GRID */
-
-.dashboard-grid {
-    display: grid;
-    grid-template-columns: 1.35fr .65fr;
-    gap: 22px;
-}
-
-/* CARDS */
-
-.dashboard-card {
-    background: white;
-    border: 1px solid #eadde5;
-    border-radius: 18px;
-    padding: 26px;
-    box-shadow: 0 8px 28px rgba(65, 38, 54, .06);
-}
-
-.card-heading {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 22px;
-}
-
-.card-heading-icon {
-    width: 42px;
-    height: 42px;
-    border-radius: 12px;
-    background: #f7e9ef;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 19px;
-}
-
-.card-heading h2 {
-    margin: 0;
-    color: #402b39;
-    font-size: 20px;
-}
-
-.card-heading p {
-    margin: 4px 0 0;
-    color: #8d7e87;
-    font-size: 13px;
-}
-
-/* ACTIONS */
-
-.action-list {
-    display: grid;
-    gap: 12px;
-}
-
-.admin-action {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 16px 18px;
-    border: 1px solid #eee3e8;
-    border-radius: 13px;
-    text-decoration: none;
-    transition: .2s ease;
-    background: #fdfbfc;
-}
-
-.admin-action:hover {
-    transform: translateY(-2px);
-    border-color: #d9b6c8;
-    background: #fbf3f7;
-}
-
-.action-left {
-    display: flex;
-    align-items: center;
-    gap: 13px;
-}
-
-.action-icon {
-    width: 38px;
-    height: 38px;
-    border-radius: 10px;
-    background: #f4e4ec;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.action-title {
-    color: #412c39;
-    font-weight: 700;
-    font-size: 14px;
-}
-
-.action-description {
-    color: #91848b;
-    font-size: 12px;
-    margin-top: 3px;
-}
-
-.action-arrow {
-    color: #9a4169;
-    font-size: 20px;
-}
-
-/* CLASSIFICATION */
-
-.classification-box {
-    background: linear-gradient(
-        135deg,
-        #fbf3f7,
-        #fff
-    );
-    border: 1px solid #ecdce4;
-    border-radius: 14px;
-    padding: 22px;
-}
-
-.classification-number {
-    font-size: 42px;
-    color: #8f315f;
-    font-weight: 800;
-}
-
-.classification-title {
-    color: #412b38;
-    font-weight: 700;
-    margin-top: 3px;
-}
-
-.classification-text {
-    color: #81747c;
-    font-size: 13px;
-    line-height: 1.6;
-    margin-top: 8px;
-}
-
-/* RESPONSIVE */
-
-@media (max-width: 950px) {
-
-    .stats-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .dashboard-grid {
-        grid-template-columns: 1fr;
-    }
-
-}
-
-@media (max-width: 650px) {
-
-    .admin-page {
-        padding: 25px 18px 40px;
-    }
-
-    .admin-header {
-        align-items: flex-start;
-        flex-direction: column;
-        gap: 15px;
-    }
-
-    .admin-header-text h1 {
-        font-size: 28px;
-    }
-
-}
-
-</style>
-
-
-<div class="admin-page">
-
-    <!-- HEADER -->
-
-    <div class="admin-header">
-
-        <div class="admin-header-text">
-
-            <small>ADMINISTRATION</small>
-
-            <h1>Admin Dashboard</h1>
-
-            <p>
-                Monitor patients and breast tissue analysis records.
-            </p>
-
+        <div class="eyebrow">
+            ADMINISTRATION
         </div>
 
-        <div class="admin-status">
-            ● System Active
-        </div>
+        <h1>
+            Admin Dashboard
+        </h1>
+
+        <p>
+            System overview and breast tissue analysis activity.
+        </p>
 
     </div>
 
 
     <!-- STATISTICS -->
 
-    <div class="stats-grid">
+    <section class="dashboard-section">
 
-        <div class="stat-card">
-
-            <div class="stat-icon">
-                👥
-            </div>
-
-            <div class="stat-label">
-                REGISTERED PATIENTS
-            </div>
-
-            <div class="stat-number">
-                {{ patient_count }}
-            </div>
-
-            <div class="stat-description">
-                Patient accounts in the system
-            </div>
-
+        <div class="section-label">
+            SYSTEM OVERVIEW
         </div>
 
 
-        <div class="stat-card">
+        <div class="stats-grid admin-stats">
 
-            <div class="stat-icon">
-                🔬
-            </div>
+            <div class="stat-card">
 
-            <div class="stat-label">
-                TOTAL ANALYSES
-            </div>
-
-            <div class="stat-number">
-                {{ prediction_count }}
-            </div>
-
-            <div class="stat-description">
-                Histopathology analyses performed
-            </div>
-
-        </div>
-
-
-        <div class="stat-card">
-
-            <div class="stat-icon">
-                🧬
-            </div>
-
-            <div class="stat-label">
-                CLASSIFICATION
-            </div>
-
-            <div class="stat-number">
-                8
-            </div>
-
-            <div class="stat-description">
-                Histopathological subtypes supported
-            </div>
-
-        </div>
-
-    </div>
-
-
-    <!-- LOWER CONTENT -->
-
-    <div class="dashboard-grid">
-
-
-        <!-- MANAGEMENT -->
-
-        <div class="dashboard-card">
-
-            <div class="card-heading">
-
-                <div class="card-heading-icon">
-                    📊
+                <div class="stat-label">
+                    Total Patients
                 </div>
+
+                <div class="stat-value">
+                    {{ patient_count|default(0) }}
+                </div>
+
+                <div class="stat-description">
+                    Registered patient accounts
+                </div>
+
+            </div>
+
+
+            <div class="stat-card">
+
+                <div class="stat-label">
+                    Total Predictions
+                </div>
+
+                <div class="stat-value">
+                    {{ prediction_count|default(0) }}
+                </div>
+
+                <div class="stat-description">
+                    Completed AI analyses
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- ADMIN OVERVIEW -->
+
+    <section class="admin-overview-panel">
+
+        <div class="admin-overview-main">
+
+            <div class="eyebrow">
+                BREASTCARE AI
+            </div>
+
+            <h2>
+                Clinical research administration
+            </h2>
+
+            <p>
+                Monitor registered patients and review AI-assisted
+                histopathology prediction records from one
+                centralized workspace.
+            </p>
+
+        </div>
+
+
+        <div class="admin-links">
+
+            <a href="{{ url_for('admin_patients') }}"
+               class="admin-link">
 
                 <div>
 
-                    <h2>Management</h2>
+                    <strong>
+                        Patients
+                    </strong>
 
-                    <p>
-                        Manage patients and AI analysis records.
-                    </p>
+                    <span>
+                        View registered patient accounts
+                    </span>
 
                 </div>
 
-            </div>
+                <span>
+                    →
+                </span>
+
+            </a>
 
 
-            <div class="action-list">
-
-
-                <a
-                    href="{{ url_for('admin_patients') }}"
-                    class="admin-action"
-                >
-
-                    <div class="action-left">
-
-                        <div class="action-icon">
-                            👤
-                        </div>
-
-                        <div>
-
-                            <div class="action-title">
-                                Patient Management
-                            </div>
-
-                            <div class="action-description">
-                                View registered patients and their records
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                    <div class="action-arrow">
-                        →
-                    </div>
-
-                </a>
-
-
-                <a
-                    href="{{ url_for('admin_predictions') }}"
-                    class="admin-action"
-                >
-
-                    <div class="action-left">
-
-                        <div class="action-icon">
-                            🔬
-                        </div>
-
-                        <div>
-
-                            <div class="action-title">
-                                Prediction Records
-                            </div>
-
-                            <div class="action-description">
-                                Review all histopathology prediction results
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                    <div class="action-arrow">
-                        →
-                    </div>
-
-                </a>
-
-            </div>
-
-        </div>
-
-
-        <!-- CLASSIFICATION -->
-
-        <div class="dashboard-card">
-
-            <div class="card-heading">
-
-                <div class="card-heading-icon">
-                    🧠
-                </div>
+            <a href="{{ url_for('admin_predictions') }}"
+               class="admin-link">
 
                 <div>
 
-                    <h2>AI Classification</h2>
+                    <strong>
+                        Prediction Records
+                    </strong>
 
-                    <p>
-                        Supported analysis
-                    </p>
+                    <span>
+                        Review completed AI analyses
+                    </span>
 
                 </div>
 
-            </div>
+                <span>
+                    →
+                </span>
 
-
-            <div class="classification-box">
-
-                <div class="classification-number">
-                    8
-                </div>
-
-                <div class="classification-title">
-                    Histopathological Subtypes
-                </div>
-
-                <div class="classification-text">
-                    The system performs binary classification
-                    and direct eight-class histopathological
-                    subtype classification.
-                </div>
-
-            </div>
+            </a>
 
         </div>
 
+    </section>
+
+
+    <!-- NOTICE -->
+
+    <div class="notice-panel">
+
+        <div class="notice-marker"></div>
+
+        <div>
+
+            <div class="notice-title">
+                Administration Notice
+            </div>
+
+            <p>
+                Prediction records are AI-assisted research
+                outputs. They should be reviewed with appropriate
+                clinical and pathological expertise.
+            </p>
+
+        </div>
 
     </div>
 
 </div>
+
 {% endblock %}

@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block title %}
-Cancer Information | BreastCare AI
+Cancer & Tissue Information | BreastCare AI
 {% endblock %}
 
 {% block topbar_title %}
@@ -10,462 +10,219 @@ Cancer Information
 
 {% block content %}
 
-<div class="page-container">
+<div class="page-content">
 
-    <section class="cancer-intro">
+    <div class="page-heading">
 
-        <span class="eyebrow">
-            Breast Health Information
-        </span>
+        <div class="eyebrow">
+            BREAST HISTOPATHOLOGY
+        </div>
 
         <h1>
-            Breast Cancer & Tissue Conditions
+            Cancer & Tissue Information
         </h1>
 
         <p>
-            Breast conditions include both benign and malignant
-            tissue changes. The information below provides a simple
-            overview of the histopathological categories included
-            in this project. A tissue classification from an AI
-            system should not be considered a medical diagnosis.
+            Histopathological categories included in BreastCare AI.
         </p>
+
+    </div>
+
+
+    <!-- BENIGN -->
+
+    <section class="information-section">
+
+        <div class="information-section-header">
+
+            <div>
+                <div class="section-label">
+                    CATEGORY 01
+                </div>
+
+                <h2>
+                    Benign Conditions
+                </h2>
+            </div>
+
+            <span class="category-marker benign">
+                BENIGN
+            </span>
+
+        </div>
+
+
+        <div class="information-list">
+
+            <article class="information-item">
+
+                <div class="information-item-title">
+                    Adenosis
+                </div>
+
+                <p>
+                    A benign breast condition involving enlarged
+                    or increased breast glands.
+                </p>
+
+            </article>
+
+
+            <article class="information-item">
+
+                <div class="information-item-title">
+                    Fibroadenoma
+                </div>
+
+                <p>
+                    A common benign breast tumor containing
+                    glandular and connective tissue.
+                </p>
+
+            </article>
+
+
+            <article class="information-item">
+
+                <div class="information-item-title">
+                    Phyllodes Tumor
+                </div>
+
+                <p>
+                    A fibroepithelial breast tumor that may be
+                    benign, borderline, or malignant.
+                </p>
+
+            </article>
+
+
+            <article class="information-item">
+
+                <div class="information-item-title">
+                    Tubular Adenoma
+                </div>
+
+                <p>
+                    A rare benign breast tumor characterized by
+                    tightly packed tubular structures.
+                </p>
+
+            </article>
+
+        </div>
 
     </section>
 
 
-    <!-- ================= BENIGN ================= -->
+    <!-- MALIGNANT -->
 
-    <div class="cancer-category-title">
+    <section class="information-section">
 
-        <span></span>
+        <div class="information-section-header">
 
-        <h2>
-            Benign Breast Conditions
-        </h2>
-
-    </div>
-
-
-    <div class="cancer-grid">
-
-
-        <!-- ADENOSIS -->
-
-        <article class="cancer-card">
-
-            <div class="cancer-card-header">
-
-                <div class="cancer-card-icon">
-                    🌸
+            <div>
+                <div class="section-label">
+                    CATEGORY 02
                 </div>
 
-                <div>
-                    <div class="cancer-type">
-                        Benign
-                    </div>
-
-                    <h3>
-                        Adenosis
-                    </h3>
-                </div>
-
+                <h2>
+                    Malignant Conditions
+                </h2>
             </div>
 
-            <h4>What it is</h4>
+            <span class="category-marker malignant">
+                MALIGNANT
+            </span>
 
-            <p>
-                Adenosis is a benign breast condition in which
-                the glands or lobules become enlarged or more
-                numerous. Some forms may appear unusual on
-                imaging or under a microscope.
-            </p>
-
-            <h4>Common features</h4>
-
-            <ul>
-                <li>Usually benign</li>
-                <li>May produce a lump or thickened area</li>
-                <li>Often identified during breast examination or imaging</li>
-            </ul>
-
-            <h4>Diagnosis</h4>
-
-            <p>
-                Clinical examination, imaging such as mammography
-                or ultrasound, and biopsy or histopathological
-                examination when necessary.
-            </p>
-
-        </article>
+        </div>
 
 
-        <!-- FIBROADENOMA -->
+        <div class="information-list">
 
-        <article class="cancer-card">
+            <article class="information-item">
 
-            <div class="cancer-card-header">
-
-                <div class="cancer-card-icon">
-                    🌷
+                <div class="information-item-title">
+                    Ductal Carcinoma
                 </div>
 
-                <div>
-                    <div class="cancer-type">
-                        Benign
-                    </div>
+                <p>
+                    A carcinoma associated with the ducts of
+                    the breast. Diagnosis requires pathological
+                    evaluation.
+                </p>
 
-                    <h3>
-                        Fibroadenoma
-                    </h3>
+            </article>
+
+
+            <article class="information-item">
+
+                <div class="information-item-title">
+                    Lobular Carcinoma
                 </div>
 
+                <p>
+                    A carcinoma associated with the lobular
+                    structures of the breast.
+                </p>
+
+            </article>
+
+
+            <article class="information-item">
+
+                <div class="information-item-title">
+                    Mucinous Carcinoma
+                </div>
+
+                <p>
+                    A breast carcinoma characterized by tumor
+                    cells associated with extracellular mucin.
+                </p>
+
+            </article>
+
+
+            <article class="information-item">
+
+                <div class="information-item-title">
+                    Papillary Carcinoma
+                </div>
+
+                <p>
+                    A breast lesion characterized by papillary
+                    growth patterns.
+                </p>
+
+            </article>
+
+        </div>
+
+    </section>
+
+
+    <!-- NOTICE -->
+
+    <div class="notice-panel">
+
+        <div class="notice-marker"></div>
+
+        <div>
+
+            <div class="notice-title">
+                Educational Information
             </div>
 
-            <h4>What it is</h4>
-
             <p>
-                Fibroadenoma is a common benign breast tumor,
-                particularly in younger people. It is not
-                breast cancer.
+                The information presented here is intended for
+                educational and research purposes. Histopathological
+                diagnosis should be performed and interpreted by
+                qualified healthcare professionals.
             </p>
 
-            <h4>Common features</h4>
-
-            <ul>
-                <li>Usually firm and smooth</li>
-                <li>May move somewhat under the skin</li>
-                <li>May be painless</li>
-            </ul>
-
-            <h4>Diagnosis</h4>
-
-            <p>
-                Clinical examination and appropriate imaging.
-                Biopsy may be recommended when the diagnosis
-                is uncertain.
-            </p>
-
-        </article>
-
-
-        <!-- TUBULAR ADENOMA -->
-
-        <article class="cancer-card">
-
-            <div class="cancer-card-header">
-
-                <div class="cancer-card-icon">
-                    🔬
-                </div>
-
-                <div>
-                    <div class="cancer-type">
-                        Benign
-                    </div>
-
-                    <h3>
-                        Tubular Adenoma
-                    </h3>
-                </div>
-
-            </div>
-
-            <h4>What it is</h4>
-
-            <p>
-                Tubular adenoma is a rare benign breast tumor
-                made primarily of closely packed tubular
-                structures.
-            </p>
-
-            <h4>Precautions</h4>
-
-            <p>
-                A benign-looking lump still requires appropriate
-                evaluation. Follow medical recommendations when
-                an abnormality is identified.
-            </p>
-
-            <h4>Diagnosis</h4>
-
-            <p>
-                Imaging may identify the lesion, while
-                histopathological examination can establish
-                the diagnosis.
-            </p>
-
-        </article>
-
-    </div>
-
-
-    <!-- ================= MALIGNANT ================= -->
-
-    <div class="cancer-category-title">
-
-        <span></span>
-
-        <h2>
-            Malignant Breast Tumors
-        </h2>
-
-    </div>
-
-
-    <div class="cancer-grid">
-
-
-        <!-- DUCTAL -->
-
-        <article class="cancer-card">
-
-            <div class="cancer-card-header">
-
-                <div class="cancer-card-icon">
-                    🧬
-                </div>
-
-                <div>
-                    <div class="cancer-type">
-                        Malignant
-                    </div>
-
-                    <h3>
-                        Ductal Carcinoma
-                    </h3>
-                </div>
-
-            </div>
-
-            <h4>What it is</h4>
-
-            <p>
-                Ductal carcinoma begins in cells lining the
-                milk ducts. Invasive ductal carcinoma has
-                grown beyond the duct into surrounding
-                breast tissue.
-            </p>
-
-            <h4>Possible signs</h4>
-
-            <ul>
-                <li>Breast lump or thickening</li>
-                <li>Change in breast size or shape</li>
-                <li>Nipple changes</li>
-                <li>Abnormal nipple discharge</li>
-                <li>Skin dimpling or other skin changes</li>
-            </ul>
-
-            <h4>Diagnosis</h4>
-
-            <p>
-                Clinical examination, mammography, ultrasound
-                or MRI when indicated, followed by biopsy and
-                microscopic examination.
-            </p>
-
-        </article>
-
-
-        <!-- LOBULAR -->
-
-        <article class="cancer-card">
-
-            <div class="cancer-card-header">
-
-                <div class="cancer-card-icon">
-                    🧬
-                </div>
-
-                <div>
-                    <div class="cancer-type">
-                        Malignant
-                    </div>
-
-                    <h3>
-                        Lobular Carcinoma
-                    </h3>
-                </div>
-
-            </div>
-
-            <h4>What it is</h4>
-
-            <p>
-                Lobular carcinoma begins in the milk-producing
-                lobules. Invasive lobular carcinoma occurs when
-                cancer cells spread beyond the lobules into
-                surrounding tissue.
-            </p>
-
-            <h4>Possible signs</h4>
-
-            <ul>
-                <li>Breast thickening or swelling</li>
-                <li>Change in breast shape</li>
-                <li>Sometimes no obvious lump</li>
-                <li>Other persistent breast changes</li>
-            </ul>
-
-            <h4>Diagnosis</h4>
-
-            <p>
-                Clinical examination, mammography, ultrasound
-                or MRI when indicated, followed by biopsy and
-                histopathological examination.
-            </p>
-
-        </article>
-
-
-        <!-- MUCINOUS -->
-
-        <article class="cancer-card">
-
-            <div class="cancer-card-header">
-
-                <div class="cancer-card-icon">
-                    💗
-                </div>
-
-                <div>
-                    <div class="cancer-type">
-                        Malignant
-                    </div>
-
-                    <h3>
-                        Mucinous Carcinoma
-                    </h3>
-                </div>
-
-            </div>
-
-            <h4>What it is</h4>
-
-            <p>
-                Mucinous carcinoma is a less common type of
-                invasive breast cancer in which cancer cells
-                are associated with substantial amounts of
-                mucus called mucin.
-            </p>
-
-            <h4>Possible signs</h4>
-
-            <ul>
-                <li>Breast lump</li>
-                <li>Breast thickening</li>
-                <li>Changes detected through imaging</li>
-            </ul>
-
-            <h4>Diagnosis</h4>
-
-            <p>
-                Breast imaging, biopsy and histopathological
-                examination. Biomarker testing may also help
-                characterize the cancer.
-            </p>
-
-        </article>
-
-
-        <!-- PAPILLARY -->
-
-        <article class="cancer-card">
-
-            <div class="cancer-card-header">
-
-                <div class="cancer-card-icon">
-                    🔬
-                </div>
-
-                <div>
-                    <div class="cancer-type">
-                        Malignant
-                    </div>
-
-                    <h3>
-                        Papillary Carcinoma
-                    </h3>
-                </div>
-
-            </div>
-
-            <h4>What it is</h4>
-
-            <p>
-                Papillary carcinoma is characterized by
-                distinctive papillary structures when examined
-                microscopically.
-            </p>
-
-            <h4>Possible signs</h4>
-
-            <ul>
-                <li>Breast lump</li>
-                <li>Nipple changes</li>
-                <li>Nipple discharge</li>
-                <li>May sometimes be detected through imaging</li>
-            </ul>
-
-            <h4>Diagnosis</h4>
-
-            <p>
-                Mammography or ultrasound, biopsy and
-                histopathological examination.
-            </p>
-
-        </article>
-
-
-        <!-- PHYLLODES -->
-
-        <article class="cancer-card">
-
-            <div class="cancer-card-header">
-
-                <div class="cancer-card-icon">
-                    🌺
-                </div>
-
-                <div>
-                    <div class="cancer-type">
-                        Benign / Borderline / Malignant
-                    </div>
-
-                    <h3>
-                        Phyllodes Tumor
-                    </h3>
-                </div>
-
-            </div>
-
-            <h4>What it is</h4>
-
-            <p>
-                Phyllodes tumors develop from the connective
-                or stromal tissue of the breast. They can be
-                benign, borderline, or malignant.
-            </p>
-
-            <h4>Possible signs</h4>
-
-            <ul>
-                <li>Rapidly enlarging breast lump</li>
-                <li>Breast enlargement or asymmetry</li>
-                <li>Skin stretching over a large mass</li>
-            </ul>
-
-            <h4>Diagnosis</h4>
-
-            <p>
-                Clinical examination, ultrasound or mammography,
-                tissue sampling and histopathological examination.
-            </p>
-
-        </article>
+        </div>
 
     </div>
 
 </div>
 
-{% endblock %}
+{% endblock %} noooo

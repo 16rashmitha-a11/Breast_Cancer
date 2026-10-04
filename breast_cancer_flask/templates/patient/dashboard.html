@@ -1,648 +1,366 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+{% extends "base.html" %}
 
-    <title>Patient Dashboard | BreastCare AI</title>
+{% block title %}
+Dashboard | BreastCare AI
+{% endblock %}
 
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+{% block topbar_title %}
+Dashboard
+{% endblock %}
 
-        body {
-            font-family: Arial, Helvetica, sans-serif;
-            background: #f8f1f5;
-            color: #3f2735;
-            min-height: 100vh;
-        }
+{% block content %}
 
-        /* ================= SIDEBAR ================= */
+<div class="page-content">
 
-        .sidebar {
-            position: fixed;
-            left: 0;
-            top: 0;
-            width: 245px;
-            height: 100vh;
-            background: #54263f;
-            color: white;
-            padding: 28px 18px;
-            z-index: 1000;
-        }
+    <!-- HEADER -->
 
-        .brand {
-            text-align: center;
-            margin-bottom: 35px;
-        }
+    <section class="page-heading">
 
-        .brand-icon {
-            width: 48px;
-            height: 48px;
-            margin: auto;
-            border-radius: 50%;
-            background: #d98aae;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 23px;
-            margin-bottom: 10px;
-        }
-
-        .brand h2 {
-            font-size: 20px;
-            margin-bottom: 4px;
-        }
-
-        .brand p {
-            font-size: 11px;
-            color: #e9cbd9;
-        }
-
-        .nav {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .nav a {
-            text-decoration: none;
-            color: #f6e8ee;
-            padding: 13px 15px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-size: 14px;
-            transition: 0.2s ease;
-        }
-
-        .nav a:hover {
-            background: #6c3452;
-            color: white;
-        }
-
-        .nav a.active {
-            background: #a94f78;
-            color: white;
-        }
-
-        .nav-icon {
-            width: 22px;
-            text-align: center;
-            font-size: 17px;
-        }
-
-        .logout {
-            position: absolute;
-            bottom: 25px;
-            left: 18px;
-            right: 18px;
-        }
-
-        .logout a {
-            text-decoration: none;
-            color: #f7dce7;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 13px 15px;
-            border-radius: 10px;
-            font-size: 14px;
-        }
-
-        .logout a:hover {
-            background: #6c3452;
-            color: white;
-        }
-
-        /* ================= MAIN ================= */
-
-        .main {
-            margin-left: 245px;
-            min-height: 100vh;
-            padding: 35px 45px;
-        }
-
-        .topbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-        }
-
-        .welcome h1 {
-            font-size: 30px;
-            color: #54263f;
-            margin-bottom: 7px;
-        }
-
-        .welcome p {
-            color: #806273;
-            font-size: 14px;
-        }
-
-        .profile-mini {
-            background: white;
-            border: 1px solid #ead8e1;
-            padding: 10px 17px;
-            border-radius: 30px;
-            color: #54263f;
-            font-size: 14px;
-        }
-
-        /* ================= HERO ================= */
-
-        .hero {
-            background: linear-gradient(
-                135deg,
-                #6d3151,
-                #9c4b70
-            );
-
-            border-radius: 22px;
-            min-height: 270px;
-            padding: 38px 45px;
-
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-
-            overflow: hidden;
-            margin-bottom: 30px;
-            box-shadow: 0 12px 30px rgba(84, 38, 63, 0.15);
-        }
-
-        .hero-content {
-            max-width: 600px;
-            color: white;
-        }
-
-        .hero-content .tag {
-            display: inline-block;
-            background: rgba(255,255,255,0.16);
-            padding: 7px 13px;
-            border-radius: 20px;
-            font-size: 12px;
-            margin-bottom: 16px;
-        }
-
-        .hero-content h2 {
-            font-size: 28px;
-            line-height: 1.25;
-            margin-bottom: 15px;
-        }
-
-        .hero-content p {
-            font-size: 14px;
-            line-height: 1.7;
-            color: #f7e8ef;
-        }
-
-        .hero-image {
-            width: 260px;
-            height: 200px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .hero-image img {
-            max-width: 100%;
-            max-height: 190px;
-            object-fit: contain;
-            border-radius: 15px;
-        }
-
-        /* ================= ACTION CARDS ================= */
-
-        .section-title {
-            color: #54263f;
-            font-size: 20px;
-            margin-bottom: 17px;
-        }
-
-        .actions {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
-        }
-
-        .action-card {
-            background: white;
-            border: 1px solid #ead8e1;
-            border-radius: 17px;
-            padding: 25px;
-            min-height: 175px;
-            transition: 0.2s ease;
-            box-shadow: 0 5px 18px rgba(84, 38, 63, 0.05);
-        }
-
-        .action-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 25px rgba(84, 38, 63, 0.10);
-        }
-
-        .action-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: 13px;
-            background: #f3dce6;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 21px;
-            margin-bottom: 15px;
-        }
-
-        .action-card h3 {
-            color: #54263f;
-            font-size: 17px;
-            margin-bottom: 8px;
-        }
-
-        .action-card p {
-            color: #806273;
-            font-size: 13px;
-            line-height: 1.55;
-            margin-bottom: 17px;
-        }
-
-        .action-card a {
-            text-decoration: none;
-            color: #9c416b;
-            font-size: 13px;
-            font-weight: bold;
-        }
-
-        .action-card a:hover {
-            color: #54263f;
-        }
-
-        /* ================= FOOTER ================= */
-
-        .footer {
-            text-align: center;
-            margin-top: 35px;
-            padding: 20px;
-            color: #9a7a8a;
-            font-size: 11px;
-        }
-
-        /* ================= RESPONSIVE ================= */
-
-        @media (max-width: 1000px) {
-
-            .actions {
-                grid-template-columns: repeat(2, 1fr);
-            }
-
-            .hero-image {
-                width: 210px;
-            }
-        }
-
-        @media (max-width: 750px) {
-
-            .sidebar {
-                width: 210px;
-            }
-
-            .main {
-                margin-left: 210px;
-                padding: 25px;
-            }
-
-            .hero {
-                padding: 30px;
-            }
-
-            .hero-image {
-                display: none;
-            }
-
-            .actions {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        @media (max-width: 550px) {
-
-            .sidebar {
-                position: relative;
-                width: 100%;
-                height: auto;
-            }
-
-            .logout {
-                position: static;
-                margin-top: 20px;
-            }
-
-            .main {
-                margin-left: 0;
-                padding: 20px;
-            }
-
-            .topbar {
-                align-items: flex-start;
-                gap: 15px;
-                flex-direction: column;
-            }
-        }
-    </style>
-</head>
-
-<body>
-
-    <!-- ================= SIDEBAR ================= -->
-
-    <aside class="sidebar">
-
-        <div class="brand">
-
-            <div class="brand-icon">
-                🩷
-            </div>
-
-            <h2>BreastCare AI</h2>
-
-            <p>AI-Assisted Breast Analysis</p>
-
+        <div class="eyebrow">
+            PATIENT DASHBOARD
         </div>
 
-        <nav class="nav">
+        <h1>
+            Welcome back, {{ user_name }}
+        </h1>
 
-            <a href="{{ url_for('patient_dashboard') }}" class="active">
-                <span class="nav-icon">⌂</span>
-                Dashboard
-            </a>
+        <p>
+            Your AI-assisted breast tissue analysis overview
+        </p>
 
-            <a href="{{ url_for('prediction') }}">
-                <span class="nav-icon">🔬</span>
-                New Prediction
-            </a>
+    </section>
 
-            <a href="{{ url_for('history') }}">
-                <span class="nav-icon">◷</span>
-                Patient History
-            </a>
 
-            <a href="{{ url_for('cancer_information') }}">
-                <span class="nav-icon">▣</span>
-                Cancer Information
-            </a>
+    <!-- ANALYSIS OVERVIEW -->
 
-            <a href="{{ url_for('profile') }}">
-                <span class="nav-icon">◯</span>
-                Profile
-            </a>
+    <section class="dashboard-section">
 
-        </nav>
-
-        <div class="logout">
-
-            <a href="{{ url_for('logout') }}">
-                <span class="nav-icon">↪</span>
-                Logout
-            </a>
-
+        <div class="section-label">
+            Analysis Overview
         </div>
 
-    </aside>
 
+        <div class="stats-grid">
 
-    <!-- ================= MAIN CONTENT ================= -->
+            <div class="stat-card">
 
-    <main class="main">
+                <div class="stat-label">
+                    Total Analyses
+                </div>
 
-        <!-- TOP BAR -->
+                <div class="stat-value">
+                    {{ total_predictions|default(0) }}
+                </div>
 
-        <div class="topbar">
-
-            <div class="welcome">
-
-                <h1>
-                    Welcome, {{ user_name }} 👋
-                </h1>
-
-                <p>
-                    Breast cancer analysis and information at your fingertips.
-                </p>
+                <div class="stat-description">
+                    Completed analyses
+                </div>
 
             </div>
 
-            <div class="profile-mini">
-                Patient
+
+            <div class="stat-card">
+
+                <div class="stat-label">
+                    Benign Results
+                </div>
+
+                <div class="stat-value">
+                    {{ total_benign|default(0) }}
+                </div>
+
+                <div class="stat-description">
+                    Classified as benign
+                </div>
+
+            </div>
+
+
+            <div class="stat-card">
+
+                <div class="stat-label">
+                    Malignant Results
+                </div>
+
+                <div class="stat-value">
+                    {{ total_malignant|default(0) }}
+                </div>
+
+                <div class="stat-description">
+                    Classified as malignant
+                </div>
+
+            </div>
+
+
+            <div class="stat-card">
+
+                <div class="stat-label">
+                    Latest Confidence
+                </div>
+
+                <div class="stat-value">
+                    {{ "%.2f"|format(latest_confidence|default(0)|float) }}%
+                </div>
+
+                <div class="stat-description">
+                    Most recent analysis
+                </div>
+
             </div>
 
         </div>
 
+    </section>
 
-        <!-- ================= HERO ================= -->
 
-        <section class="hero">
+    <!-- BREASTCARE AI OVERVIEW -->
 
-            <div class="hero-content">
+    <section class="dashboard-section">
 
-                <span class="tag">
-                    Breast Cancer Awareness
-                </span>
+        <div class="overview-panel">
+
+            <div class="overview-main">
+
+                <div class="eyebrow">
+                    BREASTCARE AI
+                </div>
 
                 <h2>
-                    Understanding Breast Cancer
+                    AI-assisted histopathological tissue analysis
                 </h2>
 
                 <p>
-                    Breast cancer is a disease in which abnormal cells in the
-                    breast grow and multiply uncontrollably. It can develop
-                    in different parts of the breast and may have different
-                    characteristics. Early detection and appropriate medical
-                    evaluation can help identify breast abnormalities and
-                    support timely treatment.
+                    BreastCare AI uses deep learning to analyze
+                    histopathology images and provide tissue
+                    classification and subtype information.
                 </p>
-
-            </div>
-
-
-            <div class="hero-image">
-
-                <img
-                    src="{{ url_for('static', filename='images/image1.png') }}"
-                    alt="Breast Cancer Awareness"
-                >
-
-            </div>
-
-        </section>
-
-
-        <!-- ================= QUICK ACTIONS ================= -->
-
-        <h2 class="section-title">
-            Quick Access
-        </h2>
-
-        <section class="actions">
-
-            <!-- Prediction -->
-
-            <div class="action-card">
-
-                <div class="action-icon">
-                    🔬
-                </div>
-
-                <h3>
-                    New Prediction
-                </h3>
 
                 <p>
-                    Upload a histopathology image and obtain an
-                    AI-assisted breast tissue classification.
+                    The system combines automated classification
+                    with Grad-CAM visualization to make the model's
+                    prediction more interpretable.
                 </p>
-
-                <a href="{{ url_for('prediction') }}">
-                    Start Analysis →
-                </a>
 
             </div>
 
 
-            <!-- History -->
+            <div class="capabilities">
 
-            <div class="action-card">
-
-                <div class="action-icon">
-                    ◷
+                <div class="capabilities-title">
+                    AI CAPABILITIES
                 </div>
 
-                <h3>
-                    Patient History
-                </h3>
 
-                <p>
-                    View your previous breast tissue analyses,
-                    predictions and generated reports.
-                </p>
+                <div class="capability-row">
 
-                <a href="{{ url_for('history') }}">
-                    View History →
-                </a>
+                    <div class="capability-number">
+                        01
+                    </div>
 
-            </div>
+                    <div>
+                        <strong>
+                            Tissue Classification
+                        </strong>
 
+                        <span>
+                            Benign / Malignant
+                        </span>
+                    </div>
 
-            <!-- Cancer Information -->
-
-            <div class="action-card">
-
-                <div class="action-icon">
-                    📖
                 </div>
 
-                <h3>
-                    Cancer Information
-                </h3>
 
-                <p>
-                    Explore information about breast conditions
-                    and histopathological cancer subtypes.
-                </p>
+                <div class="capability-row">
 
-                <a href="{{ url_for('cancer_information') }}">
-                    Explore Information →
-                </a>
+                    <div class="capability-number">
+                        02
+                    </div>
 
-            </div>
+                    <div>
+                        <strong>
+                            Subtype Classification
+                        </strong>
 
+                        <span>
+                            8 histopathological categories
+                        </span>
+                    </div>
 
-            <!-- Profile -->
-
-            <div class="action-card">
-
-                <div class="action-icon">
-                    ◯
                 </div>
 
-                <h3>
-                    My Profile
-                </h3>
 
-                <p>
-                    View your account information and personal
-                    profile details.
-                </p>
+                <div class="capability-row">
 
-                <a href="{{ url_for('profile') }}">
-                    View Profile →
-                </a>
+                    <div class="capability-number">
+                        03
+                    </div>
 
-            </div>
+                    <div>
+                        <strong>
+                            Explainable AI
+                        </strong>
 
+                        <span>
+                            Grad-CAM visualization
+                        </span>
+                    </div>
 
-            <!-- Information -->
-
-            <div class="action-card">
-
-                <div class="action-icon">
-                    ℹ
                 </div>
 
-                <h3>
-                    Breast Health
-                </h3>
-
-                <p>
-                    Learn about breast health, common changes,
-                    detection and diagnostic evaluation.
-                </p>
-
-                <a href="{{ url_for('cancer_information') }}">
-                    Learn More →
-                </a>
-
             </div>
-
-
-            <!-- Analysis -->
-
-            <div class="action-card">
-
-                <div class="action-icon">
-                    🧠
-                </div>
-
-                <h3>
-                    AI Analysis
-                </h3>
-
-                <p>
-                    Use the trained deep learning model to analyse
-                    histopathological tissue images.
-                </p>
-
-                <a href="{{ url_for('prediction') }}">
-                    Analyse Image →
-                </a>
-
-            </div>
-
-        </section>
-
-
-        <!-- ================= FOOTER ================= -->
-
-        <div class="footer">
-
-            BreastCare AI · AI-Assisted Research & Educational Application
 
         </div>
 
-    </main>
+    </section>
 
-</body>
-</html>
+
+    <!-- HOW ANALYSIS WORKS -->
+
+    <section class="dashboard-section">
+
+        <div class="section-heading">
+
+            <div>
+                <div class="section-label">
+                    Workflow
+                </div>
+
+                <h2>
+                    How the AI Analysis Works
+                </h2>
+            </div>
+
+        </div>
+
+
+        <div class="workflow">
+
+            <div class="workflow-step">
+
+                <div class="workflow-number">
+                    01
+                </div>
+
+                <div class="workflow-title">
+                    IMAGE INPUT
+                </div>
+
+                <div class="workflow-text">
+                    Histopathology image
+                </div>
+
+            </div>
+
+
+            <div class="workflow-line"></div>
+
+
+            <div class="workflow-step">
+
+                <div class="workflow-number">
+                    02
+                </div>
+
+                <div class="workflow-title">
+                    AI ANALYSIS
+                </div>
+
+                <div class="workflow-text">
+                    DenseNet121
+                </div>
+
+            </div>
+
+
+            <div class="workflow-line"></div>
+
+
+            <div class="workflow-step">
+
+                <div class="workflow-number">
+                    03
+                </div>
+
+                <div class="workflow-title">
+                    CLASSIFICATION
+                </div>
+
+                <div class="workflow-text">
+                    Benign / Malignant
+                </div>
+
+            </div>
+
+
+            <div class="workflow-line"></div>
+
+
+            <div class="workflow-step">
+
+                <div class="workflow-number">
+                    04
+                </div>
+
+                <div class="workflow-title">
+                    SUBTYPE
+                </div>
+
+                <div class="workflow-text">
+                    8 Tissue Categories
+                </div>
+
+            </div>
+
+
+            <div class="workflow-line"></div>
+
+
+            <div class="workflow-step">
+
+                <div class="workflow-number">
+                    05
+                </div>
+
+                <div class="workflow-title">
+                    EXPLANATION
+                </div>
+
+                <div class="workflow-text">
+                    Grad-CAM
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- IMPORTANT NOTICE -->
+
+    <section class="notice-panel">
+
+        <div class="notice-marker"></div>
+
+        <div>
+
+            <div class="notice-title">
+                Important Information
+            </div>
+
+            <p>
+                BreastCare AI provides AI-assisted tissue
+                classification for educational and research
+                purposes. The generated results should not be
+                considered a medical diagnosis and should be
+                interpreted by a qualified healthcare professional.
+            </p>
+
+        </div>
+
+    </section>
+
+</div>
+
+{% endblock %}

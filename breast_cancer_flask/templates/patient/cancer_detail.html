@@ -1,0 +1,386 @@
+{% extends "base.html" %}
+
+{% block title %}
+{{ cancer.title }} | BreastCare AI
+{% endblock %}
+
+{% block topbar_title %}
+Cancer Information
+{% endblock %}
+
+{% block content %}
+
+<style>
+    .cancer-detail-page {
+        width: 100%;
+        max-width: 1050px;
+        margin: 0 auto;
+        padding: 36px 42px 50px;
+        box-sizing: border-box;
+    }
+
+    /* PAGE HEADER */
+
+    .condition-header {
+        margin-bottom: 42px;
+    }
+
+    .condition-header h1 {
+        margin: 0 0 14px;
+        font-size: 36px;
+        line-height: 1.2;
+        font-weight: 700;
+        color: #14213d;
+    }
+
+    .condition-type {
+        display: inline-block;
+        padding: 6px 12px;
+        border-radius: 5px;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+    }
+
+    .condition-type.benign {
+        background: #ecfdf5;
+        color: #047857;
+    }
+
+    .condition-type.malignant {
+        background: #fef2f2;
+        color: #b91c1c;
+    }
+
+
+    /* SECTIONS */
+
+    .detail-section {
+        margin-bottom: 38px;
+    }
+
+    .section-title {
+        margin: 0 0 14px;
+        font-size: 21px;
+        line-height: 1.3;
+        font-weight: 700;
+        color: #14213d;
+    }
+
+    .section-text {
+        margin: 0;
+        max-width: 900px;
+        color: #5b6b82;
+        font-size: 15px;
+        line-height: 1.8;
+    }
+
+
+    /* LISTS */
+
+    .simple-list {
+        margin: 0;
+        padding-left: 22px;
+        max-width: 900px;
+        color: #5b6b82;
+    }
+
+    .simple-list li {
+        margin-bottom: 9px;
+        padding-left: 4px;
+        font-size: 15px;
+        line-height: 1.7;
+    }
+
+    .simple-list li::marker {
+        color: #94a3b8;
+    }
+
+
+    /* PRECAUTIONS */
+
+    .precautions-list li {
+        margin-bottom: 10px;
+    }
+
+
+    /* BOTTOM ACTION */
+
+    .bottom-action {
+        margin-top: 45px;
+        padding-top: 26px;
+        border-top: 1px solid #e5e7eb;
+    }
+
+    .back-button {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 11px 18px;
+        border: 1px solid #d8dee8;
+        border-radius: 7px;
+        background: #ffffff;
+        color: #475569;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 600;
+        transition: 0.2s ease;
+    }
+
+    .back-button:hover {
+        background: #f8fafc;
+        border-color: #cbd5e1;
+    }
+
+
+    /* MOBILE */
+
+    @media (max-width: 800px) {
+
+        .cancer-detail-page {
+            padding: 28px 24px 40px;
+        }
+
+        .condition-header h1 {
+            font-size: 30px;
+        }
+
+        .section-title {
+            font-size: 20px;
+        }
+    }
+
+    @media (max-width: 500px) {
+
+        .cancer-detail-page {
+            padding: 24px 18px 35px;
+        }
+
+        .condition-header h1 {
+            font-size: 28px;
+        }
+
+        .section-text,
+        .simple-list li {
+            font-size: 14px;
+        }
+    }
+</style>
+
+
+<div class="cancer-detail-page">
+
+    <!-- PAGE HEADER -->
+
+    <div class="condition-header">
+
+        <h1>{{ cancer.title }}</h1>
+
+        {% if cancer_name in [
+            'adenosis',
+            'fibroadenoma',
+            'phyllodes_tumor',
+            'tubular_adenoma'
+        ] %}
+
+            <span class="condition-type benign">
+                BENIGN CONDITION
+            </span>
+
+        {% else %}
+
+            <span class="condition-type malignant">
+                MALIGNANT CONDITION
+            </span>
+
+        {% endif %}
+
+    </div>
+
+
+    <!-- OVERVIEW -->
+
+    <section class="detail-section">
+
+        <h2 class="section-title">
+            Overview
+        </h2>
+
+        <p class="section-text">
+            {{ cancer.description }}
+        </p>
+
+    </section>
+
+
+    <!-- KEY FEATURES -->
+
+    <section class="detail-section">
+
+        <h2 class="section-title">
+            Key Features
+        </h2>
+
+        {% if cancer.features is string %}
+
+            <p class="section-text">
+                {{ cancer.features }}
+            </p>
+
+        {% else %}
+
+            <ul class="simple-list">
+
+                {% for item in cancer.features %}
+
+                    <li>{{ item }}</li>
+
+                {% endfor %}
+
+            </ul>
+
+        {% endif %}
+
+    </section>
+
+
+    <!-- EVALUATION -->
+
+    <section class="detail-section">
+
+        <h2 class="section-title">
+            Evaluation
+        </h2>
+
+        {% if cancer.diagnosis is string %}
+
+            <p class="section-text">
+                {{ cancer.diagnosis }}
+            </p>
+
+        {% else %}
+
+            <ul class="simple-list">
+
+                {% for item in cancer.diagnosis %}
+
+                    <li>{{ item }}</li>
+
+                {% endfor %}
+
+            </ul>
+
+        {% endif %}
+
+    </section>
+
+
+    <!-- DETECTION -->
+
+    <section class="detail-section">
+
+        <h2 class="section-title">
+            Detection & Assessment
+        </h2>
+
+        {% if cancer.detection is string %}
+
+            <p class="section-text">
+                {{ cancer.detection }}
+            </p>
+
+        {% else %}
+
+            <ul class="simple-list">
+
+                {% for item in cancer.detection %}
+
+                    <li>{{ item }}</li>
+
+                {% endfor %}
+
+            </ul>
+
+        {% endif %}
+
+    </section>
+
+
+    <!-- MANAGEMENT -->
+
+    <section class="detail-section">
+
+        <h2 class="section-title">
+            Management & Follow-up
+        </h2>
+
+        {% if cancer.management is string %}
+
+            <p class="section-text">
+                {{ cancer.management }}
+            </p>
+
+        {% else %}
+
+            <ul class="simple-list">
+
+                {% for item in cancer.management %}
+
+                    <li>{{ item }}</li>
+
+                {% endfor %}
+
+            </ul>
+
+        {% endif %}
+
+    </section>
+
+
+    <!-- PRECAUTIONS -->
+
+    <section class="detail-section">
+
+        <h2 class="section-title">
+            Important Precautions
+        </h2>
+
+        {% if cancer.precautions is string %}
+
+            <p class="section-text">
+                {{ cancer.precautions }}
+            </p>
+
+        {% else %}
+
+            <ul class="simple-list precautions-list">
+
+                {% for item in cancer.precautions %}
+
+                    <li>{{ item }}</li>
+
+                {% endfor %}
+
+            </ul>
+
+        {% endif %}
+
+    </section>
+
+
+    <!-- ONLY ONE BUTTON -->
+
+    <div class="bottom-action">
+
+        <a
+            href="{{ url_for('cancer_information') }}"
+            class="back-button"
+        >
+            ← Back to All Conditions
+        </a>
+
+    </div>
+
+</div>
+
+{% endblock %}

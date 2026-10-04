@@ -1,6 +1,8 @@
 import os
 import json
 import uuid
+import traceback
+from functools import wraps
 
 from flask import (
     Flask,
@@ -36,6 +38,7 @@ from models import (
     get_all_predictions,
     count_patients,
     count_predictions,
+    update_profile
 )
 
 from ml_service import predict_image
@@ -72,239 +75,539 @@ os.makedirs(REPORT_FOLDER, exist_ok=True)
 
 CANCER_INFORMATION = {
 
+    # =====================================================
+    # BENIGN - ADENOSIS
+    # =====================================================
+
     "adenosis": {
         "title": "Adenosis",
-        "category": "Benign Breast Condition",
+        "category": "Benign Condition",
+
         "description": (
-            "Adenosis is a benign breast condition in which the glands "
-            "(lobules) become enlarged or more numerous."
+            "Adenosis is a benign breast condition in which the "
+            "lobules, which are the milk-producing glands of the breast, "
+            "become enlarged or more numerous than usual."
         ),
+
+        "overview": (
+            "Adenosis refers to an increase in the size or number of "
+            "lobular structures in breast tissue. It is generally a "
+            "non-cancerous condition. Some forms, such as sclerosing "
+            "adenosis, can produce changes that may appear similar to "
+            "other breast abnormalities on examination or imaging."
+        ),
+
         "features": [
-            "Usually benign",
-            "May produce a lump or area of thickening",
-            "Often discovered during breast imaging or examination",
+            "Usually a benign breast condition",
+            "Involves enlarged or increased lobular structures",
+            "May produce a lump, thickening or area of breast discomfort",
+            "May be discovered during breast imaging",
+            "Some forms can resemble other breast abnormalities"
         ],
-        "precautions": [
-            "Do not assume every breast lump is cancer.",
-            "Any persistent or unusual breast change should be evaluated by a healthcare professional.",
+
+        "symptoms": [
+            "Some people may have no noticeable symptoms",
+            "A localized area of thickening may be present",
+            "A breast lump or tenderness may sometimes occur",
+            "Imaging may identify the condition before symptoms are noticed"
         ],
+
         "detection": [
-            "Awareness of normal breast appearance and feel",
-            "Appropriate clinical examination",
-            "Imaging when indicated",
+            "Clinical breast examination when indicated",
+            "Mammography when recommended",
+            "Breast ultrasound when appropriate",
+            "Further tissue evaluation when imaging findings require clarification"
         ],
+
         "diagnosis": [
             "Clinical examination",
             "Mammography or ultrasound when appropriate",
-            "Biopsy or histopathological examination when needed",
+            "Additional imaging when required",
+            "Biopsy or histopathological examination when necessary"
         ],
+
+        "management": (
+            "Management depends on the specific type of adenosis and the "
+            "clinical findings. Some cases require observation or routine "
+            "follow-up, while an abnormal or uncertain finding may require "
+            "additional evaluation."
+        ),
+
+        "precautions": [
+            "Do not assume that every breast lump is cancer.",
+            "Do not attempt to diagnose a breast abnormality yourself.",
+            "Any persistent or unusual breast change should be evaluated by a qualified healthcare professional.",
+            "Follow the recommended imaging or follow-up schedule provided by your healthcare professional."
+        ]
     },
+
+
+    # =====================================================
+    # BENIGN - FIBROADENOMA
+    # =====================================================
 
     "fibroadenoma": {
         "title": "Fibroadenoma",
         "category": "Benign Breast Tumor",
+
         "description": (
-            "Fibroadenoma is a common benign breast tumor, particularly "
-            "in younger people. It is not breast cancer."
+            "Fibroadenoma is a common benign breast tumor composed of "
+            "glandular and connective tissue. It is not breast cancer."
         ),
+
+        "overview": (
+            "Fibroadenomas are common benign breast tumors and are often "
+            "seen in younger people. They may feel firm, smooth and mobile "
+            "under the skin. Their size can vary and some may change over time."
+        ),
+
         "features": [
-            "Usually a firm, smooth lump",
-            "Often moves somewhat under the skin",
+            "Common benign breast tumor",
+            "Often firm and smooth",
+            "May feel mobile beneath the skin",
             "May be painless",
+            "Can vary in size"
         ],
-        "precautions": [
-            "Do not try to diagnose a lump yourself.",
-            "A new or changing lump should be medically evaluated.",
+
+        "symptoms": [
+            "A palpable breast lump",
+            "The lump may be painless",
+            "The lump may feel firm or rubbery",
+            "Some fibroadenomas may increase or decrease in size"
         ],
+
         "detection": [
-            "Awareness of breast changes",
-            "Clinical evaluation of a new lump",
-            "Imaging when recommended",
+            "Awareness of a new breast lump",
+            "Clinical examination",
+            "Breast ultrasound when recommended",
+            "Mammography when appropriate"
         ],
+
         "diagnosis": [
             "Clinical examination",
             "Ultrasound and/or mammography depending on age and circumstances",
-            "Biopsy may be recommended when the diagnosis is uncertain",
+            "Core needle biopsy when the diagnosis is uncertain",
+            "Histopathological examination when tissue diagnosis is required"
         ],
+
+        "management": (
+            "Many fibroadenomas can be monitored when their clinical and "
+            "imaging features are reassuring. Additional evaluation or "
+            "removal may be considered depending on the size, growth, "
+            "symptoms and clinical assessment."
+        ),
+
+        "precautions": [
+            "Do not try to diagnose a new breast lump yourself.",
+            "A new or changing breast lump should be medically evaluated.",
+            "Follow the imaging and follow-up recommendations provided by your healthcare professional.",
+            "Seek assessment if a previously stable lump changes noticeably."
+        ]
     },
+
+
+    # =====================================================
+    # BENIGN - PHYLLODES TUMOR
+    # =====================================================
+
+    "phyllodes_tumor": {
+        "title": "Phyllodes Tumor",
+        "category": "Fibroepithelial Breast Tumor",
+
+        "description": (
+            "Phyllodes tumors are fibroepithelial breast tumors that "
+            "develop from connective tissue. They may be benign, borderline "
+            "or malignant."
+        ),
+
+        "overview": (
+            "Phyllodes tumors are uncommon breast tumors. They can grow "
+            "relatively quickly and are classified according to their "
+            "pathological characteristics. Because their behavior can vary, "
+            "professional evaluation and tissue diagnosis are important."
+        ),
+
+        "features": [
+            "Uncommon fibroepithelial breast tumor",
+            "May grow relatively quickly",
+            "Can present as a large breast mass",
+            "Can be benign, borderline or malignant",
+            "Pathological examination is important for classification"
+        ],
+
+        "symptoms": [
+            "A rapidly enlarging breast lump",
+            "Breast enlargement or asymmetry",
+            "A feeling of fullness or pressure",
+            "Skin stretching over a large mass may occur"
+        ],
+
+        "detection": [
+            "Clinical assessment of a growing breast mass",
+            "Breast ultrasound",
+            "Mammography when appropriate",
+            "Tissue sampling when required"
+        ],
+
+        "diagnosis": [
+            "Clinical examination",
+            "Ultrasound and/or mammography",
+            "Core needle biopsy or other tissue sampling",
+            "Histopathological examination",
+            "Pathological classification as benign, borderline or malignant"
+        ],
+
+        "management": (
+            "Management depends on the pathological classification, tumor "
+            "size, location and other clinical factors. Surgical treatment "
+            "may be considered for confirmed phyllodes tumors, with the "
+            "specific approach determined by the treating medical team."
+        ),
+
+        "precautions": [
+            "A rapidly growing breast lump should be medically assessed.",
+            "Rapid growth does not automatically mean that a tumor is malignant.",
+            "Do not rely on an AI prediction to determine whether a phyllodes tumor is benign or malignant.",
+            "Follow professional recommendations for tissue diagnosis and follow-up."
+        ]
+    },
+
+
+    # =====================================================
+    # BENIGN - TUBULAR ADENOMA
+    # =====================================================
 
     "tubular_adenoma": {
         "title": "Tubular Adenoma",
         "category": "Benign Breast Tumor",
+
         "description": (
-            "Tubular adenoma is a rare benign breast tumor made primarily "
-            "of closely packed tubular structures."
+            "Tubular adenoma is a rare benign breast tumor characterized "
+            "by closely packed tubular structures within the breast tissue."
         ),
+
+        "overview": (
+            "Tubular adenoma is an uncommon benign breast tumor. It may "
+            "present as a localized breast mass and can have imaging or "
+            "histological characteristics that require professional "
+            "evaluation to distinguish it from other breast lesions."
+        ),
+
         "features": [
             "Rare benign breast tumor",
-            "May present as a breast lump",
             "Contains closely packed tubular structures",
+            "May present as a localized breast lump",
+            "Usually considered a benign lesion",
+            "Histopathological examination may be required"
         ],
-        "precautions": [
-            "A benign-looking lump still needs appropriate evaluation.",
-            "Follow medical recommendations if imaging shows an abnormality.",
+
+        "symptoms": [
+            "A localized breast lump",
+            "The lump may be painless",
+            "Some cases may be discovered during imaging",
+            "Symptoms vary depending on the size and location of the lesion"
         ],
+
         "detection": [
             "Recognition of a new breast lump",
-            "Clinical examination and appropriate imaging",
+            "Clinical breast examination",
+            "Breast ultrasound",
+            "Mammography when appropriate",
+            "Histopathological assessment when required"
         ],
+
         "diagnosis": [
             "Clinical examination",
             "Breast imaging",
-            "Histopathological examination",
+            "Core biopsy or tissue sampling when necessary",
+            "Histopathological examination"
         ],
+
+        "management": (
+            "Management depends on the clinical and pathological findings. "
+            "A healthcare professional may recommend observation, follow-up "
+            "or additional treatment depending on the individual case."
+        ),
+
+        "precautions": [
+            "A benign-looking breast lump still requires appropriate evaluation.",
+            "Do not assume that a lump is tubular adenoma without professional assessment.",
+            "Follow recommendations if imaging identifies an abnormality.",
+            "Report any significant change in a known breast lesion."
+        ]
     },
+
+
+    # =====================================================
+    # MALIGNANT - DUCTAL CARCINOMA
+    # =====================================================
 
     "ductal_carcinoma": {
         "title": "Ductal Carcinoma",
         "category": "Malignant Breast Tumor",
+
         "description": (
-            "Ductal carcinoma begins in the cells lining the milk ducts. "
-            "Invasive ductal carcinoma has grown beyond the duct into "
-            "surrounding breast tissue."
+            "Ductal carcinoma refers to carcinoma associated with the "
+            "milk ducts of the breast. Invasive ductal carcinoma occurs "
+            "when cancer cells grow beyond the duct into surrounding tissue."
         ),
+
+        "overview": (
+            "Ductal carcinoma is one of the major pathological patterns "
+            "used in breast cancer classification. Invasive ductal carcinoma "
+            "can spread from the ducts into surrounding breast tissue and "
+            "may potentially spread to other parts of the body."
+        ),
+
         "features": [
-            "Breast lump or thickening",
+            "Associated with the ductal structures of the breast",
+            "May be invasive or non-invasive depending on the pathological diagnosis",
+            "May present as a breast mass",
+            "May cause changes in breast appearance",
+            "Requires professional pathological evaluation"
+        ],
+
+        "symptoms": [
+            "A new breast lump or thickening",
             "Change in breast size or shape",
             "Nipple changes",
             "Abnormal nipple discharge",
             "Skin dimpling or other skin changes",
+            "Some breast cancers may cause no obvious symptoms initially"
         ],
-        "precautions": [
-            "Pay attention to unusual breast changes.",
-            "Follow recommended screening appropriate to age and individual risk.",
-            "Seek medical evaluation rather than relying on self-diagnosis.",
-        ],
+
         "detection": [
-            "Screening mammography can detect some breast cancers before symptoms appear.",
-            "Prompt evaluation of suspicious breast changes",
-            "Clinical examination",
+            "Routine breast screening when appropriate",
+            "Clinical evaluation of suspicious breast changes",
+            "Mammography",
+            "Ultrasound when indicated",
+            "MRI in selected clinical situations"
         ],
+
         "diagnosis": [
             "Clinical examination",
             "Mammography",
             "Ultrasound and/or MRI when indicated",
             "Biopsy",
             "Microscopic examination by a pathologist",
+            "Additional pathological and biomarker testing when required"
         ],
+
+        "management": (
+            "Treatment depends on the confirmed pathological diagnosis, "
+            "stage, tumor characteristics and individual patient factors. "
+            "Possible approaches can include surgery, radiation therapy, "
+            "systemic therapy or other treatments selected by the medical team."
+        ),
+
+        "precautions": [
+            "Pay attention to new or unusual breast changes.",
+            "Follow recommended screening appropriate to age and individual risk.",
+            "Do not rely on an AI prediction as a confirmed diagnosis.",
+            "Seek professional assessment for a persistent lump, nipple change or other concerning breast symptom."
+        ]
     },
+
+
+    # =====================================================
+    # MALIGNANT - LOBULAR CARCINOMA
+    # =====================================================
 
     "lobular_carcinoma": {
         "title": "Lobular Carcinoma",
         "category": "Malignant Breast Tumor",
+
         "description": (
-            "Lobular carcinoma begins in the milk-producing lobules. "
-            "Invasive lobular carcinoma occurs when cancer cells spread "
-            "beyond the lobules into surrounding tissue."
+            "Lobular carcinoma is a carcinoma associated with the "
+            "milk-producing lobular structures of the breast. Invasive "
+            "lobular carcinoma occurs when cancer cells grow beyond the "
+            "lobules into surrounding breast tissue."
         ),
+
+        "overview": (
+            "Lobular carcinoma develops in or is associated with the "
+            "lobular structures of the breast. Invasive lobular carcinoma "
+            "may grow in patterns that make it less obvious as a discrete "
+            "lump, so clinical assessment and appropriate imaging are important."
+        ),
+
         "features": [
-            "Breast thickening or swelling",
+            "Associated with the lobular structures of the breast",
+            "Invasive forms can extend into surrounding breast tissue",
+            "May not always form a clearly defined lump",
+            "Requires pathological confirmation",
+            "Additional testing may be required to characterize the tumor"
+        ],
+
+        "symptoms": [
+            "Breast thickening",
+            "Breast swelling",
             "Change in breast shape",
-            "Sometimes no obvious lump",
-            "Other persistent breast changes",
+            "A less clearly defined area of abnormality",
+            "Other persistent breast changes"
         ],
-        "precautions": [
-            "Do not ignore persistent breast changes.",
-            "People with significant family or genetic risk should discuss appropriate surveillance with a healthcare professional.",
-        ],
+
         "detection": [
             "Appropriate breast screening",
-            "Prompt investigation of unusual changes",
+            "Clinical assessment of persistent changes",
+            "Mammography",
+            "Ultrasound or MRI when clinically indicated"
         ],
+
         "diagnosis": [
             "Clinical examination",
-            "Mammography",
-            "Ultrasound or MRI when indicated",
-            "Biopsy and histopathology",
+            "Breast imaging",
+            "Biopsy",
+            "Histopathological examination",
+            "Additional pathological testing when required"
         ],
+
+        "management": (
+            "Management depends on the confirmed diagnosis, stage, "
+            "biological characteristics and individual clinical factors. "
+            "Treatment decisions should be made by the patient's healthcare team."
+        ),
+
+        "precautions": [
+            "Do not ignore persistent breast changes.",
+            "Seek professional evaluation if a new or unusual breast change develops.",
+            "People with significant family or genetic risk should discuss appropriate surveillance with a healthcare professional.",
+            "AI classification should not be considered a substitute for pathological diagnosis."
+        ]
     },
+
+
+    # =====================================================
+    # MALIGNANT - MUCINOUS CARCINOMA
+    # =====================================================
 
     "mucinous_carcinoma": {
         "title": "Mucinous Carcinoma",
         "category": "Malignant Breast Tumor",
+
         "description": (
             "Mucinous carcinoma is a less common type of invasive breast "
-            "cancer in which cancer cells are associated with substantial "
-            "amounts of mucus, known as mucin."
+            "cancer in which tumor cells are associated with substantial "
+            "amounts of extracellular mucin."
         ),
+
+        "overview": (
+            "Mucinous carcinoma is characterized by the presence of "
+            "mucin surrounding or associated with tumor cells. It is "
+            "identified through pathological examination and may have "
+            "distinctive microscopic characteristics."
+        ),
+
         "features": [
+            "Less common type of invasive breast cancer",
+            "Tumor cells are associated with extracellular mucin",
+            "Has characteristic microscopic features",
+            "Requires pathological confirmation",
+            "Biological characteristics can vary between tumors"
+        ],
+
+        "symptoms": [
             "Breast lump",
             "Breast thickening",
-            "Changes detected during imaging",
+            "Changes detected during breast imaging",
+            "Other persistent breast changes"
         ],
-        "precautions": [
-            "Follow recommended breast screening.",
-            "Report new or persistent breast changes.",
-        ],
+
         "detection": [
-            "Breast screening",
-            "Timely investigation of abnormalities",
+            "Breast screening when appropriate",
+            "Clinical assessment of suspicious breast changes",
+            "Mammography",
+            "Ultrasound or other imaging when indicated"
         ],
+
         "diagnosis": [
             "Breast imaging",
             "Biopsy",
             "Histopathological examination",
-            "Biomarker testing may help characterize the cancer",
+            "Microscopic identification of mucinous features",
+            "Biomarker testing may help characterize the cancer"
         ],
+
+        "management": (
+            "Treatment is based on the confirmed pathological diagnosis, "
+            "stage, tumor characteristics and individual clinical factors. "
+            "The treating healthcare team determines the appropriate management plan."
+        ),
+
+        "precautions": [
+            "Follow recommended breast screening.",
+            "Report new or persistent breast changes to a healthcare professional.",
+            "Do not assume that a particular subtype can be confirmed from an AI prediction alone.",
+            "Professional pathological evaluation is required for diagnosis."
+        ]
     },
+
+
+    # =====================================================
+    # MALIGNANT - PAPILLARY CARCINOMA
+    # =====================================================
 
     "papillary_carcinoma": {
         "title": "Papillary Carcinoma",
         "category": "Malignant Breast Tumor",
+
         "description": (
             "Papillary carcinoma is a breast cancer characterized by "
-            "distinctive papillary structures when examined microscopically."
+            "distinctive papillary growth patterns when the tissue is "
+            "examined microscopically."
         ),
+
+        "overview": (
+            "Papillary carcinoma includes breast lesions with papillary "
+            "architecture identified through pathological examination. "
+            "The exact type and behavior of a papillary lesion depend on "
+            "its pathological characteristics."
+        ),
+
         "features": [
+            "Characterized by papillary growth patterns",
+            "Requires microscopic pathological evaluation",
+            "May occur in different pathological forms",
+            "May present as a breast lesion or mass",
+            "Additional pathological testing may be required"
+        ],
+
+        "symptoms": [
             "Breast lump",
             "Nipple changes",
             "Nipple discharge",
-            "May sometimes be detected through imaging before noticeable symptoms",
+            "Breast thickening",
+            "Some lesions may be detected during imaging before symptoms appear"
         ],
-        "precautions": [
-            "Do not ignore nipple discharge or a new breast lump.",
-            "Obtain professional assessment of persistent changes.",
-        ],
+
         "detection": [
-            "Appropriate screening",
+            "Appropriate breast screening",
             "Clinical evaluation of suspicious symptoms",
-            "Breast imaging",
+            "Mammography",
+            "Ultrasound",
+            "Additional imaging when clinically indicated"
         ],
+
         "diagnosis": [
             "Mammography",
             "Ultrasound",
             "Biopsy",
             "Histopathological examination",
+            "Additional pathological or biomarker testing when required"
         ],
-    },
 
-    "phyllodes_tumor": {
-        "title": "Phyllodes Tumor",
-        "category": "Fibroepithelial Breast Tumor",
-        "description": (
-            "Phyllodes tumors develop from the connective or stromal tissue "
-            "of the breast. They can be benign, borderline, or malignant."
+        "management": (
+            "Management depends on the exact pathological diagnosis, "
+            "extent of disease, tumor characteristics and individual "
+            "clinical factors. Treatment should be determined by qualified healthcare professionals."
         ),
-        "features": [
-            "Rapidly enlarging breast lump",
-            "Breast enlargement or asymmetry",
-            "Skin stretching over a large mass",
-        ],
+
         "precautions": [
-            "A rapidly growing breast lump should be medically assessed.",
-            "Rapid growth does not automatically mean that a tumor is cancerous.",
-        ],
-        "detection": [
-            "Prompt evaluation of a growing breast mass",
-            "Breast imaging",
-            "Tissue diagnosis when necessary",
-        ],
-        "diagnosis": [
-            "Clinical examination",
-            "Ultrasound and/or mammography",
-            "Core biopsy or other tissue sampling",
-            "Histopathological examination",
-        ],
+            "Do not ignore nipple discharge or a new breast lump.",
+            "Obtain professional assessment of persistent breast changes.",
+            "Follow recommended screening and clinical follow-up.",
+            "An AI classification should not be treated as a confirmed medical diagnosis."
+        ]
     },
 }
 
@@ -314,7 +617,6 @@ CANCER_INFORMATION = {
 # =========================================================
 
 def allowed_file(filename):
-
     return (
         "." in filename
         and filename.rsplit(".", 1)[1].lower()
@@ -324,6 +626,14 @@ def allowed_file(filename):
 
 # =========================================================
 # HELPER - PATIENT AUTHENTICATION
+#
+# IMPORTANT:
+# This is intentionally a normal helper function.
+# Your existing routes use:
+#
+#     check = patient_required()
+#
+# so DO NOT use @patient_required on routes.
 # =========================================================
 
 def patient_required():
@@ -369,34 +679,30 @@ def get_cancer_info(name):
 
 
 # =========================================================
-# VERY IMPORTANT
+# HELPER - CONVERT DATABASE ROW
+# =========================================================
+
+def row_to_dict(row):
+
+    if row is None:
+        return None
+
+    try:
+        return dict(row)
+    except Exception:
+        return row
+
+
+# =========================================================
 # PREPARE PREDICTION FOR HTML TEMPLATES
 # =========================================================
 
 def prepare_prediction_for_template(prediction_data):
 
-    """
-    Converts database prediction data into a normal dictionary
-    and creates all variables required by the HTML templates.
-
-    This fixes:
-        UndefinedError: 'probabilities' is undefined
-        UndefinedError: 'value' is undefined
-        UndefinedError: 'binary_confidence_percent' is undefined
-        UndefinedError: 'subclass_confidence_percent' is undefined
-    """
-
     if prediction_data is None:
         return None
 
-    # -----------------------------------------------------
-    # Convert sqlite3.Row / dict-like object to dictionary
-    # -----------------------------------------------------
-
-    try:
-        prediction = dict(prediction_data)
-    except Exception:
-        prediction = prediction_data
+    prediction = row_to_dict(prediction_data)
 
     # -----------------------------------------------------
     # BINARY CONFIDENCE
@@ -409,14 +715,11 @@ def prepare_prediction_for_template(prediction_data):
     except (TypeError, ValueError):
         binary_confidence = 0.0
 
-    # If model stored probability as 0-1,
-    # convert it to percentage.
     if binary_confidence <= 1:
         binary_confidence_percent = binary_confidence * 100
     else:
         binary_confidence_percent = binary_confidence
 
-    # Keep inside 0-100
     binary_confidence_percent = max(
         0.0,
         min(100.0, binary_confidence_percent)
@@ -442,10 +745,6 @@ def prepare_prediction_for_template(prediction_data):
         0.0,
         min(100.0, subclass_confidence_percent)
     )
-
-    # -----------------------------------------------------
-    # ADD CLEAN PERCENTAGE VARIABLES
-    # -----------------------------------------------------
 
     prediction["binary_confidence_percent"] = round(
         binary_confidence_percent,
@@ -491,10 +790,6 @@ def prepare_prediction_for_template(prediction_data):
 
             probabilities = {}
 
-    # -----------------------------------------------------
-    # MAKE SURE probabilities IS ALWAYS DEFINED
-    # -----------------------------------------------------
-
     if not isinstance(probabilities, dict):
         probabilities = {}
 
@@ -520,42 +815,22 @@ def prepare_prediction_for_template(prediction_data):
                 min(100.0, percentage)
             )
 
-            probability_percentages[
-                class_name
-            ] = round(
+            probability_percentages[class_name] = round(
                 percentage,
                 2
             )
 
         except (TypeError, ValueError):
 
-            probability_percentages[
-                class_name
-            ] = 0.0
-
-    # -----------------------------------------------------
-    # BOTH VARIABLES ARE PROVIDED
-    #
-    # Some templates may use:
-    # probabilities
-    #
-    # Others may use:
-    # probability_percentages
-    # -----------------------------------------------------
+            probability_percentages[class_name] = 0.0
 
     prediction["probabilities"] = probabilities
 
-    prediction[
-        "probability_percentages"
-    ] = probability_percentages
+    prediction["probability_percentages"] = (
+        probability_percentages
+    )
 
-    # -----------------------------------------------------
-    # SORTED PROBABILITIES
-    # -----------------------------------------------------
-
-    prediction[
-        "sorted_probabilities"
-    ] = sorted(
+    prediction["sorted_probabilities"] = sorted(
         probability_percentages.items(),
         key=lambda x: x[1],
         reverse=True
@@ -571,15 +846,14 @@ def prepare_prediction_for_template(prediction_data):
     )
 
     if image_path:
-        prediction[
-            "original_image_filename"
-        ] = os.path.basename(
-            image_path
+
+        prediction["original_image_filename"] = (
+            os.path.basename(image_path)
         )
+
     else:
-        prediction[
-            "original_image_filename"
-        ] = None
+
+        prediction["original_image_filename"] = None
 
     # -----------------------------------------------------
     # GRAD-CAM FILENAME
@@ -591,33 +865,23 @@ def prepare_prediction_for_template(prediction_data):
 
     if gradcam_path:
 
-        prediction[
-            "gradcam_filename"
-        ] = os.path.basename(
-            gradcam_path
+        prediction["gradcam_filename"] = (
+            os.path.basename(gradcam_path)
         )
 
     else:
 
-        prediction[
-            "gradcam_filename"
-        ] = None
+        prediction["gradcam_filename"] = None
 
     # -----------------------------------------------------
     # CANCER INFORMATION
     # -----------------------------------------------------
 
-    prediction[
-        "cancer_info"
-    ] = get_cancer_info(
+    prediction["cancer_info"] = get_cancer_info(
         prediction.get(
             "subclass_prediction"
         )
     )
-
-    # -----------------------------------------------------
-    # RETURN FINAL DICTIONARY
-    # -----------------------------------------------------
 
     return prediction
 
@@ -789,9 +1053,87 @@ def patient_dashboard():
     if check:
         return check
 
+    raw_predictions = get_user_predictions(
+        session["user_id"]
+    )
+
+    total_predictions = len(
+        raw_predictions
+    )
+
+    total_benign = sum(
+        1
+        for prediction in raw_predictions
+        if str(
+            prediction["binary_prediction"]
+        ).strip().lower() == "benign"
+    )
+
+    total_malignant = sum(
+        1
+        for prediction in raw_predictions
+        if str(
+            prediction["binary_prediction"]
+        ).strip().lower() == "malignant"
+    )
+
+    latest_prediction = None
+
+    if raw_predictions:
+
+        try:
+
+            latest_prediction = max(
+                raw_predictions,
+                key=lambda prediction: prediction["id"]
+            )
+
+        except (
+            KeyError,
+            TypeError,
+            ValueError
+        ):
+
+            latest_prediction = raw_predictions[0]
+
+    latest_confidence = 0.0
+
+    if latest_prediction is not None:
+
+        try:
+
+            latest_confidence = float(
+                latest_prediction[
+                    "binary_confidence"
+                ] or 0
+            )
+
+            if latest_confidence <= 1:
+                latest_confidence *= 100
+
+            latest_confidence = max(
+                0.0,
+                min(100.0, latest_confidence)
+            )
+
+        except (
+            KeyError,
+            TypeError,
+            ValueError
+        ):
+
+            latest_confidence = 0.0
+
     return render_template(
         "patient/dashboard.html",
-        user_name=session.get("name")
+        user_name=session.get("name"),
+        total_predictions=total_predictions,
+        total_benign=total_benign,
+        total_malignant=total_malignant,
+        latest_confidence=round(
+            latest_confidence,
+            2
+        )
     )
 
 
@@ -827,15 +1169,10 @@ def predict():
     if check:
         return check
 
-    # -----------------------------------------------------
-    # GET MULTIPLE IMAGES
-    # -----------------------------------------------------
-
     files = request.files.getlist(
         "images"
     )
 
-    # Fallback for old HTML
     if not files:
 
         single_file = request.files.get(
@@ -844,10 +1181,6 @@ def predict():
 
         if single_file:
             files = [single_file]
-
-    # -----------------------------------------------------
-    # VALID FILES
-    # -----------------------------------------------------
 
     valid_files = []
 
@@ -874,10 +1207,6 @@ def predict():
             url_for("prediction")
         )
 
-    # -----------------------------------------------------
-    # STORE ALL PREDICTION IDS
-    # -----------------------------------------------------
-
     batch_prediction_ids = []
 
     failed_images = []
@@ -900,10 +1229,6 @@ def predict():
     print(
         "=========================================="
     )
-
-    # -----------------------------------------------------
-    # PROCESS EACH IMAGE
-    # -----------------------------------------------------
 
     for index, file in enumerate(
         valid_files,
@@ -933,7 +1258,6 @@ def predict():
 
         try:
 
-            # SAVE IMAGE
             file.save(
                 image_path
             )
@@ -942,10 +1266,6 @@ def predict():
                 "Image saved:",
                 image_path
             )
-
-            # -------------------------------------------------
-            # AI PREDICTION
-            # -------------------------------------------------
 
             result = predict_image(
                 image_path
@@ -979,10 +1299,6 @@ def predict():
                 )
             )
 
-            # -------------------------------------------------
-            # GRAD-CAM
-            # -------------------------------------------------
-
             gradcam_path = result.get(
                 "gradcam_path"
             )
@@ -1000,51 +1316,47 @@ def predict():
                     "Grad-CAM was not generated."
                 )
 
-            # -------------------------------------------------
-            # SUBCLASS PROBABILITIES
-            # -------------------------------------------------
-
             subclass_probabilities = result.get(
                 "subclass_probabilities",
                 {}
             )
 
-            # -------------------------------------------------
-            # SAVE DATABASE RECORD
-            # -------------------------------------------------
-
             prediction_id = save_prediction(
+    user_id=session["user_id"],
+    original_filename=original_filename,
+    image_path=image_path,
+    gradcam_path=gradcam_path,
 
-                user_id=session[
-                    "user_id"
-                ],
+    binary_prediction=result["binary_prediction"],
+    binary_confidence=result["binary_confidence"],
 
-                original_filename=original_filename,
+    subclass_prediction=result["subclass_prediction"],
+    subclass_confidence=result["subclass_confidence"],
 
-                image_path=image_path,
+    subclass_probabilities=json.dumps(
+        subclass_probabilities
+    ),
 
-                gradcam_path=gradcam_path,
+    activation_percentage=result.get(
+        "activation_percentage"
+    ),
 
-                binary_prediction=result[
-                    "binary_prediction"
-                ],
+    stage=result.get(
+        "stage"
+    ),
 
-                binary_confidence=result[
-                    "binary_confidence"
-                ],
+    stage_confidence=result.get(
+        "stage_confidence"
+    ),
 
-                subclass_prediction=result[
-                    "subclass_prediction"
-                ],
+    stage_score=result.get(
+        "stage_score"
+    ),
 
-                subclass_confidence=result[
-                    "subclass_confidence"
-                ],
-
-                subclass_probabilities=json.dumps(
-                    subclass_probabilities
-                )
-            )
+    stage_notice=result.get(
+        "stage_notice"
+    )
+)
 
             batch_prediction_ids.append(
                 prediction_id
@@ -1054,10 +1366,6 @@ def predict():
                 "Prediction saved:",
                 prediction_id
             )
-
-            # -------------------------------------------------
-            # GENERATE REPORT
-            # -------------------------------------------------
 
             try:
 
@@ -1084,26 +1392,29 @@ def predict():
                 )
 
         except Exception as error:
-
             print("")
+            print("==========================================")
+            print(f"ERROR PROCESSING IMAGE "
+                  f"{index}/{total_images}"
+    )    
             print(
-                f"ERROR PROCESSING IMAGE "
-                f"{index}/{total_images}"
-            )
-
+                "FILE:",
+                original_filename)
             print(
-                repr(error)
-            )
-
+                "ERROR TYPE:",
+                type(error).__name__
+                )
+            print(
+                "ERROR:",
+                str(error)
+                )
+            print("FULL TRACEBACK:")
+            traceback.print_exc()
+            print("==========================================")
             failed_images.append(
-                original_filename
-            )
-
+            original_filename
+    )
             continue
-
-    # =====================================================
-    # NO SUCCESSFUL IMAGE
-    # =====================================================
 
     if not batch_prediction_ids:
 
@@ -1115,10 +1426,6 @@ def predict():
         return redirect(
             url_for("prediction")
         )
-
-    # =====================================================
-    # STORE IDS
-    # =====================================================
 
     session[
         "batch_prediction_ids"
@@ -1282,6 +1589,7 @@ def history():
         )
 
         if prepared:
+
             predictions.append(
                 prepared
             )
@@ -1338,10 +1646,6 @@ def prediction_detail(
             url_for("history")
         )
 
-    # -----------------------------------------------------
-    # PREPARE EVERYTHING FOR TEMPLATE
-    # -----------------------------------------------------
-
     prediction_data = prepare_prediction_for_template(
         prediction_data
     )
@@ -1365,9 +1669,11 @@ def prediction_detail(
 # CANCER INFORMATION
 # =========================================================
 
-@app.route(
-    "/cancer-information"
-)
+# ============================================================
+# CANCER INFORMATION
+# ============================================================
+
+@app.route("/cancer-information")
 def cancer_information():
 
     check = patient_required()
@@ -1376,42 +1682,31 @@ def cancer_information():
         return check
 
     return render_template(
-        "patient/cancer_information.html",
+        "patient/cancer_info.html",
         cancers=CANCER_INFORMATION
     )
 
 
-# =========================================================
-# CANCER INFORMATION DETAIL
-# =========================================================
-
 @app.route(
-    "/cancer-information/<name>"
+    "/cancer-information/<name>",
+    endpoint="cancer_information_detail"
 )
-def cancer_information_detail(
-    name
-):
+def cancer_information_detail(name):
 
     check = patient_required()
 
     if check:
         return check
 
-    cancer_info = get_cancer_info(
-        name
-    )
+    cancer = CANCER_INFORMATION.get(name)
 
-    if cancer_info is None:
-
-        return redirect(
-            url_for(
-                "cancer_information"
-            )
-        )
+    if cancer is None:
+        return "Cancer information not found", 404
 
     return render_template(
         "patient/cancer_detail.html",
-        cancer=cancer_info
+        cancer=cancer,
+        cancer_name=name
     )
 
 
@@ -1419,17 +1714,29 @@ def cancer_information_detail(
 # PROFILE
 # =========================================================
 
-@app.route("/profile")
+@app.route("/profile", methods=["GET", "POST"])
 def profile():
-
     check = patient_required()
-
     if check:
         return check
 
-    user = get_user_by_id(
-        session["user_id"]
-    )
+    user = get_user_by_id(session["user_id"])
+
+    if request.method == "POST":
+
+        phone = request.form.get("phone", "").strip()
+        age = request.form.get("age", "").strip()
+        address = request.form.get("address", "").strip()
+
+        update_profile(
+            session["user_id"],
+            phone,
+            age,
+            user["gender"] if user["gender"] else "",
+            address
+        )
+
+        return redirect(url_for("profile"))
 
     return render_template(
         "patient/profile.html",
@@ -1451,12 +1758,105 @@ def admin_dashboard():
     if check:
         return check
 
+    patients = get_all_patients()
+
+    raw_predictions = get_all_predictions()
+
+    total_patients = len(
+        patients
+    )
+
+    total_predictions = len(
+        raw_predictions
+    )
+
+    total_benign = 0
+    total_malignant = 0
+    latest_confidence = 0.0
+
+    for prediction_data in raw_predictions:
+
+        prediction_dict = row_to_dict(
+            prediction_data
+        )
+
+        binary_prediction = str(
+            prediction_dict.get(
+                "binary_prediction",
+                ""
+            )
+        ).strip().lower()
+
+        if binary_prediction == "benign":
+
+            total_benign += 1
+
+        elif binary_prediction == "malignant":
+
+            total_malignant += 1
+
+    latest_prediction = None
+
+    if raw_predictions:
+
+        try:
+
+            latest_prediction = max(
+                raw_predictions,
+                key=lambda prediction: prediction["id"]
+            )
+
+        except (
+            KeyError,
+            TypeError,
+            ValueError
+        ):
+
+            latest_prediction = raw_predictions[0]
+
+    if latest_prediction is not None:
+
+        latest_prediction = row_to_dict(
+            latest_prediction
+        )
+
+        try:
+
+            latest_confidence = float(
+                latest_prediction.get(
+                    "binary_confidence",
+                    0
+                ) or 0
+            )
+
+        except (
+            TypeError,
+            ValueError
+        ):
+
+            latest_confidence = 0.0
+
+        if latest_confidence <= 1:
+
+            latest_confidence *= 100
+
+        latest_confidence = max(
+            0.0,
+            min(100.0, latest_confidence)
+        )
+
     return render_template(
         "admin/dashboard.html",
-
-        patient_count=count_patients(),
-
-        prediction_count=count_predictions()
+        patient_count=total_patients,
+        prediction_count=total_predictions,
+        total_patients=total_patients,
+        total_predictions=total_predictions,
+        total_benign=total_benign,
+        total_malignant=total_malignant,
+        latest_confidence=round(
+            latest_confidence,
+            2
+        )
     )
 
 
@@ -1603,10 +2003,6 @@ def admin_prediction_detail(
                 "admin_predictions"
             )
         )
-
-    # =====================================================
-    # THIS IS THE IMPORTANT FIX
-    # =====================================================
 
     prediction_data = prepare_prediction_for_template(
         prediction_data
@@ -1901,7 +2297,7 @@ def admin_download_report(
 
 
 # =========================================================
-# RUN
+# RUN APPLICATION
 # =========================================================
 
 if __name__ == "__main__":

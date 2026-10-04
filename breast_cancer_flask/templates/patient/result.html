@@ -1,52 +1,72 @@
 {% extends "base.html" %}
 
 {% block title %}
-Profile | BreastCare AI
+AI Explainability | BreastCare AI
+{% endblock %}
+
+{% block topbar_title %}
+AI Explainability
 {% endblock %}
 
 {% block content %}
-<div class="result-card gradcam-card">
 
-    <div class="result-card-header">
-        <h2>AI Explainability</h2>
+<div class="page-content">
+
+    <div class="page-heading">
+
+        <div class="eyebrow">
+            EXPLAINABLE AI
+        </div>
+
+        <h1>
+            AI Explainability
+        </h1>
+
         <p>
-            Grad-CAM highlights the regions of the image
-            that contributed most to the model's prediction.
+            Grad-CAM visualization generated from the model analysis.
         </p>
+
     </div>
 
-    {% if gradcam_url %}
 
-        <div class="gradcam-image-container">
+    <div class="single-result-image">
+
+        {% if gradcam_url %}
 
             <img
                 src="{{ gradcam_url }}"
                 alt="Grad-CAM visualization"
-                class="gradcam-image"
             >
 
-        </div>
+            <div class="image-caption">
 
-        <div class="gradcam-actions">
+                Grad-CAM highlights image regions that contributed
+                to the model's prediction.
 
-            <a
-                href="{{ gradcam_url }}"
-                download
-                class="btn">
-                Download Grad-CAM
-            </a>
+            </div>
 
-        </div>
+        {% else %}
 
-    {% else %}
+            <div class="image-unavailable">
+                Grad-CAM visualization is not available.
+            </div>
 
-        <div class="empty-state">
-            <p>
-                Grad-CAM visualization could not be generated
-                for this prediction.
-            </p>
-        </div>
+        {% endif %}
 
-    {% endif %}
+    </div>
+
+
+    <div class="result-actions">
+
+        <a href="{{ url_for('history') }}"
+           class="secondary-button">
+
+            Prediction History
+
+        </a>
+
+    </div>
+
 </div>
+
 {% endblock %}

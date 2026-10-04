@@ -1,147 +1,466 @@
 {% extends "base.html" %}
 
+{% block title %}
+Cancer Information | BreastCare AI
+{% endblock %}
+
 {% block topbar_title %}
 Cancer Information
 {% endblock %}
 
-
 {% block content %}
+
+<style>
+    .cancer-info-page {
+        width: 100%;
+    }
+
+    .cancer-info-header {
+        margin-bottom: 34px;
+    }
+
+    .cancer-info-header .eyebrow {
+        margin-bottom: 8px;
+    }
+
+    .cancer-info-header h1 {
+        margin: 0 0 10px;
+    }
+
+    .cancer-info-header p {
+        margin: 0;
+    }
+
+    .condition-category {
+        margin-bottom: 36px;
+    }
+
+    .category-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 18px;
+    }
+
+    .category-left {
+        min-width: 0;
+    }
+
+    .category-label {
+        margin-bottom: 7px;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.14em;
+        color: #94a3b8;
+        text-transform: uppercase;
+    }
+
+    .category-title {
+        margin: 0;
+        font-size: 24px;
+        line-height: 1.25;
+        color: #172033;
+        font-weight: 700;
+    }
+
+    .category-description {
+        margin: 6px 0 0;
+        color: #64748b;
+        font-size: 14px;
+        line-height: 1.6;
+    }
+
+    .category-badge {
+        flex-shrink: 0;
+        margin-left: 20px;
+        padding: 7px 12px;
+        border-radius: 5px;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+    }
+
+    .category-badge.benign {
+        background: #ecfdf5;
+        color: #047857;
+    }
+
+    .category-badge.malignant {
+        background: #fef2f2;
+        color: #b91c1c;
+    }
+
+    .condition-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px;
+    }
+
+    .condition-card {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        min-height: 92px;
+        padding: 20px 22px;
+        border: 1px solid #e2e8f0;
+        border-radius: 9px;
+        background: #ffffff;
+        text-decoration: none;
+        transition: border-color 0.2s ease,
+                    box-shadow 0.2s ease,
+                    transform 0.2s ease;
+        box-sizing: border-box;
+    }
+
+    .condition-card:hover {
+        border-color: #cbd5e1;
+        box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06);
+        transform: translateY(-1px);
+    }
+
+    .condition-card-content {
+        min-width: 0;
+    }
+
+    .condition-type {
+        display: inline-block;
+        margin-bottom: 8px;
+        padding: 5px 9px;
+        border-radius: 4px;
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+    }
+
+    .condition-type.benign {
+        background: #ecfdf5;
+        color: #047857;
+    }
+
+    .condition-type.malignant {
+        background: #fef2f2;
+        color: #b91c1c;
+    }
+
+    .condition-name {
+        margin: 0;
+        color: #172033;
+        font-size: 17px;
+        font-weight: 700;
+    }
+
+    .condition-arrow {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        width: 34px;
+        height: 34px;
+        margin-left: 18px;
+        border: 1px solid #e2e8f0;
+        border-radius: 50%;
+        color: #64748b;
+        font-size: 16px;
+    }
+
+    .information-note {
+        margin-top: 12px;
+        padding: 18px 20px;
+        border: 1px solid #e2e8f0;
+        border-radius: 9px;
+        background: #f8fafc;
+        color: #64748b;
+        font-size: 13px;
+        line-height: 1.65;
+    }
+
+    @media (max-width: 850px) {
+        .condition-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 600px) {
+        .category-header {
+            align-items: flex-start;
+            gap: 15px;
+        }
+
+        .category-title {
+            font-size: 21px;
+        }
+
+        .category-badge {
+            margin-left: 0;
+        }
+
+        .condition-card {
+            min-height: 82px;
+            padding: 17px 18px;
+        }
+    }
+</style>
+
 
 <div class="page-content">
 
-    <div class="page-heading">
+    <div class="cancer-info-page">
 
-        <div class="eyebrow">
-            BREAST HISTOPATHOLOGY
-        </div>
+        <!-- PAGE HEADER -->
 
-        <h1>
-            Breast Tissue Information
-        </h1>
+        <div class="cancer-info-header">
 
-        <p>
-            Educational information about the tissue
-            categories represented in the dataset.
-        </p>
+            <div class="eyebrow">
+                BREAST HEALTH INFORMATION
+            </div>
 
-    </div>
-
-
-    <div class="cancer-grid">
-
-
-        <div class="cancer-card">
-
-            <h3>
-                Adenosis
-            </h3>
+            <h1>
+                Cancer Information
+            </h1>
 
             <p>
-                A benign breast condition involving enlarged
-                or increased breast glands.
+                Histopathological tissue categories analyzed by the BreastCare AI system.
             </p>
 
         </div>
 
 
-        <div class="cancer-card">
+        <!-- BENIGN CONDITIONS -->
 
-            <h3>
-                Ductal Carcinoma
-            </h3>
+        <section class="condition-category">
 
-            <p>
-                A carcinoma associated with the ducts of
-                the breast. Diagnosis requires pathological
-                evaluation.
-            </p>
+            <div class="category-header">
 
+                <div class="category-left">
+
+                    <div class="category-label">
+                        CATEGORY 01
+                    </div>
+
+                    <h2 class="category-title">
+                        Benign Conditions
+                    </h2>
+
+                    <p class="category-description">
+                        Non-cancerous breast tissue conditions represented in the histopathology dataset.
+                    </p>
+
+                </div>
+
+                <span class="category-badge benign">
+                    BENIGN
+                </span>
+
+            </div>
+
+
+            <div class="condition-grid">
+
+                <a
+                    href="{{ url_for('cancer_information_detail', name='adenosis') }}"
+                    class="condition-card"
+                >
+                    <div class="condition-card-content">
+                        <span class="condition-type benign">
+                            BENIGN
+                        </span>
+
+                        <h3 class="condition-name">
+                            Adenosis
+                        </h3>
+                    </div>
+
+                    <span class="condition-arrow">
+                        →
+                    </span>
+                </a>
+
+
+                <a
+                    href="{{ url_for('cancer_information_detail', name='fibroadenoma') }}"
+                    class="condition-card"
+                >
+                    <div class="condition-card-content">
+                        <span class="condition-type benign">
+                            BENIGN
+                        </span>
+
+                        <h3 class="condition-name">
+                            Fibroadenoma
+                        </h3>
+                    </div>
+
+                    <span class="condition-arrow">
+                        →
+                    </span>
+                </a>
+
+
+                <a
+                    href="{{ url_for('cancer_information_detail', name='phyllodes_tumor') }}"
+                    class="condition-card"
+                >
+                    <div class="condition-card-content">
+                        <span class="condition-type benign">
+                            BENIGN
+                        </span>
+
+                        <h3 class="condition-name">
+                            Phyllodes Tumor
+                        </h3>
+                    </div>
+
+                    <span class="condition-arrow">
+                        →
+                    </span>
+                </a>
+
+
+                <a
+                    href="{{ url_for('cancer_information_detail', name='tubular_adenoma') }}"
+                    class="condition-card"
+                >
+                    <div class="condition-card-content">
+                        <span class="condition-type benign">
+                            BENIGN
+                        </span>
+
+                        <h3 class="condition-name">
+                            Tubular Adenoma
+                        </h3>
+                    </div>
+
+                    <span class="condition-arrow">
+                        →
+                    </span>
+                </a>
+
+            </div>
+
+        </section>
+
+
+        <!-- MALIGNANT CONDITIONS -->
+
+        <section class="condition-category">
+
+            <div class="category-header">
+
+                <div class="category-left">
+
+                    <div class="category-label">
+                        CATEGORY 02
+                    </div>
+
+                    <h2 class="category-title">
+                        Malignant Conditions
+                    </h2>
+
+                    <p class="category-description">
+                        Malignant breast cancer tissue categories represented in the histopathology dataset.
+                    </p>
+
+                </div>
+
+                <span class="category-badge malignant">
+                    MALIGNANT
+                </span>
+
+            </div>
+
+
+            <div class="condition-grid">
+
+                <a
+                    href="{{ url_for('cancer_information_detail', name='ductal_carcinoma') }}"
+                    class="condition-card"
+                >
+                    <div class="condition-card-content">
+                        <span class="condition-type malignant">
+                            MALIGNANT
+                        </span>
+
+                        <h3 class="condition-name">
+                            Ductal Carcinoma
+                        </h3>
+                    </div>
+
+                    <span class="condition-arrow">
+                        →
+                    </span>
+                </a>
+
+
+                <a
+                    href="{{ url_for('cancer_information_detail', name='lobular_carcinoma') }}"
+                    class="condition-card"
+                >
+                    <div class="condition-card-content">
+                        <span class="condition-type malignant">
+                            MALIGNANT
+                        </span>
+
+                        <h3 class="condition-name">
+                            Lobular Carcinoma
+                        </h3>
+                    </div>
+
+                    <span class="condition-arrow">
+                        →
+                    </span>
+                </a>
+
+
+                <a
+                    href="{{ url_for('cancer_information_detail', name='mucinous_carcinoma') }}"
+                    class="condition-card"
+                >
+                    <div class="condition-card-content">
+                        <span class="condition-type malignant">
+                            MALIGNANT
+                        </span>
+
+                        <h3 class="condition-name">
+                            Mucinous Carcinoma
+                        </h3>
+                    </div>
+
+                    <span class="condition-arrow">
+                        →
+                    </span>
+                </a>
+
+
+                <a
+                    href="{{ url_for('cancer_information_detail', name='papillary_carcinoma') }}"
+                    class="condition-card"
+                >
+                    <div class="condition-card-content">
+                        <span class="condition-type malignant">
+                            MALIGNANT
+                        </span>
+
+                        <h3 class="condition-name">
+                            Papillary Carcinoma
+                        </h3>
+                    </div>
+
+                    <span class="condition-arrow">
+                        →
+                    </span>
+                </a>
+
+            </div>
+
+        </section>
+
+
+        <!-- INFORMATION NOTE -->
+
+        <div class="information-note">
+            The information provided on these pages is for educational and research purposes.
+            AI-assisted classification should not be considered a substitute for professional medical diagnosis.
         </div>
-
-
-        <div class="cancer-card">
-
-            <h3>
-                Fibroadenoma
-            </h3>
-
-            <p>
-                A common benign breast tumor containing
-                glandular and connective tissue.
-            </p>
-
-        </div>
-
-
-        <div class="cancer-card">
-
-            <h3>
-                Lobular Carcinoma
-            </h3>
-
-            <p>
-                A carcinoma associated with the lobular
-                structures of the breast.
-            </p>
-
-        </div>
-
-
-        <div class="cancer-card">
-
-            <h3>
-                Mucinous Carcinoma
-            </h3>
-
-            <p>
-                A breast carcinoma characterized by tumor
-                cells associated with extracellular mucin.
-            </p>
-
-        </div>
-
-
-        <div class="cancer-card">
-
-            <h3>
-                Papillary Carcinoma
-            </h3>
-
-            <p>
-                A breast lesion characterized by papillary
-                growth patterns.
-            </p>
-
-        </div>
-
-
-        <div class="cancer-card">
-
-            <h3>
-                Phyllodes Tumor
-            </h3>
-
-            <p>
-                A fibroepithelial breast tumor that may be
-                benign, borderline, or malignant.
-            </p>
-
-        </div>
-
-
-        <div class="cancer-card">
-
-            <h3>
-                Tubular Adenoma
-            </h3>
-
-            <p>
-                A rare benign breast tumor characterized by
-                tightly packed tubular structures.
-            </p>
-
-        </div>
-
 
     </div>
 

@@ -6,123 +6,186 @@ Register | BreastCare AI
 
 {% block public_content %}
 
-<div class="auth-page">
+<div class="public-page">
 
-    <div class="auth-card">
+    <div class="public-shell">
 
-        <div class="auth-logo">
-            🩷
+
+        <!-- BRAND -->
+
+        <div class="public-brand-panel">
+
+            <div class="public-brand-mark">
+                BC
+            </div>
+
+            <div class="public-brand-name">
+                BreastCare AI
+            </div>
+
+            <div class="public-brand-subtitle">
+                Breast Cancer Analysis
+            </div>
+
+            <div class="public-brand-description">
+
+                Create an account to access AI-assisted
+                histopathology analysis and prediction history.
+
+            </div>
+
+            <div class="public-brand-line"></div>
+
+            <div class="public-brand-footer">
+                Deep Learning · Histopathology · Explainable AI
+            </div>
+
         </div>
 
-        <span class="eyebrow">
-            BreastCare AI
-        </span>
 
-        <h1>
-            Create Account
-        </h1>
+        <!-- REGISTER -->
 
-        <p>
-            Create your account to access BreastCare AI.
-        </p>
+        <div class="auth-panel">
+
+            <div class="auth-content">
+
+                <div class="eyebrow">
+                    ACCOUNT REGISTRATION
+                </div>
+
+                <h1>
+                    Create Account
+                </h1>
+
+                <p class="auth-description">
+                    Create your account to access BreastCare AI.
+                </p>
 
 
-        {% with messages = get_flashed_messages(
-            with_categories=true
-        ) %}
+                {% with messages = get_flashed_messages(
+                    with_categories=true
+                ) %}
 
-            {% if messages %}
+                    {% if messages %}
 
-                {% for category, message in messages %}
+                        {% for category, message in messages %}
 
-                    <div class="flash {{ category }}">
-                        {{ message }}
+                            <div class="flash {{ category }}">
+                                {{ message }}
+                            </div>
+
+                        {% endfor %}
+
+                    {% endif %}
+
+                {% endwith %}
+
+
+                <form method="POST"
+                      action="{{ url_for('register') }}"
+                      class="auth-form">
+
+
+                    <div class="form-group">
+
+                        <label for="name">
+                            Full Name
+                        </label>
+
+                        <input
+                            type="text"
+                            id="name"
+                            name="name"
+                            placeholder="Enter your name"
+                            autocomplete="name"
+                            required
+                        >
+
                     </div>
 
-                {% endfor %}
 
-            {% endif %}
+                    <div class="form-group">
 
-        {% endwith %}
+                        <label for="email">
+                            Email
+                        </label>
 
+                        <input
+                            type="email"
+                            id="email"
+                            name="email"
+                            placeholder="Enter your email"
+                            autocomplete="email"
+                            required
+                        >
 
-        <form
-            method="POST"
-            action="{{ url_for('register') }}"
-        >
-
-            <label>
-                Full Name
-            </label>
-
-            <input
-                type="text"
-                name="name"
-                placeholder="Enter your name"
-                required
-            >
+                    </div>
 
 
-            <label>
-                Email
-            </label>
+                    <div class="form-group">
 
-            <input
-                type="email"
-                name="email"
-                placeholder="Enter your email"
-                required
-            >
+                        <label for="password">
+                            Password
+                        </label>
 
+                        <input
+                            type="password"
+                            id="password"
+                            name="password"
+                            placeholder="Create a password"
+                            autocomplete="new-password"
+                            required
+                        >
 
-            <label>
-                Password
-            </label>
-
-            <input
-                type="password"
-                name="password"
-                placeholder="Create a password"
-                required
-            >
+                    </div>
 
 
-            <label>
-                Account Type
-            </label>
+                    <div class="form-group">
 
-            <select name="role">
+                        <label for="role">
+                            Account Type
+                        </label>
 
-                <option value="patient">
-                    Patient
-                </option>
+                        <select id="role"
+                                name="role">
 
-                
+                            <option value="patient">
+                                Patient
+                            </option>
 
-            </select>
+                        </select>
 
-
-            <button
-                type="submit"
-                class="primary-btn"
-            >
-                Create Account
-            </button>
-
-        </form>
+                    </div>
 
 
-        <div class="auth-bottom">
+                    <button type="submit"
+                            class="auth-submit">
 
-            Already have an account?
+                        Create Account
 
-            <a href="{{ url_for('login') }}">
-                Login
-            </a>
+                    </button>
+
+                </form>
+
+
+                <div class="auth-switch">
+
+                    <span>
+                        Already have an account?
+                    </span>
+
+                    <a href="{{ url_for('login') }}">
+                        Login
+                    </a>
+
+                </div>
+
+            </div>
 
         </div>
 
     </div>
 
 </div>
+
 {% endblock %}

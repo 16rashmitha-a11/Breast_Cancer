@@ -1,585 +1,151 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "base.html" %}
 
-<head>
+{% block title %}
+Analysis Results | BreastCare AI
+{% endblock %}
 
-    <meta charset="UTF-8">
+{% block topbar_title %}
+Analysis Results
+{% endblock %}
 
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
+{% block content %}
 
-    <title>Analysis Results</title>
+<div class="page-content">
 
-    <style>
+    <div class="page-heading">
 
-        * {
-            box-sizing: border-box;
-        }
-
-        body {
-            margin: 0;
-            font-family: Arial, Helvetica, sans-serif;
-            background: #f5f7fb;
-            color: #1f2937;
-        }
-
-        .container {
-            width: 92%;
-            max-width: 1200px;
-            margin: 40px auto;
-        }
-
-        .header {
-            background: white;
-            border-radius: 18px;
-            padding: 28px;
-            margin-bottom: 25px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.06);
-        }
-
-        .header h1 {
-            margin: 0 0 8px;
-            font-size: 30px;
-        }
-
-        .header p {
-            margin: 0;
-            color: #6b7280;
-        }
-
-        .summary {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-top: 20px;
-            padding-top: 18px;
-            border-top: 1px solid #e5e7eb;
-        }
-
-        .count {
-            font-size: 18px;
-            font-weight: bold;
-        }
-
-        .history-btn {
-            text-decoration: none;
-            padding: 11px 18px;
-            border-radius: 10px;
-            background: #eef2ff;
-            color: #4338ca;
-            font-weight: 600;
-        }
-
-        .result-card {
-            background: white;
-            border-radius: 18px;
-            margin-bottom: 28px;
-            overflow: hidden;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.07);
-        }
-
-        .result-header {
-            padding: 20px 25px;
-            border-bottom: 1px solid #e5e7eb;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .result-number {
-            font-size: 20px;
-            font-weight: bold;
-        }
-
-        .filename {
-            color: #6b7280;
-            font-size: 14px;
-            margin-top: 5px;
-        }
-
-        .result-body {
-            padding: 25px;
-        }
-
-        .images {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 25px;
-            margin-bottom: 25px;
-        }
-
-        .image-box {
-            background: #f8fafc;
-            border: 1px solid #e5e7eb;
-            border-radius: 14px;
-            padding: 15px;
-        }
-
-        .image-box h3 {
-            margin-top: 0;
-            margin-bottom: 12px;
-            font-size: 16px;
-        }
-
-        .image-box img {
-            width: 100%;
-            max-height: 300px;
-            object-fit: contain;
-            display: block;
-            border-radius: 10px;
-            background: #fff;
-        }
-
-        .no-image {
-            height: 250px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #9ca3af;
-            background: #f3f4f6;
-            border-radius: 10px;
-        }
-
-        .analysis-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 18px;
-        }
-
-        .analysis-box {
-            border: 1px solid #e5e7eb;
-            border-radius: 14px;
-            padding: 20px;
-        }
-
-        .analysis-box h3 {
-            margin-top: 0;
-            margin-bottom: 15px;
-        }
-
-        .label {
-            color: #6b7280;
-            font-size: 13px;
-            margin-bottom: 5px;
-        }
-
-        .value {
-            font-size: 22px;
-            font-weight: bold;
-        }
-
-        .confidence {
-            margin-top: 12px;
-        }
-
-        .progress {
-            height: 9px;
-            background: #e5e7eb;
-            border-radius: 20px;
-            overflow: hidden;
-            margin-top: 7px;
-        }
-
-        .progress-bar {
-            height: 100%;
-            background: #4f46e5;
-            border-radius: 20px;
-        }
-
-        .benign {
-            color: #15803d;
-        }
-
-        .malignant {
-            color: #dc2626;
-        }
-
-        .info {
-            margin-top: 20px;
-            padding: 20px;
-            border-radius: 14px;
-            background: #f8fafc;
-        }
-
-        .info h3 {
-            margin-top: 0;
-        }
-
-        .info p {
-            line-height: 1.6;
-            color: #4b5563;
-        }
-
-        .actions {
-            margin-top: 22px;
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
-
-        .btn {
-            text-decoration: none;
-            padding: 11px 17px;
-            border-radius: 10px;
-            font-weight: 600;
-        }
-
-        .btn-primary {
-            background: #4f46e5;
-            color: white;
-        }
-
-        .btn-secondary {
-            background: #eef2ff;
-            color: #4338ca;
-        }
-
-        @media (max-width: 800px) {
-
-            .images,
-            .analysis-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .summary {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 15px;
-            }
-
-            .result-header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 8px;
-            }
-        }
-
-    </style>
-
-</head>
-
-
-<body>
-
-<div class="container">
-
-    <!-- ================================================= -->
-    <!-- PAGE HEADER -->
-    <!-- ================================================= -->
-
-    <div class="header">
+        <div class="eyebrow">
+            AI ANALYSIS
+        </div>
 
         <h1>
             Analysis Results
         </h1>
 
         <p>
-            Your uploaded images have been analyzed successfully.
+            {{ total_results|default(0) }} analysis result(s) generated.
         </p>
-
-        <div class="summary">
-
-            <div class="count">
-                {{ total_results }}
-                image{% if total_results != 1 %}s{% endif %}
-                analyzed
-            </div>
-
-            <a href="{{ url_for('history') }}"
-               class="history-btn">
-
-                View History
-
-            </a>
-
-        </div>
 
     </div>
 
 
-    <!-- ================================================= -->
-    <!-- ALL RESULTS -->
-    <!-- ================================================= -->
+    {% if predictions %}
 
-    {% for item in results %}
+        <div class="batch-results-list">
 
-        {% set prediction = item.prediction %}
+            {% for prediction in predictions %}
 
-        <div class="result-card">
+            <article class="batch-result-item">
 
-            <!-- RESULT HEADER -->
+                <div class="batch-result-image">
 
-            <div class="result-header">
+                    {% if prediction.original_image_filename %}
 
-                <div>
+                        <img
+                            src="{{ url_for(
+                                'uploaded_image',
+                                filename=prediction.original_image_filename
+                            ) }}"
+                            alt="Histopathology image"
+                        >
 
-                    <div class="result-number">
-                        Result {{ loop.index }}
-                    </div>
-
-                    <div class="filename">
-                        {{ prediction.original_filename }}
-                    </div>
+                    {% endif %}
 
                 </div>
 
-                <div>
-                    #{{ prediction.id }}
-                </div>
 
-            </div>
+                <div class="batch-result-content">
 
+                    <div class="section-label">
+                        ANALYSIS {{ loop.index }}
+                    </div>
 
-            <!-- RESULT BODY -->
+                    <h2>
 
-            <div class="result-body">
+                        {% if prediction.subclass_prediction %}
 
-
-                <!-- ========================================= -->
-                <!-- IMAGES -->
-                <!-- ========================================= -->
-
-                <div class="images">
-
-
-                    <!-- ORIGINAL IMAGE -->
-
-                    <div class="image-box">
-
-                        <h3>
-                            Original Image
-                        </h3>
-
-                        {% if item.original_image_filename %}
-
-                            <img
-                                src="{{ url_for(
-                                    'uploaded_image',
-                                    filename=item.original_image_filename
-                                ) }}"
-                                alt="Original Image"
-                            >
+                            {{
+                                prediction.subclass_prediction
+                                .replace("_", " ")
+                                .title()
+                            }}
 
                         {% else %}
 
-                            <div class="no-image">
-                                Original image unavailable
-                            </div>
+                            Tissue Classification
 
                         {% endif %}
 
-                    </div>
+                    </h2>
 
 
-                    <!-- GRAD-CAM -->
+                    {% if prediction.binary_prediction|lower == "malignant" %}
 
-                    <div class="image-box">
+                        <span class="status-badge malignant">
+                            Malignant
+                        </span>
 
-                        <h3>
-                            AI Grad-CAM Analysis
-                        </h3>
+                    {% else %}
 
-                        {% if item.gradcam_filename %}
+                        <span class="status-badge benign">
+                            Benign
+                        </span>
 
-                            <img
-                                src="{{ url_for(
-                                    'gradcam_image',
-                                    filename=item.gradcam_filename
-                                ) }}"
-                                alt="Grad-CAM Analysis"
-                            >
-
-                        {% else %}
-
-                            <div class="no-image">
-                                Grad-CAM unavailable
-                            </div>
-
-                        {% endif %}
-
-                    </div>
-
-                </div>
+                    {% endif %}
 
 
-                <!-- ========================================= -->
-                <!-- ANALYSIS -->
-                <!-- ========================================= -->
+                    <p>
 
-                <div class="analysis-grid">
+                        Model confidence:
 
+                        {{
+                            "%.2f"|format(
+                                prediction.binary_confidence|float
+                                if prediction.binary_confidence|float > 1
+                                else prediction.binary_confidence|float * 100
+                            )
+                        }}%
 
-                    <!-- BINARY RESULT -->
+                    </p>
 
-                    <div class="analysis-box">
-
-                        <h3>
-                            Cancer Classification
-                        </h3>
-
-                        <div class="label">
-                            Prediction
-                        </div>
-
-                        <div class="value
-                            {% if prediction.binary_prediction == 'Benign' %}
-                                benign
-                            {% else %}
-                                malignant
-                            {% endif %}
-                        ">
-
-                            {{ prediction.binary_prediction }}
-
-                        </div>
-
-
-                        <div class="confidence">
-
-                            <div class="label">
-                                Confidence:
-                                {{ prediction.binary_confidence }}%
-                            </div>
-
-                            <div class="progress">
-
-                                <div
-                                    class="progress-bar"
-                                    data-value="{{ prediction.binary_confidence | default(0) }}"
-                                ></div>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-
-                    <!-- SUBCLASS RESULT -->
-
-                    <div class="analysis-box">
-
-                        <h3>
-                            Subclass Classification
-                        </h3>
-
-                        <div class="label">
-                            Detected Type
-                        </div>
-
-                        <div class="value">
-
-                            {{ prediction.subclass_prediction
-                               |replace('_', ' ')
-                               |title }}
-
-                        </div>
-
-
-                        <div class="confidence">
-
-                            <div class="label">
-                                Confidence:
-                                {{ prediction.subclass_confidence }}%
-                            </div>
-
-                            <div class="progress">
-
-                                <div
-                                    class="progress-bar"
-                                    data-value="{{ prediction.subclass_confidence | default(0) }}"
-                                ></div>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-                <!-- ========================================= -->
-                <!-- CANCER INFORMATION -->
-                <!-- ========================================= -->
-
-                {% if item.cancer_info %}
-
-                    <div class="info">
-
-                        <h3>
-                            {{ item.cancer_info.title }}
-                        </h3>
-
-                        <p>
-                            {{ item.cancer_info.description }}
-                        </p>
-
-                    </div>
-
-                {% endif %}
-
-
-                <!-- ========================================= -->
-                <!-- ACTIONS -->
-                <!-- ========================================= -->
-
-                <div class="actions">
 
                     <a
                         href="{{ url_for(
                             'prediction_detail',
                             prediction_id=prediction.id
                         ) }}"
-                        class="btn btn-secondary"
+                        class="table-action"
                     >
-                        View Detailed Result
-                    </a>
-
-
-                    <a
-                        href="{{ url_for(
-                            'download_report',
-                            prediction_id=prediction.id
-                        ) }}"
-                        class="btn btn-primary"
-                    >
-                        Download PDF Report
+                        View Analysis
                     </a>
 
                 </div>
 
-            </div>
+            </article>
+
+            {% endfor %}
 
         </div>
 
-    {% endfor %}
+    {% else %}
 
+        <div class="empty-state">
 
-    <!-- ================================================= -->
-    <!-- BOTTOM -->
-    <!-- ================================================= -->
+            <h2>
+                No analysis results available
+            </h2>
 
-    <div style="text-align:center; margin:35px 0;">
+            <a href="{{ url_for('prediction') }}"
+               class="primary-button">
 
-        <a
-            href="{{ url_for('history') }}"
-            class="btn btn-secondary"
-        >
-            Go to Prediction History
-        </a>
+                New Prediction
 
-        <a
-            href="{{ url_for('prediction') }}"
-            class="btn btn-primary"
-        >
-            Analyze More Images
-        </a>
+            </a>
 
-    </div>
+        </div>
+
+    {% endif %}
 
 </div>
 
-</body>
-
-</html>
+{% endblock %}

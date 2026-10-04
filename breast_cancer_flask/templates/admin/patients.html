@@ -1,5 +1,9 @@
 {% extends "base.html" %}
 
+{% block title %}
+Patients | BreastCare AI
+{% endblock %}
+
 {% block topbar_title %}
 Patients
 {% endblock %}
@@ -19,7 +23,7 @@ Patients
         </h1>
 
         <p>
-            Registered patient accounts.
+            Registered patient accounts and analysis activity.
         </p>
 
     </div>
@@ -36,7 +40,7 @@ Patients
                     <tr>
 
                         <th>
-                            ID
+                            #
                         </th>
 
                         <th>
@@ -68,17 +72,19 @@ Patients
 
                     <tr>
 
-                        <!--
-                            This is the PATIENT list number.
-                            It is NOT the database user ID.
-                        -->
                         <td>
-                            #{{ loop.index }}
+                            <span class="table-number">
+                                {{ loop.index }}
+                            </span>
                         </td>
 
 
                         <td>
-                            {{ patient["name"] }}
+
+                            <strong class="table-primary">
+                                {{ patient["name"] }}
+                            </strong>
+
                         </td>
 
 
@@ -89,8 +95,8 @@ Patients
 
                         <td>
 
-                            <span class="status">
-                                {{ patient["role"] }}
+                            <span class="role-badge">
+                                {{ patient["role"]|capitalize }}
                             </span>
 
                         </td>
@@ -103,7 +109,7 @@ Patients
                                     'admin_patient_detail',
                                     user_id=patient['id']
                                 ) }}"
-                                class="btn btn-secondary"
+                                class="table-action"
                             >
                                 View
                             </a>
@@ -118,11 +124,11 @@ Patients
 
                     <tr>
 
-                        <td
-                            colspan="5"
-                            style="text-align: center; padding: 40px;"
-                        >
-                            No patients registered yet.
+                        <td colspan="5"
+                            class="table-empty">
+
+                            No patient records found.
+
                         </td>
 
                     </tr>
